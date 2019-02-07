@@ -26,7 +26,7 @@ dependencies {
 
     //implementation(Config.Dependencies.tornadofx)
 
-    implementation ("org.drx:evoleq:1.0.0-beta")
+    implementation ("org.drx:evoleq:1.0.0")
 
     testCompile("junit", "junit", "4.12")
 }
