@@ -62,33 +62,4 @@ class ParallelFx<D>(
     }
 
     fun job(): Job = deferred!!
-        /*private val delay: Long = 1, block:  ()-> D) : Evolving<D> {
-    private val property: SimpleObjectProperty<D> = SimpleObjectProperty()
-    private var updated = false
-    init {
-        val listener = ChangeListener<D>{_, oV, nV ->
-            if (nV != oV) {
-                updated = true
-            }
-        }
-        property.addListener( listener )
-        GlobalScope.launch {
-            coroutineScope {
-                //val init = WaitForProperty(FxApp.TOOLKIT_INIT_PROPERTY).toChange().get()
-                launch {
-                    Platform.runLater {
-                        property.value = block()
-                        property.removeListener(listener)
-                    }
-                }
-            }
-        }
-    }
-    override suspend fun get(): D {
-        while(!updated){
-            delay(delay)  // reason why get has to be suspended
-        }
-        return property.value
-    }
-    */
 }
