@@ -18,13 +18,51 @@ package org.drx.evoleq.fx.evolving
 import javafx.application.Platform
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.value.ChangeListener
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.drx.evoleq.evolving.Evolving
+import org.drx.evoleq.evolving.Immediate
+import org.drx.evoleq.evolving.Parallel
 
-class ParallelFx<D>(private val delay: Long = 1, block:  ()-> D) : Evolving<D> {
+class ParallelFx<D>(
+        private val delay: Long = 1,
+        val scope: CoroutineScope = GlobalScope,
+        private val block:  ParallelFx<D>.() -> D
+) : Evolving<D> {
+
+    private var deferred: Deferred<D>? = null
+
+    init{
+        scope.launch{ coroutineScope{
+            deferred = async {
+                var d:D? = null
+                Platform.runLater {
+                    d = this@ParallelFx.block()
+                }
+                while(d == null){
+                    delay(1)
+                }
+                d!!
+            }
+        }}
+    }
+
+    override suspend fun get(): D {
+        while(deferred == null) {
+            delay(delay)
+        }
+        return deferred!!.await()
+    }
+
+    fun cancel(d: D): Evolving<D> = Immediate {
+        while(deferred == null) {
+            delay(delay)
+        }
+        deferred!!.cancel()
+        d
+    }
+
+    fun job(): Job = deferred!!
+        /*private val delay: Long = 1, block:  ()-> D) : Evolving<D> {
     private val property: SimpleObjectProperty<D> = SimpleObjectProperty()
     private var updated = false
     init {
@@ -52,4 +90,5 @@ class ParallelFx<D>(private val delay: Long = 1, block:  ()-> D) : Evolving<D> {
         }
         return property.value
     }
+    */
 }

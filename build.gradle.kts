@@ -26,9 +26,11 @@ dependencies {
 
     //implementation(Config.Dependencies.tornadofx)
 
-    implementation ("org.drx:evoleq:1.0.0")
+    implementation ("org.drx:evoleq:1.0.1")
 
     testCompile("junit", "junit", "4.12")
+    testCompile ("org.testfx:testfx-core:4.0.15-alpha")
+    testCompile ("org.testfx:testfx-junit:4.0.15-alpha")
 }
 
 configure<JavaPluginConvention> {
