@@ -16,8 +16,16 @@
 package org.drx.evoleq.fx.component
 
 import javafx.scene.Node
+import javafx.scene.Scene
+import javafx.stage.Stage
 import org.drx.evoleq.stub.Stub
 
-interface FxComponent<N: Node, D> : Stub<D> {
+interface FxComponent<N, D> : Stub<D> {
     fun show(): N
 }
+
+interface FxNodeComponent<N: Node, D> : FxComponent<N,D>
+
+interface FxStageComponent<D> : FxComponent<Stage,D>
+
+interface FxSceneComponent<D> : FxComponent<Scene, D>

@@ -23,19 +23,19 @@ import org.drx.evoleq.dsl.Configuration
 import org.drx.evoleq.dsl.StubConfiguration
 import org.drx.evoleq.dsl.configure
 import org.drx.evoleq.evolving.Evolving
-import org.drx.evoleq.fx.component.FxComponent
+import org.drx.evoleq.fx.component.FxNodeComponent
 import org.drx.evoleq.stub.Stub
 import kotlin.reflect.KClass
 
-class FxComponentConfiguration< N: Node, D> : Configuration<FxComponent<N, D>> {
+class FxNodeComponentConfiguration< N: Node, D> : Configuration<FxNodeComponent<N, D>> {
 
     lateinit var view: N
     lateinit var stub: Stub<D>
     lateinit var id: KClass<*>
 
-    override fun configure(): FxComponent<N,D> = object: FxComponent<N,D>{
+    override fun configure(): FxNodeComponent<N,D> = object: FxNodeComponent<N,D>{
         override val id: KClass<*>
-            get() = this@FxComponentConfiguration.id
+            get() = this@FxNodeComponentConfiguration.id
 
         override fun show(): N = view
 
@@ -52,6 +52,7 @@ class FxComponentConfiguration< N: Node, D> : Configuration<FxComponent<N, D>> {
 
     fun stub(conf: StubConfiguration<D>.()->Unit) {
         stub = configure(conf)
+        id = stub.id
     }
 
     //fun<M : Node, E> child()
@@ -59,7 +60,7 @@ class FxComponentConfiguration< N: Node, D> : Configuration<FxComponent<N, D>> {
 
 }
 
-fun <N: Node, D> fxComponent(configuration: FxComponentConfiguration<N,D>.()->Unit) = configure(configuration)
+fun <N: Node, D> fxNode(configuration: FxNodeComponentConfiguration<N,D>.()->Unit) = configure(configuration)
 
 open class FxNodeConfiguration<N : Node> : Configuration<N> {
 

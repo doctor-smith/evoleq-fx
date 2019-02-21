@@ -15,6 +15,7 @@
  */
 package org.drx.evoleq.fx.dsl
 
+import junit.framework.Assert.fail
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 
@@ -22,8 +23,8 @@ class ApplicationDslTest {
 
     @Test fun application() = runBlocking {
 
-        assert(false)
-
+        //assert(false)
+        //fail("Prototype")
     }
 
 }

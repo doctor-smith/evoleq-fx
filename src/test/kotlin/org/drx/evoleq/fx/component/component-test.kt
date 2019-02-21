@@ -15,29 +15,24 @@
  */
 package org.drx.evoleq.fx.component
 
-import javafx.scene.Parent
 import javafx.scene.Scene
 import javafx.scene.control.Button
 import javafx.scene.control.Label
-import javafx.scene.layout.Pane
 import javafx.scene.layout.VBox
 import javafx.stage.Stage
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.drx.evoleq.dsl.conditions
 import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.application.AppManager
-import org.drx.evoleq.fx.dsl.fxComponent
+import org.drx.evoleq.fx.dsl.fxNode
 import org.drx.evoleq.fx.dsl.launchApplicationStub
 import org.drx.evoleq.fx.evolving.ParallelFx
 import org.drx.evoleq.stub.Stub
 import org.drx.evoleq.stub.toFlow
 import org.junit.Test
-import java.lang.Thread.sleep
 
 class ComponentTest {
     @Test fun component() = runBlocking  {
@@ -49,12 +44,12 @@ class ComponentTest {
             override fun configure(): Stub<Data> = stub{
                 id(App::class)
 
-                val component = fxComponent<VBox, Data>{
+                val component = fxNode<VBox, Data>{
                     view {
                         node(VBox()){
                             val defaultHeight = 30;
                             children.addAll(
-                                fxComponent<Label,Unit> {
+                                fxNode<Label,Unit> {
                                     stub{}
                                     view{
                                         node(Label()){
@@ -67,7 +62,7 @@ class ComponentTest {
                                     }
                                 }.show(),
 
-                                fxComponent<Button,Data>{
+                                fxNode<Button,Data>{
                                     stub{}
                                     view{
                                         node(Button()){
