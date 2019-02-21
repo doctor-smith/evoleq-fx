@@ -2,7 +2,9 @@ object Config {
 
     object Project {
         val group = "org.drx"
-        val version = "1.0.1"
+        // val version = "1.0.0" ParallelFx
+        // val version = "1.0.1" AsyncFx
+        val version = "1.0.2" // AppManager, Launcher, FxComponent,
         val artifactId = "evoleq-fx"
     }
 
