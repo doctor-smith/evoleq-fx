@@ -22,8 +22,10 @@ import org.testfx.api.FxToolkit
 import java.lang.Thread.sleep
 
 class AsyncFxTest {
+
     val primaryStage: Stage = FxToolkit.registerPrimaryStage()
-    @Test fun runsOnApplicationThread() = runBlocking{
+    @Test
+    fun runsOnApplicationThread() = runBlocking{
         val asyncFx = AsyncFx<String> {
             Thread.currentThread().name
         }
@@ -31,4 +33,5 @@ class AsyncFxTest {
 
         assert(threadName == "JavaFX Application Thread")
     }
+
 }

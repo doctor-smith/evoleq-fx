@@ -23,6 +23,7 @@ import kotlinx.coroutines.launch
 import org.drx.evoleq.dsl.Configuration
 import org.drx.evoleq.dsl.StubConfiguration
 import org.drx.evoleq.dsl.configure
+import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.stub.Stub
 import kotlin.reflect.KClass
@@ -41,26 +42,30 @@ abstract class AppManager<D> : Application(), Configuration<Stub<D>> {
     }
 
 
-    companion object {
+    companion object Manager{
         private lateinit var STUB: Stub<*>
         private var TOOLKIT_INITIALIZED: Boolean = false
-        private var STUB_INITIALIZED = false
+        //private var STUB_INITIALIZED = false
         protected val REGISTRY: HashMap<KClass<*>, Stub<*>> by lazy { HashMap<KClass<*>, Stub<*>>() }
+        var CALLED = -1
 
         fun waitingForToolkit(): Boolean = !TOOLKIT_INITIALIZED
-        fun waitingForStub(): Boolean = !STUB_INITIALIZED
+        //fun waitingForStub(): Boolean = !STUB_INITIALIZED
         /**
          * Launch an application ( and register it ).
          * Calling this function a second time with a second app will not launch the entire
          * application (which is impossibly) - it will only change the implementation of the app-manager
          */
         @Suppress("UNCHECKED_CAST")
-        fun <D, A : AppManager<D>> launch(app: A): Parallel<Stub<D>> = Parallel {
+        fun <D, A : AppManager<D>> launch(app: A): Parallel<Stub<D>> {
+            CALLED++
+            return Parallel {
             // reset state
-            STUB_INITIALIZED = false
+            var STUB_INITIALIZED = false
 
             // eventually launch app
-            if(waitingForToolkit()) {
+            if(/*CALLED == 0 &&*/ waitingForToolkit()) {
+                //CALLED++
                 scope.launch {
                     coroutineScope {
                         launch(app::class.java)
@@ -68,6 +73,7 @@ abstract class AppManager<D> : Application(), Configuration<Stub<D>> {
                 }
             }
             while(waitingForToolkit()){
+                //println("waiting for toolkit ...")
                 kotlinx.coroutines.delay(1)
             }
 
@@ -77,16 +83,18 @@ abstract class AppManager<D> : Application(), Configuration<Stub<D>> {
                 AppManager.STUB = app.configure()
                 STUB_INITIALIZED = true
             } }
-            while(waitingForStub()){
+            while(!STUB_INITIALIZED){
                 kotlinx.coroutines.delay(1)
             }
             val stub = AppManager.STUB as Stub<D>
             REGISTRY[stub.id] = stub
             stub
-        }
+        }}
 
         @Suppress("UNCHECKED_CAST")
         fun <E> appStub(id: KClass<*>): Stub<E>? = REGISTRY[id] as Stub<E>?
+
+        fun appStubs() = REGISTRY.values
 /*
         fun shutDown(id: KClass<*>) : Boolean {
             val stub = REGISTRY[id]
@@ -129,5 +137,11 @@ abstract class AppManager<D> : Application(), Configuration<Stub<D>> {
     }
 
 
+}
+
+class BgAppManager : AppManager<Unit>(){
+    override fun configure(): Stub<Unit> = stub{
+        id(BgAppManager::class)
+    }
 }
 

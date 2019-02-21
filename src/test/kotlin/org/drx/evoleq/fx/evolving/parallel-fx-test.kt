@@ -23,8 +23,10 @@ import java.lang.Thread.sleep
 
 class ParallelFxTest {
     val primaryStage: Stage = FxToolkit.registerPrimaryStage()
-    @Test fun runsOnApplicationThread() = runBlocking{
+    @Test
+    fun runsOnApplicationThread() = runBlocking{
         val parallelFx = ParallelFx<String> {
+            assert(FxToolkit.isFXApplicationThreadRunning())
             Thread.currentThread().name
         }
         val threadName = parallelFx.get()

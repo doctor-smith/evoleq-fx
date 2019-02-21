@@ -15,6 +15,7 @@
  */
 package org.drx.evoleq.fx.application
 
+import javafx.application.Platform
 import javafx.stage.Stage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -22,9 +23,17 @@ import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.fx.dsl.launchApplicationStub
 import org.drx.evoleq.fx.evolving.ParallelFx
 import org.drx.evoleq.stub.Stub
-import org.junit.Test
+import org.junit.*
+import org.testfx.api.FxToolkit
+import java.lang.Thread.sleep
 
 class AppManagerTest {
+
+    @Before
+    fun launchBgAppManager() = runBlocking {
+        FxToolkit.registerPrimaryStage()
+        val m = FxToolkit.setupApplication { BgAppManager() }
+    }
 
     @Test fun launchApp() = runBlocking {
         class App: AppManager<Unit>() {
@@ -37,6 +46,7 @@ class AppManagerTest {
             override fun configure(): Stub<Unit> = stub {
                 id(App::class)
                 evolve { ParallelFx {
+                    println("fx")
                     val stage = Stage()
                     stage.title = "PIPI"
                     showStage(stage)
@@ -48,7 +58,7 @@ class AppManagerTest {
         assert(stub.id == App::class)
         val u = stub.evolve(Unit).get()
 
-        delay(1_000)
+        //delay(1_000)
     }
 
 
@@ -107,7 +117,7 @@ class AppManagerTest {
         val stub1 = AppManager.launch(App1()).get()
         val v1 = stub1.evolve(false).get()
         assert(v1)
-        delay(500)
+        //delay(500)
         assert(stub1.id == App1::class )
         assert(AppManager.appStub<Boolean>(stub1.id) != null)
 
@@ -115,12 +125,12 @@ class AppManagerTest {
         val v2 = stub2.evolve(false).get()
         assert(v2)
         assert(stub2.id == App2::class )
-        delay(500)
+        //delay(500)
 
         assert(AppManager.appStub<Boolean>(stub2.id) != null)
         assert(AppManager.appStub<Boolean>(stub1.id) != null)
 
-        delay(500)
+        //delay(500)
 
     }
 }

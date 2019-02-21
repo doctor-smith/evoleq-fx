@@ -15,6 +15,8 @@
  */
 package org.drx.evoleq.fx.component
 
+import javafx.application.Application
+import javafx.application.Platform
 import javafx.scene.Scene
 import javafx.scene.control.Button
 import javafx.scene.control.Label
@@ -27,15 +29,29 @@ import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.application.AppManager
+import org.drx.evoleq.fx.application.BgAppManager
 import org.drx.evoleq.fx.dsl.fxNode
 import org.drx.evoleq.fx.dsl.launchApplicationStub
 import org.drx.evoleq.fx.evolving.ParallelFx
 import org.drx.evoleq.stub.Stub
 import org.drx.evoleq.stub.toFlow
+import org.junit.After
+import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.Test
+import org.testfx.api.FxToolkit
 
 class ComponentTest {
-    @Test fun component() = runBlocking  {
+
+    @Before
+    fun launchBgAppManager() = runBlocking {
+        FxToolkit.registerPrimaryStage()
+        val m = FxToolkit.setupApplication { BgAppManager() }
+    }
+
+
+    @Test
+    fun component() = runBlocking  {
         class Data(val message: String = "", val passedStates: ArrayList<String> = arrayListOf<String>())
 
         //val passedStates = arrayListOf<String>()
@@ -102,17 +118,6 @@ class ComponentTest {
                         data.passedStates.add(data.message)
                         println(data.message)
                         delay(2_000)
-                        /*
-                        var waiting = true
-                        GlobalScope.launch {
-                            delay(2_000)
-                            waiting = false
-                        }
-                        while(waiting){
-                            sleep(10)
-                        }
-                        */
-                        //Thread.currentThread().sleep(2_000)
                         Data("close",data.passedStates)
                     }
                     "close" -> ParallelFx {
@@ -149,7 +154,7 @@ class ComponentTest {
         println(data.passedStates)
         assert(data.passedStates == arrayListOf("show", "shown", "close"))
 
-        delay(1_000)
+        //delay(1_000)
 
     }
 }
