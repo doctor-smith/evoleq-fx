@@ -19,6 +19,8 @@ import javafx.application.Platform
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.value.ChangeListener
 import kotlinx.coroutines.*
+import org.drx.evoleq.coroutines.blockRace
+import org.drx.evoleq.evolving.Cancellable
 import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.evolving.Parallel
@@ -27,12 +29,14 @@ class ParallelFx<D>(
         private val delay: Long = 1,
         val scope: CoroutineScope = GlobalScope,
         private val block:  ParallelFx<D>.() -> D
-) : Evolving<D> {
+) : Evolving<D>, Cancellable<D> {
 
-    private var deferred: Deferred<D>? = null
+    private lateinit var deferred: Deferred<D>
 
-    init{
-        scope.launch{ coroutineScope{
+    private var default: D? = null
+
+    init {
+        scope.launch { coroutineScope {
             deferred = async {
                 var d:D? = null
                 Platform.runLater {
@@ -43,23 +47,37 @@ class ParallelFx<D>(
                 }
                 d!!
             }
-        }}
+        } }
     }
 
     override suspend fun get(): D {
-        while(deferred == null) {
+        while (!::deferred.isInitialized) {
             delay(delay)
         }
-        return deferred!!.await()
+
+        return blockRace(
+                scope,
+                { deferred.await() },
+                { while(default == null) { delay(1) }
+                    default!! }
+        ).await()
     }
 
-    fun cancel(d: D): Evolving<D> = Immediate {
-        while(deferred == null) {
-            delay(delay)
+    override fun cancel(d: D): Evolving<D> = Immediate {
+        default = d
+        if(::deferred.isInitialized) {
+            deferred.cancel()
         }
-        deferred!!.cancel()
+        else { coroutineScope{
+            var cnt = 0
+            while (cnt < 1000 && !::deferred.isInitialized) {
+                delay(delay)
+                cnt++
+            }
+            deferred.cancel()
+        } }
         d
     }
 
-    fun job(): Job = deferred!!
+    fun job(): Job = deferred
 }

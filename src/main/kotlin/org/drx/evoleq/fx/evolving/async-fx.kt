@@ -17,6 +17,9 @@ package org.drx.evoleq.fx.evolving
 
 import javafx.application.Platform
 import kotlinx.coroutines.*
+import org.drx.evoleq.coroutines.blockRace
+import org.drx.evoleq.coroutines.suspended
+import org.drx.evoleq.evolving.Cancellable
 import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.evolving.Immediate
 
@@ -25,12 +28,14 @@ class AsyncFx<D>(
         private val delay: Long = 1,
         val scope: CoroutineScope = GlobalScope,
         private val block:  AsyncFx<D>.() -> D
-) : Evolving<D> {
+) : Evolving<D>, Cancellable<D> {
 
-    private var deferred: Deferred<D>? = null
+    private lateinit var deferred: Deferred<D>//? = null
+
+    private var default: D? = null
 
     init {
-        scope.launch { coroutineScope {
+        scope.launch { //coroutineScope {
             deferred = async {
                 var d:D? = null
                 Platform.runLater {
@@ -41,23 +46,37 @@ class AsyncFx<D>(
                 }
                 d!!
             }
-        }}
+        }//}
     }
 
     override suspend fun get(): D {
-        while (deferred == null) {
+        while (!::deferred.isInitialized) {
             delay(delay)
         }
-        return deferred!!.await()
+
+        return blockRace(
+                scope,
+                { deferred.await() },
+                { while(default == null) { delay(1) }
+                default!! }
+               ).await()
     }
 
-    fun cancel(d: D): Evolving<D> = Immediate {
-        while (deferred == null) {
-            delay(delay)
+    override fun cancel(d: D): Evolving<D> = Immediate {
+        default = d
+        if(::deferred.isInitialized) {
+            deferred.cancel()
         }
-        deferred!!.cancel()
+        else { coroutineScope{
+            var cnt = 0
+            while (cnt < 1000 && !::deferred.isInitialized) {
+                delay(delay)
+                cnt++
+            }
+            deferred.cancel()
+        } }
         d
     }
 
-    fun job(): Job = deferred!!
+    fun job(): Job = deferred
 }
