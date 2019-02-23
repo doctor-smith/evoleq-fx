@@ -15,11 +15,11 @@
  */
 package org.drx.evoleq.fx.component
 
-import javafx.application.Application
-import javafx.application.Platform
+import javafx.scene.Group
 import javafx.scene.Scene
 import javafx.scene.control.Button
 import javafx.scene.control.Label
+import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import javafx.stage.Stage
 import kotlinx.coroutines.delay
@@ -30,14 +30,11 @@ import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.application.AppManager
 import org.drx.evoleq.fx.application.BgAppManager
-import org.drx.evoleq.fx.dsl.fxNode
-import org.drx.evoleq.fx.dsl.launchApplicationStub
+import org.drx.evoleq.fx.dsl.*
 import org.drx.evoleq.fx.evolving.ParallelFx
 import org.drx.evoleq.stub.Stub
 import org.drx.evoleq.stub.toFlow
-import org.junit.After
 import org.junit.Before
-import org.junit.BeforeClass
 import org.junit.Test
 import org.testfx.api.FxToolkit
 
@@ -156,5 +153,143 @@ class ComponentTest {
 
         //delay(1_000)
 
+    }
+
+
+    @Test
+    fun parentComponent() = runBlocking {
+        val x = fxPane<VBox, Unit>{
+
+            view {
+                node(VBox()){
+                    spacing = 10.0
+                }
+            }
+            child(fxNode<Button, Unit>{
+                view{node(Button("1"))
+                }
+            })
+            child(fxNode<Button, Unit>{
+                view{node(Button("2"))}
+            })
+            child(fxNode<Button, Unit>{
+                view{node(Button("3")){
+
+                }}
+            })
+            child(fxPane<HBox,Unit> {
+                view{node(HBox()){
+
+                }}
+                child(fxNode<Label,Unit> { view{node(Label("1"))} })
+                child(fxNode<Label,Unit> { view{node(Label("2"))} })
+                child(fxNode<Label,Unit> { view{node(Label("3"))} })
+            })
+        }
+
+        class App : AppManager<Unit>() {
+            override fun configure(): Stub<Unit> = stub {
+                id(App::class)
+                evolve{ ParallelFx<Unit>{
+                    val stage = Stage()
+                    val scene = Scene(x.show())
+                    stage.scene = scene
+                    showStage(stage)
+                    Unit
+                } }
+            }
+        }
+
+        val appLauncherStub = launchApplicationStub<Unit, App> {
+            application(App())
+        }
+
+        val appStub = appLauncherStub.evolve(null).get()!!
+
+        val res = appStub.evolve(Unit).get()
+
+        delay(2_000)
+    }
+
+
+    @Test
+    fun sceneComponent() = runBlocking {
+        val sceneComponent = fxScene<VBox, Unit> {
+            configure{ }
+            sceneData(width = 300.0, height = 200.0)
+            root( fxPane<VBox,Unit>{
+                view{
+                    node(VBox())
+                }
+                child(fxNode<Label,Unit>{view{node(Label("label 1"))}})
+                child(fxNode<Label,Unit>{view{node(Label("label 2"))}})
+                child(fxNode<Label,Unit>{view{node(Label("label 3"))}})
+            } as FxParentComponent<VBox, Unit> )
+        }
+
+        class App : AppManager<Unit>() {
+            override fun configure(): Stub<Unit> = stub {
+                id(App::class)
+                evolve{ ParallelFx<Unit>{
+                    val stage = Stage()
+                    val scene = sceneComponent.show()
+                    stage.scene = scene
+                    showStage(stage)
+                    Unit
+                } }
+            }
+        }
+
+        val appLauncherStub = launchApplicationStub<Unit, App> {
+            application(App())
+        }
+
+        val appStub = appLauncherStub.evolve(null).get()!!
+
+        val res = appStub.evolve(Unit).get()
+
+        delay(2_000)
+
+    }
+
+    @Test
+    fun stageComponent() = runBlocking {
+
+        val stageComponent = fxStage<Unit>{
+            configure{
+                title = "Title"
+            }
+            scene<VBox>( fxScene {
+                root(fxPane<VBox,Unit> {
+                    view{
+                        node(VBox())
+                    }
+                    child(fxNode<Label,Unit> { view{node(Label("HUHU")){
+                        prefWidth = 200.0
+                    }} })
+                } as FxParentComponent<VBox, Unit>)
+            } )
+
+        }
+
+        class App : AppManager<Unit>() {
+            override fun configure(): Stub<Unit> = stub {
+                id(App::class)
+                evolve{ ParallelFx<Unit>{
+                    showStage(stageComponent.show())
+                    Unit
+                } }
+            }
+        }
+
+        val appLauncherStub = launchApplicationStub<Unit, App> {
+            application(App())
+        }
+
+        val appStub = appLauncherStub.evolve(null).get()!!
+
+        val res = appStub.evolve(Unit).get()
+
+        delay(2_000)
     }
 }

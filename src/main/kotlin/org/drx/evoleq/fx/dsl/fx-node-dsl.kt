@@ -15,7 +15,9 @@
  */
 package org.drx.evoleq.fx.dsl
 
+import javafx.event.ActionEvent
 import javafx.scene.Node
+import javafx.scene.control.Button
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -27,13 +29,14 @@ import org.drx.evoleq.fx.component.FxNodeComponent
 import org.drx.evoleq.stub.Stub
 import kotlin.reflect.KClass
 
-class FxNodeComponentConfiguration< N: Node, D> : Configuration<FxNodeComponent<N, D>> {
+
+open class FxNodeComponentConfiguration< N: Node, D> : Configuration<FxNodeComponent<N, D>> {
 
     lateinit var view: N
     lateinit var stub: Stub<D>
     lateinit var id: KClass<*>
 
-    override fun configure(): FxNodeComponent<N,D> = object: FxNodeComponent<N,D>{
+    override fun configure(): FxNodeComponent<N, D> = object: FxNodeComponent<N, D> {
         override val id: KClass<*>
             get() = this@FxNodeComponentConfiguration.id
 
@@ -47,7 +50,7 @@ class FxNodeComponentConfiguration< N: Node, D> : Configuration<FxNodeComponent<
 
 
     fun view(conf : FxNodeConfiguration<N>.()->Unit) {
-          view = configure(conf)
+        view = configure(conf)
     }
 
     fun stub(conf: StubConfiguration<D>.()->Unit) {
@@ -55,11 +58,9 @@ class FxNodeComponentConfiguration< N: Node, D> : Configuration<FxNodeComponent<
         id = stub.id
     }
 
-    //fun<M : Node, E> child()
 
 
 }
-
 fun <N: Node, D> fxNode(configuration: FxNodeComponentConfiguration<N,D>.()->Unit) = configure(configuration)
 
 open class FxNodeConfiguration<N : Node> : Configuration<N> {
@@ -85,3 +86,15 @@ open class FxNodeConfiguration<N : Node> : Configuration<N> {
 
 
 }
+
+
+
+
+
+fun Button.action(action: ActionEvent.()->Unit): Button {
+    this.setOnAction{
+        it.action()
+    }
+    return this
+}
+
