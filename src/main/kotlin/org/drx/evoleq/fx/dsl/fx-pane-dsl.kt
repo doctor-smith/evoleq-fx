@@ -21,6 +21,7 @@ import org.drx.evoleq.dsl.configure
 import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.fx.component.FxNodeComponent
 import org.drx.evoleq.fx.component.FxPaneComponent
+import org.drx.evoleq.fx.component.FxParentComponent
 import org.drx.evoleq.stub.Stub
 import kotlin.reflect.KClass
 
@@ -53,4 +54,4 @@ open class FxPaneComponentConfiguration<G : Pane, D> : FxNodeComponentConfigurat
     }
 }
 
-fun <G : Pane, D> fxPane(configuration: FxPaneComponentConfiguration<G, D>.()->Unit) : FxNodeComponent<G, D> = configure(configuration)
+fun <G : Pane, D> fxPane(configuration: FxPaneComponentConfiguration<G, D>.()->Unit) : FxParentComponent<G, D> = configure(configuration) as FxPaneComponent<G,D>

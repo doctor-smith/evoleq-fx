@@ -24,6 +24,7 @@ import org.drx.evoleq.dsl.configure
 import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.fx.component.FxGroupComponent
 import org.drx.evoleq.fx.component.FxNodeComponent
+import org.drx.evoleq.fx.component.FxParentComponent
 import org.drx.evoleq.stub.Stub
 import kotlin.reflect.KClass
 
@@ -59,4 +60,4 @@ open class FxGroupComponentConfiguration<G : Group, D> : FxNodeComponentConfigur
 
 }
 
-fun <G : Group, D> fxGroup(configuration: FxGroupComponentConfiguration<G, D>.()->Unit) : FxNodeComponent<G, D> = configure(configuration)
+fun <G : Group, D> fxGroup(configuration: FxGroupComponentConfiguration<G, D>.()->Unit) : FxParentComponent<G, D> = configure(configuration) as FxGroupComponent<G,D>

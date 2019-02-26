@@ -230,7 +230,7 @@ class ComponentTest {
                 child(fxNode<Label,Unit>{view{node<Label>{ text = "label 2"}}})
                 child(fxNode<Label,Unit>{view{node(Label("label 3"))}})
                 child(fxNode<Button,Nothing>{view{node<Button>{text = "Button"}}})
-            } as FxParentComponent<VBox, Unit> )
+            })
         }
 
         class App : AppManager<Unit>() {
@@ -266,7 +266,7 @@ class ComponentTest {
                 title = "Title"
             }
             scene<VBox>( fxScene {
-                root(fxPane<VBox,Unit> {
+                root(fxPane{
                     view{
                         node<VBox>()
                     }
@@ -274,7 +274,7 @@ class ComponentTest {
                         text = "HUHU"
                         prefWidth = 200.0
                     }} })
-                } as FxParentComponent<VBox, Unit>)
+                })
             } )
 
         }
@@ -304,14 +304,14 @@ class ComponentTest {
         val stage = fxStage<Nothing>{
             configure { initStyle(StageStyle.UNDECORATED) }
             scene(fxScene<Pane,Nothing>{
-                root(fxPane<Pane, Nothing>{
+                root(fxPane{
                     view{node<Pane>{
 
                     }}
                     child(fxNode<Button, Nothing>{
                         view{node<Button>{text = "Hello"}}
                     })
-                } as FxParentComponent<Pane, Nothing>)
+                })
             })
         }
 
