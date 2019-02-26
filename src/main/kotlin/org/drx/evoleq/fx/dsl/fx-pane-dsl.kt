@@ -27,8 +27,6 @@ import kotlin.reflect.KClass
 
 open class FxPaneComponentConfiguration<G : Pane, D> : FxNodeComponentConfiguration<G, D>() {
 
-    //private lateinit var group: G
-
     private val childComponents = ArrayList<FxNodeComponent<*, *>>()
 
     fun<N : Node, E> child(component: FxNodeComponent<N, E>) {
@@ -37,19 +35,21 @@ open class FxPaneComponentConfiguration<G : Pane, D> : FxNodeComponentConfigurat
 
     override fun configure(): FxPaneComponent<G, D> = object: FxPaneComponent<G, D>(){
 
-        override val node = view
+        init{ waitForData() }
+
+        override val node = viewDef
 
         override val children = childComponents
 
         override val id: KClass<*>
-            get() = this@FxPaneComponentConfiguration.id
+            get() = this@FxPaneComponentConfiguration.idDef
 
-        //override fun show(): N = view
+        //override fun show(): N = viewDef
 
         override val stubs: HashMap<KClass<*>, Stub<*>>
-            get() = stub.stubs
+            get() = stubDef.stubs
 
-        override suspend fun evolve(d: D): Evolving<D> = stub.evolve(d)
+        override suspend fun evolve(d: D): Evolving<D> = stubDef.evolve(d)
     }
 }
 

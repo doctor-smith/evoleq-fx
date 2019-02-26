@@ -15,28 +15,33 @@
  */
 package org.drx.evoleq.fx.component
 
-import javafx.scene.Group
+import javafx.geometry.Insets
 import javafx.scene.Scene
 import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.layout.HBox
+import javafx.scene.layout.Pane
 import javafx.scene.layout.VBox
 import javafx.stage.Stage
+import javafx.stage.StageStyle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.drx.evoleq.dsl.conditions
+import org.drx.evoleq.dsl.configureSuspended
 import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.application.AppManager
 import org.drx.evoleq.fx.application.BgAppManager
 import org.drx.evoleq.fx.dsl.*
+import org.drx.evoleq.fx.evolving.AsyncFx
 import org.drx.evoleq.fx.evolving.ParallelFx
 import org.drx.evoleq.stub.Stub
 import org.drx.evoleq.stub.toFlow
 import org.junit.Before
 import org.junit.Test
 import org.testfx.api.FxToolkit
+import java.lang.Thread.sleep
 
 class ComponentTest {
 
@@ -57,48 +62,45 @@ class ComponentTest {
             override fun configure(): Stub<Data> = stub{
                 id(App::class)
 
-                val component = fxNode<VBox, Data>{
-                    view {
-                        node(VBox()){
-                            val defaultHeight = 30;
-                            children.addAll(
-                                fxNode<Label,Unit> {
-                                    stub{}
-                                    view{
-                                        node(Label()){
-                                            text = "Hello World"
-                                        }
-                                        style("""
-                                            -fx-text-align: left;
-                                            -fx-pref-height: $defaultHeight;
-                                        """.trimIndent())
-                                    }
-                                }.show(),
-
-                                fxNode<Button,Data>{
-                                    stub{}
-                                    view{
-                                        node(Button()){
-                                            text = "Text"
-                                        }
-                                        style("""
-                                            -fx-pref-height: $defaultHeight;
-                                            -fx-pref-width: 500;
-                                            -fx-color: gray;
-                                        """.trimIndent())
-                                    }
-                                }.show()
-
-                            )
-
-                        }
+                val component = fxPane<VBox, Data>{
+                    view { node<VBox>{}
                         style("""
                             -fx-color: green;
                             -fx-padding: 10 10 10 10;
                         """.trimIndent())
                     }
+
+                    val defaultHeight = 30
+                    child( fxNode<Label,Unit> {
+                            stub{}
+                            view{
+                                node<Label>{
+                                    text = "Hello World"
+                                }
+                                style("""
+                                    -fx-text-align: left;
+                                    -fx-pref-height: $defaultHeight;
+                                """.trimIndent()
+                                )
+                            }
+                        }
+                    )
+                    child( fxNode<Button,Data>{
+                            stub{}
+                            view{ node<Button>{
+                                    text = "Text"
+                                }
+                                style("""
+                                    -fx-pref-height: $defaultHeight;
+                                    -fx-pref-width: 500;
+                                    -fx-color: gray;
+                                """.trimIndent()
+                                )
+                            }
+                        }
+                    )
                     stub{}
-                }
+                } as FxParentComponent<VBox,Data>
                 lateinit var stage: Stage
                 evolve{ data -> when(data.message) {
                     "show" ->ParallelFx {
@@ -161,7 +163,7 @@ class ComponentTest {
         val x = fxPane<VBox, Unit>{
 
             view {
-                node(VBox()){
+                node<VBox>{
                     spacing = 10.0
                 }
             }
@@ -216,14 +218,18 @@ class ComponentTest {
     fun sceneComponent() = runBlocking {
         val sceneComponent = fxScene<VBox, Unit> {
             configure{ }
-            sceneData(width = 300.0, height = 200.0)
+            sceneConstructorData(width = 300.0, height = 200.0)
             root( fxPane<VBox,Unit>{
                 view{
-                    node(VBox())
+                    node<VBox>{
+                        spacing = 2.0
+                        padding = Insets(5.0,5.0,5.0,5.0)
+                    }
                 }
                 child(fxNode<Label,Unit>{view{node(Label("label 1"))}})
-                child(fxNode<Label,Unit>{view{node(Label("label 2"))}})
+                child(fxNode<Label,Unit>{view{node<Label>{ text = "label 2"}}})
                 child(fxNode<Label,Unit>{view{node(Label("label 3"))}})
+                child(fxNode<Button,Nothing>{view{node<Button>{text = "Button"}}})
             } as FxParentComponent<VBox, Unit> )
         }
 
@@ -262,9 +268,10 @@ class ComponentTest {
             scene<VBox>( fxScene {
                 root(fxPane<VBox,Unit> {
                     view{
-                        node(VBox())
+                        node<VBox>()
                     }
-                    child(fxNode<Label,Unit> { view{node(Label("HUHU")){
+                    child(fxNode<Label,Unit> { view{node<Label>{
+                        text = "HUHU"
                         prefWidth = 200.0
                     }} })
                 } as FxParentComponent<VBox, Unit>)
@@ -291,5 +298,53 @@ class ComponentTest {
         val res = appStub.evolve(Unit).get()
 
         delay(2_000)
+    }
+
+    @Test fun showStageTwice() = runBlocking {
+        val stage = fxStage<Nothing>{
+            configure { initStyle(StageStyle.UNDECORATED) }
+            scene(fxScene<Pane,Nothing>{
+                root(fxPane<Pane, Nothing>{
+                    view{node<Pane>{
+
+                    }}
+                    child(fxNode<Button, Nothing>{
+                        view{node<Button>{text = "Hello"}}
+                    })
+                } as FxParentComponent<Pane, Nothing>)
+            })
+        }
+
+        class App : AppManager<Int>() {
+            override fun configure(): Stub<Int> = stub {
+                id(App::class)
+                evolve{ x: Int-> AsyncFx<Int>{
+                        val s = stage.show()
+                        showStage(s)
+                        //sleep(500)
+                        hideStage(s)
+                        //sleep(500)
+                        x+1
+                    }
+                }
+            }
+        }
+
+        val appLauncherStub = launchApplicationStub<Int, App> {
+            application(App())
+        }
+
+        val appStub = appLauncherStub.evolve(null).get()!!
+
+        val res = appStub.toFlow<Int,Boolean>(
+                conditions{
+                    testObject(true)
+                    check { b -> b }
+                    updateCondition{x -> x <= 1}
+                }
+        ).evolve(0).get()
+        assert(res == 2 )
+        delay(1_000)
+
     }
 }

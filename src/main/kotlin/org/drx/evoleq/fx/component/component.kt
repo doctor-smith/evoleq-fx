@@ -33,7 +33,7 @@ interface FxNodeComponent<N: Node, D> : FxComponent<N,D>
 
 abstract class FxParentComponent<P: Parent, D> : FxNodeComponent<P,D> {
 
-    abstract val node: P
+    abstract val node: ()->P
 
     abstract val children: ArrayList<FxNodeComponent<*,*>>
 
@@ -43,19 +43,25 @@ abstract class FxParentComponent<P: Parent, D> : FxNodeComponent<P,D> {
 
 abstract class FxGroupComponent<G: Group, D> : FxParentComponent<G, D>() {
     override fun show(): G {
+        //node.children.clear()
+        val n = node()
+        n.children.clear()
         children.forEach {
-            node.children.add( it.show() )
+            n.children.add( it.show() )
         }
-        return node
+        return n
     }
 }
 
 abstract class FxPaneComponent<P: Pane, D> : FxParentComponent<P, D>() {
     override fun show(): P {
+        //node.children.clear()
+        val n = node()
+        n.children.clear()
         children.forEach {
-            node.children.add( it.show() )
+            n.children.add( it.show() )
         }
-        return node
+        return n
     }
 }
 
@@ -66,6 +72,7 @@ interface FxStageComponent<D> : FxComponent<Stage,D>{
     val stage: Stage
     val configure: Stage.()->Stage
     override fun show(): Stage {
+        val stage = Stage()
         val scene = sceneComponent.show()
         stage.configure().scene = scene
         return stage
@@ -77,7 +84,12 @@ interface FxSceneComponent<R: Parent,D> : FxComponent<Scene, D>{
     val sceneData: FxSceneConfigData
     val configure: Scene.()->Scene
     override fun show(): Scene {
+        //rootComponent.node.scene.root = null//.children.clear()
         val root: R = rootComponent.show()
+        if(rootComponent.node().scene != null){
+            return root.toScene(sceneData)
+        }
         return root.toScene(sceneData).configure()
     }
 }
+

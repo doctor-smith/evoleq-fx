@@ -56,11 +56,14 @@ fun fxSceneData(
     return FxSceneConfigData.Empty
 }
 
-fun <R : Parent> R.toScene(data: FxSceneConfigData) : Scene = when(data) {
-    is FxSceneConfigData.Empty -> Scene(this)
-    is FxSceneConfigData.Data1 -> Scene(this, data.width, data.height)
-    is FxSceneConfigData.Data2 -> Scene(this,data.width, data.height, data.depthBuffer)
-    is FxSceneConfigData.Data3 -> Scene(this,data.width, data.height, data.depthBuffer, data.antialiasing)
-    is FxSceneConfigData.Data4 -> Scene(this,data.width, data.height, data.fill)
-    is FxSceneConfigData.Data5 -> Scene(this,data.fill)
-}
+fun <R : Parent> R.toScene(data: FxSceneConfigData) : Scene =
+        when(this.scene != null){
+            true ->this.scene
+            false->  when(data) {
+                is FxSceneConfigData.Empty -> Scene(this)
+                is FxSceneConfigData.Data1 -> Scene(this, data.width, data.height)
+                is FxSceneConfigData.Data2 -> Scene(this,data.width, data.height, data.depthBuffer)
+                is FxSceneConfigData.Data3 -> Scene(this,data.width, data.height, data.depthBuffer, data.antialiasing)
+                is FxSceneConfigData.Data4 -> Scene(this,data.width, data.height, data.fill)
+                is FxSceneConfigData.Data5 -> Scene(this,data.fill)
+} }

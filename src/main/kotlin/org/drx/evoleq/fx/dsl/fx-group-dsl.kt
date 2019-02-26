@@ -17,6 +17,9 @@ package org.drx.evoleq.fx.dsl
 
 import javafx.scene.Group
 import javafx.scene.Node
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.drx.evoleq.dsl.configure
 import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.fx.component.FxGroupComponent
@@ -35,20 +38,25 @@ open class FxGroupComponentConfiguration<G : Group, D> : FxNodeComponentConfigur
 
     override fun configure(): FxGroupComponent<G, D> = object: FxGroupComponent<G, D>(){
 
-        override val node = view
+        init{ waitForData() }
+
+        override val node = viewDef
 
         override val children = childComponents
 
         override val id: KClass<*>
-            get() = this@FxGroupComponentConfiguration.id
+            get() = this@FxGroupComponentConfiguration.idDef
 
 
 
         override val stubs: HashMap<KClass<*>, Stub<*>>
-            get() = stub.stubs
+            get() = stubDef.stubs
 
-        override suspend fun evolve(d: D): Evolving<D> = stub.evolve(d)
+        override suspend fun evolve(d: D): Evolving<D> = stubDef.evolve(d)
     }
+
+
+
 }
 
 fun <G : Group, D> fxGroup(configuration: FxGroupComponentConfiguration<G, D>.()->Unit) : FxNodeComponent<G, D> = configure(configuration)

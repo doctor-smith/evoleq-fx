@@ -78,7 +78,7 @@ abstract class AppManager<D> : Application(), Configuration<Stub<D>> {
             }
 
             // configure app and
-            // set stub to return and
+            // set stubDef to return and
             scope.launch { coroutineScope{
                 AppManager.STUB = app.configure()
                 STUB_INITIALIZED = true
@@ -96,10 +96,10 @@ abstract class AppManager<D> : Application(), Configuration<Stub<D>> {
 
         fun appStubs() = REGISTRY.values
 /*
-        fun shutDown(id: KClass<*>) : Boolean {
-            val stub = REGISTRY[id]
-            if(stub != null){
-                REGISTRY.remove(id)
+        fun shutDown(idDef: KClass<*>) : Boolean {
+            val stubDef = REGISTRY[idDef]
+            if(stubDef != null){
+                REGISTRY.remove(idDef)
             }
             return true
         }

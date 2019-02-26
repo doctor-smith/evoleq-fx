@@ -28,34 +28,49 @@ import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.fx.component.FxNodeComponent
 import org.drx.evoleq.stub.Stub
 import kotlin.reflect.KClass
+import kotlin.reflect.full.createInstance
 
 
 open class FxNodeComponentConfiguration< N: Node, D> : Configuration<FxNodeComponent<N, D>> {
 
-    lateinit var view: N
-    lateinit var stub: Stub<D>
-    lateinit var id: KClass<*>
+    lateinit var viewDef: ()->N
+    lateinit var stubDef: Stub<D>
+    lateinit var idDef: KClass<*>
+
 
     override fun configure(): FxNodeComponent<N, D> = object: FxNodeComponent<N, D> {
-        override val id: KClass<*>
-            get() = this@FxNodeComponentConfiguration.id
+        init{
+            waitForData()
+        }
 
-        override fun show(): N = view
+        override val id: KClass<*>
+            get() = this@FxNodeComponentConfiguration.idDef
+
+        override fun show(): N = viewDef()
 
         override val stubs: HashMap<KClass<*>, Stub<*>>
-            get() = stub.stubs
+            get() = stubDef.stubs
 
-        override suspend fun evolve(d: D): Evolving<D> = stub.evolve(d)
+        override suspend fun evolve(d: D): Evolving<D> = stubDef.evolve(d)
     }
 
+    fun waitForData(){
+        GlobalScope.launch{
+            while (!(::viewDef.isInitialized &&
+                     ::stubDef.isInitialized &&
+                     ::idDef.isInitialized)) {
+                delay(1)
+            }
+        }
+    }
 
-    fun view(conf : FxNodeConfiguration<N>.()->Unit) {
-        view = configure(conf)
+    fun view(conf : FxNodeLazyConfiguration<N>.()->Unit) {
+        viewDef =  configure(conf)
     }
 
     fun stub(conf: StubConfiguration<D>.()->Unit) {
-        stub = configure(conf)
-        id = stub.id
+        stubDef = configure(conf)
+        idDef = stubDef.id
     }
 
 
@@ -63,30 +78,49 @@ open class FxNodeComponentConfiguration< N: Node, D> : Configuration<FxNodeCompo
 }
 fun <N: Node, D> fxNode(configuration: FxNodeComponentConfiguration<N,D>.()->Unit) = configure(configuration)
 
-open class FxNodeConfiguration<N : Node> : Configuration<N> {
+open class FxNodeLazyConfiguration<N : Node> : Configuration<()->N> {
 
-    lateinit var view : N
+    //lateinit var view : N
+    lateinit var configure: () -> N
+    private  var style: String? = null
 
-    override fun configure(): N = view
+    override fun configure(): ()->N = configure//{view}
 
-    fun node(node: N, configure: N.()->Unit = {}) {
-        node.configure()
-        this.view = node
-    }
-
-    fun style(css: String) {
-        GlobalScope.launch {
-            while (!::view.isInitialized) {
-                delay(1)
-            }
-            view.style = css
-            view.applyCss()
+    fun node(node: N, configuration: N.()->Unit = {}) {
+        configure = {
+            node.configuration()
+            node.style()// = style
+            //this.view = node
+            node
         }
     }
+
+    inline fun <reified M : N> node(noinline configuration: M.()->Unit = {}){
+        configure = {
+            val node = M::class.createInstance()
+            node.configuration()
+
+            node.style() // = style
+            node
+        }
+    }
+    fun N.style() {
+        GlobalScope.launch {
+            while(this@FxNodeLazyConfiguration.style == null) {
+                delay(1)
+            }
+            this@style.style = this@FxNodeLazyConfiguration.style
+            this@style.applyCss()
+        }
+    }
+    fun style(css: String) { style = css }
 
 
 }
 
+//open class LazyFxNodeConfiguration<N: Node, D> : Configuration<FxNodeComponent<N,D>> {
+
+//}
 
 
 
