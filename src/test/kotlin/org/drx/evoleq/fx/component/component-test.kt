@@ -19,9 +19,7 @@ import javafx.geometry.Insets
 import javafx.scene.Scene
 import javafx.scene.control.Button
 import javafx.scene.control.Label
-import javafx.scene.layout.HBox
-import javafx.scene.layout.Pane
-import javafx.scene.layout.VBox
+import javafx.scene.layout.*
 import javafx.stage.Stage
 import javafx.stage.StageStyle
 import kotlinx.coroutines.delay
@@ -347,4 +345,51 @@ class ComponentTest {
         delay(1_000)
 
     }
+
+    @Test fun fxBorderPane() = runBlocking {
+
+        val stageComponent = fxStage<Unit>{
+            configure{
+                title = "Title"
+            }
+            scene<BorderPane>( fxScene {
+                root(fxBorderPane {
+                    view{  node<BorderPane>() }
+
+                    top( fxPane<StackPane, Nothing>{
+                        view{node<StackPane>()}
+                        child(fxNode<Button,Unit>{view{node<Button>{text = "1"}}} )
+                    })
+
+                    right( fxNode<Button,Unit>{view{node<Button>{text = "1"}}} )
+                    bottom( fxNode<Button,Unit>{view{node<Button>{text = "1"}}} )
+                    left( fxNode<Button,Unit>{view{node<Button>{text = "1"}}} )
+                    center( fxNode<Button,Unit>{view{node<Button>{text = "1"}}} )
+
+                })
+            } )
+
+        }
+
+        class App : AppManager<Unit>() {
+            override fun configure(): Stub<Unit> = stub {
+                id(App::class)
+                evolve{ ParallelFx<Unit>{
+                    showStage(stageComponent.show())
+                    Unit
+                } }
+            }
+        }
+
+        val appLauncherStub = launchApplicationStub<Unit, App> {
+            application(App())
+        }
+
+        val appStub = appLauncherStub.evolve(null).get()!!
+
+        val res = appStub.evolve(Unit).get()
+
+        //delay(2_000)
+    }
+
 }

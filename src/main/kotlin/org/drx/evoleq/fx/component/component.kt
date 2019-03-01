@@ -19,6 +19,7 @@ import javafx.scene.Group
 import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.Scene
+import javafx.scene.layout.BorderPane
 import javafx.scene.layout.Pane
 import javafx.stage.Stage
 import org.drx.evoleq.fx.data.FxSceneConfigData
@@ -58,6 +59,40 @@ abstract class FxPaneComponent<P: Pane, D> : FxParentComponent<P, D>() {
         //node.children.clear()
         val n = node()
         n.children.clear()
+        children.forEach {
+            n.children.add( it.show() )
+        }
+        return n
+    }
+}
+
+abstract class FxBorderPaneComponent<B : BorderPane, D> : FxParentComponent<B, D>() {
+    abstract val topComponent:FxNodeComponent<*,*>?
+    abstract val rightComponent:FxNodeComponent<*,*>?
+    abstract val bottomComponent:FxNodeComponent<*,*>?
+    abstract val leftComponent:FxNodeComponent<*,*>?
+    abstract val centerComponent:FxNodeComponent<*,*>?
+    override fun show(): B {
+        //while (node == null)
+        //node.children.clear()
+        val n = node()
+        n.children.clear()
+        if(topComponent != null) {
+            n.top = topComponent!!.show()
+        }
+        if(rightComponent != null) {
+            n.right = rightComponent!!.show()
+        }
+        if(bottomComponent != null) {
+            n.bottom = bottomComponent!!.show()
+        }
+        if(leftComponent != null) {
+            n.left = leftComponent!!.show()
+        }
+        if(centerComponent != null) {
+            n.center = centerComponent!!.show()
+        }
+
         children.forEach {
             n.children.add( it.show() )
         }
