@@ -20,6 +20,7 @@ import org.drx.evoleq.dsl.configure
 import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.fx.application.AppManager
 import org.drx.evoleq.stub.Stub
+import kotlin.reflect.KClass
 
 
 class LaunchApplicationStubConfiguration<D, A: AppManager<D>> : Configuration<Stub<Stub<D>?>> {
@@ -38,3 +39,21 @@ class LaunchApplicationStubConfiguration<D, A: AppManager<D>> : Configuration<St
 }
 
 fun <D, A: AppManager<D>> launchApplicationStub(configuration: LaunchApplicationStubConfiguration<D, A>.()->Unit): Stub<Stub<D>?> = configure(configuration)
+
+
+class LaunchApplicationStubFromClassConfiguration<D, A: KClass<out AppManager<D>>> : Configuration<Stub<Stub<D>?>> {
+
+    private lateinit var application: A
+
+    override fun configure(): Stub<Stub<D>?> = stub{
+        evolve{ AppManager.launch(application) }
+    }
+
+    fun application(application: A){
+        this.application = application
+    }
+
+
+}
+
+fun <D, A: KClass<out AppManager<D>>> launchApplicationStubFromClass(configuration: LaunchApplicationStubFromClassConfiguration<D, A>.()->Unit): Stub<Stub<D>?> = configure(configuration)
