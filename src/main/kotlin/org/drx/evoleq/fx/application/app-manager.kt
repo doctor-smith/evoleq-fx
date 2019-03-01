@@ -27,6 +27,7 @@ import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.stub.Stub
 import kotlin.reflect.KClass
+import kotlin.reflect.full.createInstance
 
 /**
  * You will have to override the configure method.
@@ -90,6 +91,11 @@ abstract class AppManager<D> : Application(), Configuration<Stub<D>> {
             REGISTRY[stub.id] = stub
             stub
         }}
+
+        fun <D, C: KClass<out AppManager<D>>> launch(appClass: C): Parallel<Stub<D>> {
+            val app = appClass.createInstance()
+            return Manager.launch(app)
+        }
 
         @Suppress("UNCHECKED_CAST")
         fun <E> appStub(id: KClass<*>): Stub<E>? = REGISTRY[id] as Stub<E>?
