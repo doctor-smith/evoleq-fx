@@ -1,10 +1,9 @@
 ##Versions
 
-1.0.2: AppManager, FxComponents:
-* AppManager: <br>
-Use JavaFX-Application class to
-    * do stage-management 
-    * launch and manage applications  
+1.0.2: AppManager, FxComponents
+* AppManager: <br>Use JavaFX-Application class to
+   * do stage-management 
+   * launch and manage applications  
 
   Note that AppManager implements Configuration<Stub<D>>
   making it easy to use it in the evoleq context
