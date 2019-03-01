@@ -60,7 +60,29 @@ class AppManagerTest {
 
         //delay(1_000)
     }
+    @Test fun launchFromClass() = runBlocking{
+        class App: AppManager<Unit>() {
 
+            override fun showStage(stage: Stage) {
+                println("show stage")
+                super.showStage(stage)
+            }
+
+            override fun configure(): Stub<Unit> = stub {
+                id(App::class)
+                evolve { ParallelFx {
+                    println("fx")
+                    val stage = Stage()
+                    stage.title = "PIPI"
+                    showStage(stage)
+                } }
+            }
+        }
+
+        val stub = AppManager.launch(App::class).get()
+        assert(stub.id == App::class)
+        val u = stub.evolve(Unit).get()
+    }
 
     @Test fun launchViaDsl() = runBlocking{
 
