@@ -1,6 +1,6 @@
 ##Versions
 
-1.0.2: AppManager, FxComponents:
+1.0.2: AppManager, FxComponents
 * AppManager: <br>
 Use JavaFX-Application class to
     * do stage-management 
