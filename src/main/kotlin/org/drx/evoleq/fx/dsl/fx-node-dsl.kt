@@ -73,6 +73,11 @@ open class FxNodeComponentConfiguration< N: Node, D> : Configuration<FxNodeCompo
         idDef = stubDef.id
     }
 
+    fun stub(stub: Stub<D>) {
+        stubDef = stub
+        idDef = stub.id
+    }
+
 
 
 }
