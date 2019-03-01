@@ -101,6 +101,11 @@ open class FxStageComponentConfiguration<D> : Configuration<FxStageComponent<D>>
         stubDef = configure(conf)
         idDef = stubDef.id
     }
+
+    fun stub(stub: Stub<D>) {
+        stubDef = stub
+        idDef = stub.id
+    }
 }
 
 /**
