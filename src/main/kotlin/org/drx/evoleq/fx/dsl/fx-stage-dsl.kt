@@ -16,10 +16,7 @@
 package org.drx.evoleq.fx.dsl
 
 import javafx.scene.Parent
-import javafx.stage.Modality
 import javafx.stage.Stage
-import javafx.stage.StageStyle
-import javafx.stage.Window
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -28,29 +25,47 @@ import org.drx.evoleq.dsl.Configuration
 import org.drx.evoleq.dsl.StubConfiguration
 import org.drx.evoleq.dsl.configure
 import org.drx.evoleq.evolving.Evolving
+import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.component.FxSceneComponent
 import org.drx.evoleq.fx.component.FxStageComponent
+import org.drx.evoleq.stub.ParentStubKey
 import org.drx.evoleq.stub.Stub
 import kotlin.reflect.KClass
 
-
+class SceneStubKey
 open class FxStageComponentConfiguration<D> : Configuration<FxStageComponent<D>> {
 
     private lateinit var idDef: KClass<*>
     private val stage: Stage by lazy{ Stage() }
     private lateinit var sceneComponentDef: FxSceneComponent<*, D>
     lateinit var stubDef: Stub<D>
+    var parentalStub: Stub<*>? = null
+
     var configure: Stage.()-> Stage = { this }
-    private var initStyleSet: Boolean = false
-    private var initModalitySet: Boolean = false
-    private var initOwnerSet: Boolean = false
 
-
+    var usingStub: Boolean = false
 
     override fun configure(): FxStageComponent<D> = object: FxStageComponent<D> {
 
         init{
-            waitForData()
+            if(!usingStub){
+                stubDef = object: Stub<D>{
+                    override val id: KClass<*>
+                        get() = this@FxStageComponentConfiguration::class
+                    override val stubs: HashMap<KClass<*>, Stub<*>>
+                        get() = HashMap()
+                }
+            }
+            Parallel<Unit> {
+                while (!::stubDef.isInitialized) {
+                    delay(1)
+                }
+                stubDef.stubs[SceneStubKey::class] = sceneComponentDef
+                if (parentalStub != null) {
+                    sceneComponentDef.stubs[ParentStubKey::class] = parentalStub!!
+                }
+                idDef = stubDef.id
+            }
         }
 
         override val configure: Stage.() -> Stage
@@ -65,16 +80,6 @@ open class FxStageComponentConfiguration<D> : Configuration<FxStageComponent<D>>
             get() = stubDef.stubs
 
         override suspend fun evolve(d: D): Evolving<D> = stubDef.evolve(d)
-    }
-
-    fun waitForData() = runBlocking {
-        GlobalScope.launch{
-            while (!(::sceneComponentDef.isInitialized &&
-                    ::stubDef.isInitialized &&
-                    ::idDef.isInitialized)) {
-                delay(1)
-            }
-        }
     }
 
     /**
@@ -95,17 +100,26 @@ open class FxStageComponentConfiguration<D> : Configuration<FxStageComponent<D>>
     }
 
     /**
-     * Configure the components stub
+     * Configure the components stub.
      */
     fun stub(conf: StubConfiguration<D>.()->Unit) {
+        val stubConf = StubConfiguration<D>()
+        usingStub = true
         stubDef = configure(conf)
         idDef = stubDef.id
     }
 
+    fun parentalStub(stub: Stub<*>) {
+        parentalStub = stub
+    }
+
+
     fun stub(stub: Stub<D>) {
+        usingStub = true
         stubDef = stub
         idDef = stub.id
     }
+
 }
 
 /**

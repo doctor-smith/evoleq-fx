@@ -15,6 +15,7 @@
  */
 package org.drx.evoleq.fx.component
 
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.Insets
 import javafx.scene.Scene
 import javafx.scene.control.Button
@@ -25,7 +26,7 @@ import javafx.stage.StageStyle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.drx.evoleq.dsl.conditions
-import org.drx.evoleq.dsl.configureSuspended
+import org.drx.evoleq.dsl.observingStub
 import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.evolving.Parallel
@@ -34,12 +35,14 @@ import org.drx.evoleq.fx.application.BgAppManager
 import org.drx.evoleq.fx.dsl.*
 import org.drx.evoleq.fx.evolving.AsyncFx
 import org.drx.evoleq.fx.evolving.ParallelFx
+import org.drx.evoleq.stub.ParentStubKey
 import org.drx.evoleq.stub.Stub
 import org.drx.evoleq.stub.toFlow
 import org.junit.Before
 import org.junit.Test
+import org.testfx.api.FxRobot
 import org.testfx.api.FxToolkit
-import java.lang.Thread.sleep
+import kotlin.reflect.KClass
 
 class ComponentTest {
 
@@ -70,7 +73,7 @@ class ComponentTest {
 
                     val defaultHeight = 30
                     child( fxNode<Label,Unit> {
-                            stub{}
+                            //stub{}
                             view{
                                 node<Label>{
                                     text = "Hello World"
@@ -84,7 +87,7 @@ class ComponentTest {
                         }
                     )
                     child( fxNode<Button,Data>{
-                            stub{}
+                            //stub{}
                             view{ node<Button>{
                                     text = "Text"
                                 }
@@ -97,7 +100,7 @@ class ComponentTest {
                             }
                         }
                     )
-                    stub{}
+                    //stub{}
                 } as FxParentComponent<VBox,Data>
                 lateinit var stage: Stage
                 evolve{ data -> when(data.message) {
@@ -350,7 +353,7 @@ class ComponentTest {
 
         val stageComponent = fxStage<Unit>{
             configure{
-                title = "Title"
+                title = "BorderPaneComponent"
             }
             scene<BorderPane>( fxScene {
                 root(fxBorderPane {
@@ -390,6 +393,190 @@ class ComponentTest {
         val res = appStub.evolve(Unit).get()
 
         //delay(2_000)
+    }
+
+
+    @Test
+    fun parentChildRelations() = runBlocking {
+        // button to be clicked by FxRobot
+        var button: Button? = null
+        // hopefully carries value after button click - initially set to false
+        var expected: Boolean = false
+
+
+
+        class Data(val clicked : Boolean = false)
+        val stageComponent = fxStage<Data> {
+
+            scene(fxScene<StackPane,Data>{
+                root(fxPane{
+                    class ButtonStub
+                    view{node<StackPane>()}
+
+                    child(fxNode<Button,Boolean>{
+                        val nodeClicked = SimpleBooleanProperty()
+                        view{node<Button>{
+                            text = "ClickMe"
+                            setOnAction {
+                                nodeClicked.value = true
+                                //nodeClicked.value = false
+                            }
+                            button = this
+                        }}
+                        stub(observingStub<Boolean,Boolean> {
+                            id(ButtonStub::class)
+                            gap{
+                                from{b -> Immediate{
+                                    println("from")
+                                    b
+                                }}
+                                to{ b,c ->  Parallel{
+                                    println("button clicked")
+                                    //parent<Boolean>().evolve(c).get()
+                                    true
+                                    //
+                                }}
+                            }
+                            evolve{
+                                println("evolving button stub")
+                                delay(500)
+                                //nodeClicked.value = false
+                                Immediate{it}
+                            }
+                            observe(nodeClicked)
+                        })
+                    })
+
+                    stub{
+                        var buttonStub: Stub<Boolean>? = null
+                        val U =
+                        this@fxPane.whenReady {
+
+                            child<ButtonStub, Boolean>().stubs[ParentStubKey::class] = stub<Boolean> {
+                                evolve { b -> parent<Boolean>().evolve(b) }
+                            }
+
+                            buttonStub = this@fxPane.stubConfiguration.stubs[ButtonStub::class]!! as Stub<Boolean>
+
+                        }
+
+
+                        evolve{
+                            //U.get()
+                            //assert(child<ButtonStub, Boolean>() != null)
+                            println("evolving fxPaneStub")
+
+                            val b =buttonStub!!
+                                    /*.toFlow<Boolean,Boolean>(conditions{
+                                        testObject(true)
+                                        check{b -> b}
+                                        updateCondition { true }
+                                    })*/
+                                    .evolve(false).get()
+                            //parent<Boolean>().evolve(b)
+                            Immediate{Data(b)}
+                        }
+
+                    }
+                })
+                stub{
+                    parentalStub(stub<Boolean>{
+                        evolve { b -> parent<Boolean>().evolve(b) }
+                    })
+
+                    evolve{
+                        println("rootStub.evolve, data: ${it.clicked}")
+                        child<RootStubKey, Data>().evolve(it)
+                    }
+                }
+
+            })
+            stub{
+                parentalStub(stub<Boolean>{
+                    evolve { b -> Immediate{
+                        println("@stage: button clicked")
+                        b
+                    } }
+                })
+                evolve{
+                    println("evolving stageStub")
+                    child<SceneStubKey, Data>().evolve(it)
+                }
+            }
+
+        }
+
+
+
+        class App : AppManager<Unit>() {
+            override fun configure(): Stub<Unit> = stub {
+                id(App::class)
+                evolve{ ParallelFx<Unit>{
+                    showStage(stageComponent.show())
+                    Parallel<Data> {
+                        println("xxx")
+                        val d = stageComponent.evolve(Data()).get()
+                        println("clicked:" + d.clicked)
+                        expected = d.clicked
+                        d
+                    }
+                    Unit
+                } }
+            }
+        }
+
+        val appLauncherStub = launchApplicationStub<Unit, App> {
+            application(App())
+        }
+
+        val appStub = appLauncherStub.evolve(null).get()!!
+
+        val res = appStub.evolve(Unit).get()
+
+        FxRobot().clickOn(button)
+        delay(1_000)
+        assert(expected)
+
+        //delay(10_000)
+    }
+
+    @Test
+    fun anchorPaneComponent() = runBlocking {
+        val stageComponent = fxStage<Nothing>{
+            scene(fxScene<AnchorPane,Nothing>{
+                sceneConstructorData(width = 500.0, height = 600.0)
+                root( fxAnchorPane<AnchorPane, Nothing>{
+                    view{node<AnchorPane>()}
+
+                    child(fxNode<Button,Nothing>{
+                        view{node<Button>{
+                            text = "Hi there"
+                            leftAnchor(15.0)
+                            topAnchor(10.0)
+                        }}
+                    })
+                })
+            })
+        }
+
+        class App : AppManager<Unit>() {
+            override fun configure(): Stub<Unit> = stub {
+                id(App::class)
+                evolve{ ParallelFx<Unit>{
+                    showStage(stageComponent.show())
+                    Unit
+                } }
+            }
+        }
+
+        val appLauncherStub = launchApplicationStub<Unit, App> {
+            application(App())
+        }
+
+        val appStub = appLauncherStub.evolve(null).get()!!
+
+        val res = appStub.evolve(Unit).get()
+
     }
 
 }

@@ -21,62 +21,139 @@ import javafx.scene.control.Button
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import org.drx.evoleq.dsl.Configuration
 import org.drx.evoleq.dsl.StubConfiguration
 import org.drx.evoleq.dsl.configure
 import org.drx.evoleq.evolving.Evolving
+import org.drx.evoleq.evolving.Immediate
+import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.component.FxNodeComponent
 import org.drx.evoleq.stub.Stub
+import kotlin.Exception
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
 
 open class FxNodeComponentConfiguration< N: Node, D> : Configuration<FxNodeComponent<N, D>> {
 
-    lateinit var viewDef: ()->N
-    lateinit var stubDef: Stub<D>
-    lateinit var idDef: KClass<*>
+    lateinit var viewConfiguration: ()->N
+    lateinit var stubConfiguration: Stub<D>
+    lateinit var idConfiguration: KClass<*>
+
+    // data related to configuration process
+    // states
+    var viewReady : Boolean = false
+    var stubReady : Boolean = false
+    var idSet: Boolean = false
+    var usingStub: Boolean = false
+    // timeouts
+    val stubTimeout: Long = 1_000
+    val viewTimeout: Long = 1_000
+    val idTimeout: Long = 1_000
+
+    init{
+        Parallel<Unit> {
+            // stub interface provides a default impl
+            try {
+                withTimeout(stubTimeout) {
+                    while (!(::stubConfiguration.isInitialized)) {
+                        kotlinx.coroutines.delay(1)
+                    }
+                    stubReady = true
+                }
+            } catch (exception: Exception) {
+            }
+        }
+        //  ::idConfiguration.isInitialized
+        Parallel<Unit> {
+            withTimeout(stubTimeout) {
+                while (!::idConfiguration.isInitialized) {
+                    kotlinx.coroutines.delay(idTimeout)
+                }
+                idSet = true
+            }
+        }
+
+
+        Parallel<Unit> {
+            // cannot use gui, without viewConfiguration being initialized
+            withTimeout(viewTimeout) {
+                while (!::viewConfiguration.isInitialized) {
+                    kotlinx.coroutines.delay(1)
+                }
+                viewReady = true
+            }
+        }
+
+    }
 
 
     override fun configure(): FxNodeComponent<N, D> = object: FxNodeComponent<N, D> {
         init{
-            waitForData()
-        }
-
-        override val id: KClass<*>
-            get() = this@FxNodeComponentConfiguration.idDef
-
-        override fun show(): N = viewDef()
-
-        override val stubs: HashMap<KClass<*>, Stub<*>>
-            get() = stubDef.stubs
-
-        override suspend fun evolve(d: D): Evolving<D> = stubDef.evolve(d)
-    }
-
-    fun waitForData(){
-        GlobalScope.launch{
-            while (!(::viewDef.isInitialized &&
-                     ::stubDef.isInitialized &&
-                     ::idDef.isInitialized)) {
-                delay(1)
+            if(!usingStub) {
+                println("not using stub !!!")
+                stubConfiguration = object: Stub<D>{
+                    override val id: KClass<*>
+                        get() = this@FxNodeComponentConfiguration::class
+                    override val stubs: HashMap<KClass<*>, Stub<*>>
+                        get() = HashMap()
+                }
+                //stubReady = true
+                //idSet = true
+            } else {
+                println("using configured stub !!!")
             }
         }
+        override val id: KClass<*>
+            get() = this@FxNodeComponentConfiguration.idConfiguration
+
+        override fun show(): N = viewConfiguration()
+
+        override val stubs: HashMap<KClass<*>, Stub<*>>
+            get() = stubConfiguration.stubs
+
+        override suspend fun evolve(d: D): Evolving<D> = stubConfiguration.evolve(d)
     }
 
     fun view(conf : FxNodeLazyConfiguration<N>.()->Unit) {
-        viewDef =  configure(conf)
+        viewConfiguration =  configure(conf)
     }
 
     fun stub(conf: StubConfiguration<D>.()->Unit) {
-        stubDef = configure(conf)
-        idDef = stubDef.id
+        usingStub = true
+        stubConfiguration = configure(conf)
+        idConfiguration = stubConfiguration.id
     }
 
     fun stub(stub: Stub<D>) {
-        stubDef = stub
-        idDef = stub.id
+        usingStub = true
+        stubConfiguration = stub
+        idConfiguration = stub.id
     }
+
+    fun whenViewIsReady(postConfigure: N.()->N): Parallel<Boolean> = Parallel{
+        while(!::viewConfiguration.isInitialized){
+            delay(1)
+        }
+        viewConfiguration = {viewConfiguration().postConfigure()}
+        true
+    }
+
+    fun whenStubIsReady(postConfigure: Stub<D>.()->Unit): Parallel<Boolean> = Parallel {
+        try{
+            withTimeout(stubTimeout) {
+                while (!(stubReady )) { //&& idSet
+                    delay(1)
+                }
+                stubConfiguration.postConfigure()
+                true
+            }
+        } catch(exception: Exception) {
+            cancel(false).get()
+        }
+    }
+
 
 
 

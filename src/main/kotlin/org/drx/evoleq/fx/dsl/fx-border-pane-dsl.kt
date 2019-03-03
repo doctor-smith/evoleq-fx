@@ -17,29 +17,15 @@ package org.drx.evoleq.fx.dsl
 
 import javafx.scene.Node
 import javafx.scene.layout.BorderPane
-import javafx.scene.layout.Pane
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.drx.evoleq.dsl.configure
 import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.fx.component.FxBorderPaneComponent
 import org.drx.evoleq.fx.component.FxNodeComponent
-import org.drx.evoleq.fx.component.FxPaneComponent
 import org.drx.evoleq.fx.component.FxParentComponent
 import org.drx.evoleq.stub.Stub
-import java.lang.Thread.sleep
 import kotlin.reflect.KClass
 
-open class FxBorderPaneComponentConfiguration<B: BorderPane,D> : FxNodeComponentConfiguration<B, D>() {
-
-    private val childComponents = ArrayList<FxNodeComponent<*, *>>()
-
-    fun<N : Node, E> child(component: FxNodeComponent<N, E>) {
-        childComponents.add(component)
-    }
-
+open class FxBorderPaneComponentConfiguration<B: BorderPane,D> : FxParentComponentConfiguration<B, D>() {
 
     var topComponent: FxNodeComponent<*, *>? = null
     var rightComponent: FxNodeComponent<*, *>? = null
@@ -64,17 +50,17 @@ open class FxBorderPaneComponentConfiguration<B: BorderPane,D> : FxNodeComponent
         override val topComponent: FxNodeComponent<*, *>?
             get() = this@FxBorderPaneComponentConfiguration.topComponent
 
-        override val node = viewDef
+        override val node = viewConfiguration
 
         override val children = childComponents
 
         override val id: KClass<*>
-            get() = this@FxBorderPaneComponentConfiguration.idDef
+            get() = this@FxBorderPaneComponentConfiguration.idConfiguration
 
         override val stubs: HashMap<KClass<*>, Stub<*>>
-            get() = stubDef.stubs
+            get() = stubConfiguration.stubs
 
-        override suspend fun evolve(d: D): Evolving<D> = stubDef.evolve(d)
+        override suspend fun evolve(d: D): Evolving<D> = stubConfiguration.evolve(d)
     }
 
     fun <N : Node, D> top(component: FxNodeComponent<N,D>) {

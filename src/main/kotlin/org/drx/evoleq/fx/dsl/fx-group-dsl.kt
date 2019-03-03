@@ -17,9 +17,6 @@ package org.drx.evoleq.fx.dsl
 
 import javafx.scene.Group
 import javafx.scene.Node
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.drx.evoleq.dsl.configure
 import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.fx.component.FxGroupComponent
@@ -28,32 +25,21 @@ import org.drx.evoleq.fx.component.FxParentComponent
 import org.drx.evoleq.stub.Stub
 import kotlin.reflect.KClass
 
-open class FxGroupComponentConfiguration<G : Group, D> : FxNodeComponentConfiguration<G, D>() {
-
-
-    private val childComponents = ArrayList<FxNodeComponent<*, *>>()
-
-    fun<N : Node, E> child(component: FxNodeComponent<N, E>) {
-        childComponents.add(component)
-    }
+open class FxGroupComponentConfiguration<G : Group, D> : FxParentComponentConfiguration<G, D>() {
 
     override fun configure(): FxGroupComponent<G, D> = object: FxGroupComponent<G, D>(){
 
-        init{ waitForData() }
-
-        override val node = viewDef
+        override val node = viewConfiguration
 
         override val children = childComponents
 
         override val id: KClass<*>
-            get() = this@FxGroupComponentConfiguration.idDef
-
-
+            get() = this@FxGroupComponentConfiguration.idConfiguration
 
         override val stubs: HashMap<KClass<*>, Stub<*>>
-            get() = stubDef.stubs
+            get() = stubConfiguration.stubs
 
-        override suspend fun evolve(d: D): Evolving<D> = stubDef.evolve(d)
+        override suspend fun evolve(d: D): Evolving<D> = stubConfiguration.evolve(d)
     }
 
 

@@ -19,21 +19,21 @@ import javafx.scene.Parent
 import javafx.scene.Scene
 import javafx.scene.SceneAntialiasing
 import javafx.scene.paint.Paint
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.drx.evoleq.dsl.Configuration
 import org.drx.evoleq.dsl.StubConfiguration
 import org.drx.evoleq.dsl.configure
 import org.drx.evoleq.evolving.Evolving
+import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.component.FxParentComponent
 import org.drx.evoleq.fx.component.FxSceneComponent
 import org.drx.evoleq.fx.data.FxSceneConfigData
 import org.drx.evoleq.fx.data.fxSceneData
+import org.drx.evoleq.stub.ParentStubKey
 import org.drx.evoleq.stub.Stub
 import kotlin.reflect.KClass
 
-
+class RootStubKey
 open class FxSceneComponentConfiguration<R: Parent, D> : Configuration<FxSceneComponent<R, D>> {
 
     lateinit var stubDef: Stub<D>
@@ -41,10 +41,42 @@ open class FxSceneComponentConfiguration<R: Parent, D> : Configuration<FxSceneCo
     lateinit var rootComponentDef: FxParentComponent<R, D>
     var sceneConfigData: FxSceneConfigData = FxSceneConfigData.Empty
     var configure: Scene.()-> Scene = { this }
+    var parentalStub: Stub<*>? = null
+
+    var usingStub: Boolean = false
+
+    var rootReady = false
 
     override fun configure(): FxSceneComponent<R, D> = object: FxSceneComponent<R, D> {
 
-        init{ waitForData() }
+        init{
+            if(!usingStub){
+                stubDef = object: Stub<D>{
+                    override val id: KClass<*>
+                        get() = this@FxSceneComponentConfiguration::class
+                    override val stubs: HashMap<KClass<*>, Stub<*>>
+                        get() = HashMap()
+                }
+            }
+            Parallel<Unit> {
+                while(!::stubDef.isInitialized){
+                    delay(1)
+                }
+                stubDef.stubs[RootStubKey::class] = rootComponentDef
+                if (parentalStub != null) {
+                    rootComponentDef.stubs[ParentStubKey::class] = parentalStub!!
+                }
+                rootReady = true
+
+                idDef = stubDef.id
+            }
+            runBlocking{withTimeout(1_000) {
+                while (!rootReady) {
+                    delay(1)
+                }
+            }
+            }
+        }
 
         override val id: KClass<*>
             get() = this@FxSceneComponentConfiguration.idDef
@@ -64,34 +96,10 @@ open class FxSceneComponentConfiguration<R: Parent, D> : Configuration<FxSceneCo
         override suspend fun evolve(d: D): Evolving<D> = stubDef.evolve(d)
     }
 
-    fun waitForData(){
-        GlobalScope.launch{
-            while (!(::rootComponentDef.isInitialized &&
-                            ::stubDef.isInitialized &&
-                            ::idDef.isInitialized)) {
-                delay(1)
-            }
-        }
-    }
-
     fun root(component: FxParentComponent<R, D>) {
         rootComponentDef = component
     }
-/*
-    fun Scene.constructorData(
-            width: Double? = null,
-            height: Double? = null,
-            depthBuffer: Boolean? = null,
-            antialiasing: SceneAntialiasing? = null,
-            fill: Paint? = null) {
-        sceneConfigData = fxSceneData(
-                width,
-                height,
-                depthBuffer,
-                antialiasing,
-                fill)
-    }
-*/
+
     fun sceneConstructorData(
             width: Double? = null,
             height: Double? = null,
@@ -114,13 +122,19 @@ open class FxSceneComponentConfiguration<R: Parent, D> : Configuration<FxSceneCo
     }
 
     fun stub(conf: StubConfiguration<D>.()->Unit) {
+        usingStub = true
         stubDef = configure(conf)
         idDef = stubDef.id
     }
 
     fun stub(stub: Stub<D>) {
+        usingStub = true
         stubDef = stub
         idDef = stub.id
+    }
+
+    fun parentalStub(stub: Stub<*>) {
+        parentalStub = stub
     }
 }
 

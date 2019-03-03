@@ -15,42 +15,30 @@
  */
 package org.drx.evoleq.fx.dsl
 
-import javafx.scene.Node
 import javafx.scene.layout.Pane
 import org.drx.evoleq.dsl.configure
 import org.drx.evoleq.evolving.Evolving
-import org.drx.evoleq.fx.component.FxNodeComponent
 import org.drx.evoleq.fx.component.FxPaneComponent
 import org.drx.evoleq.fx.component.FxParentComponent
 import org.drx.evoleq.stub.Stub
 import kotlin.reflect.KClass
 
 
-open class FxPaneComponentConfiguration<G : Pane, D> : FxNodeComponentConfiguration<G, D>() {
-
-    private val childComponents = ArrayList<FxNodeComponent<*, *>>()
-
-    fun<N : Node, E> child(component: FxNodeComponent<N, E>) {
-        childComponents.add(component)
-    }
+open class FxPaneComponentConfiguration<G : Pane, D> : FxParentComponentConfiguration<G, D>() {
 
     override fun configure(): FxPaneComponent<G, D> = object: FxPaneComponent<G, D>(){
 
-        init{ waitForData() }
-
-        override val node = viewDef
+        override val node = viewConfiguration
 
         override val children = childComponents
 
         override val id: KClass<*>
-            get() = this@FxPaneComponentConfiguration.idDef
-
-        //override fun show(): N = viewDef
+            get() = this@FxPaneComponentConfiguration.idConfiguration
 
         override val stubs: HashMap<KClass<*>, Stub<*>>
-            get() = stubDef.stubs
+            get() = stubConfiguration.stubs
 
-        override suspend fun evolve(d: D): Evolving<D> = stubDef.evolve(d)
+        override suspend fun evolve(d: D): Evolving<D> = stubConfiguration.evolve(d)
     }
 }
 

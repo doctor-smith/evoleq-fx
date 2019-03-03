@@ -19,6 +19,7 @@ import javafx.scene.Group
 import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.Scene
+import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.Pane
 import javafx.stage.Stage
@@ -38,7 +39,7 @@ abstract class FxParentComponent<P: Parent, D> : FxNodeComponent<P,D> {
 
     abstract val children: ArrayList<FxNodeComponent<*,*>>
 
-    fun children(): ArrayList<FxNodeComponent<*,*>> = children
+    //fun children(): ArrayList<FxNodeComponent<*,*>> = children
 
 }
 
@@ -56,7 +57,6 @@ abstract class FxGroupComponent<G: Group, D> : FxParentComponent<G, D>() {
 
 abstract class FxPaneComponent<P: Pane, D> : FxParentComponent<P, D>() {
     override fun show(): P {
-        //node.children.clear()
         val n = node()
         n.children.clear()
         children.forEach {
@@ -100,6 +100,16 @@ abstract class FxBorderPaneComponent<B : BorderPane, D> : FxParentComponent<B, D
     }
 }
 
+abstract class FxAnchorPaneComponent<A: AnchorPane, D> : FxParentComponent<A, D>() {
+    override fun show(): A {
+        val n = node()
+        n.children.clear()
+        children.forEach {
+            n.children.add( it.show() )
+        }
+        return n
+    }
+}
 
 
 interface FxStageComponent<D> : FxComponent<Stage,D>{
