@@ -22,9 +22,14 @@ import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.fx.component.FxBorderPaneComponent
 import org.drx.evoleq.fx.component.FxNodeComponent
 import org.drx.evoleq.fx.component.FxParentComponent
+import org.drx.evoleq.stub.DefaultIdentificationKey
 import org.drx.evoleq.stub.Stub
 import kotlin.reflect.KClass
-
+class TopComponentKey
+class BottomComponentKey
+class RightComponentKey
+class LeftComponentKey
+class CenterComponentKey
 open class FxBorderPaneComponentConfiguration<B: BorderPane,D> : FxParentComponentConfiguration<B, D>() {
 
     var topComponent: FxNodeComponent<*, *>? = null
@@ -34,6 +39,8 @@ open class FxBorderPaneComponentConfiguration<B: BorderPane,D> : FxParentCompone
     var centerComponent: FxNodeComponent<*, *>? = null
 
     override fun configure(): FxBorderPaneComponent<B,D>  = object: FxBorderPaneComponent<B, D>(){
+
+        init{ component = this }
 
         override val bottomComponent: FxNodeComponent<*, *>?
             get() = this@FxBorderPaneComponentConfiguration.bottomComponent
@@ -65,22 +72,57 @@ open class FxBorderPaneComponentConfiguration<B: BorderPane,D> : FxParentCompone
 
     fun <N : Node, D> top(component: FxNodeComponent<N,D>) {
         topComponent = component
+        whenStubIsReady {
+            if(component.id == DefaultIdentificationKey::class){
+                stubs[TopComponentKey::class] = component
+            } else {
+                stubs[component.id] = component
+            }
+        }
     }
 
     fun <N : Node, D> right(component: FxNodeComponent<N,D>) {
         rightComponent = component
+        whenStubIsReady {
+            if(component.id == DefaultIdentificationKey::class){
+                stubs[RightComponentKey::class] = component
+            } else {
+                stubs[component.id] = component
+            }
+        }
     }
 
     fun <N : Node, D> bottom(component: FxNodeComponent<N,D>) {
         bottomComponent = component
+        whenStubIsReady {
+            if(component.id == DefaultIdentificationKey::class){
+                stubs[BottomComponentKey::class] = component
+            } else {
+                stubs[component.id] = component
+            }
+        }
     }
 
     fun <N : Node, D> left(component: FxNodeComponent<N,D>) {
         leftComponent = component
+        whenStubIsReady {
+            if(component.id == DefaultIdentificationKey::class){
+                stubs[LeftComponentKey::class] = component
+            } else {
+                stubs[component.id] = component
+            }
+        }
     }
 
     fun <N : Node, D> center(component: FxNodeComponent<N,D>) {
         centerComponent = component
+        whenStubIsReady {
+            if(component.id == DefaultIdentificationKey::class){
+                stubs[CenterComponentKey::class] = component
+            } else {
+                stubs[component.id] = component
+            }
+        }
     }
 }
 
