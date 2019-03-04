@@ -17,10 +17,7 @@ package org.drx.evoleq.fx.dsl
 
 import javafx.scene.Parent
 import javafx.stage.Stage
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import org.drx.evoleq.dsl.Configuration
 import org.drx.evoleq.dsl.StubConfiguration
 import org.drx.evoleq.dsl.configure
@@ -45,6 +42,9 @@ open class FxStageComponentConfiguration<D> : Configuration<FxStageComponent<D>>
 
     var usingStub: Boolean = false
 
+    private var ready: Boolean = false
+    private var readyTimeout: Long = 1_000
+
     override fun configure(): FxStageComponent<D> = object: FxStageComponent<D> {
 
         init{
@@ -65,6 +65,7 @@ open class FxStageComponentConfiguration<D> : Configuration<FxStageComponent<D>>
                     sceneComponentDef.stubs[ParentStubKey::class] = parentalStub!!
                 }
                 idDef = stubDef.id
+                ready = true
             }
         }
 
@@ -118,6 +119,15 @@ open class FxStageComponentConfiguration<D> : Configuration<FxStageComponent<D>>
         usingStub = true
         stubDef = stub
         idDef = stub.id
+    }
+
+    fun <T> whenReady(perform: ()->T) = Parallel<T> {
+        withTimeout(readyTimeout) {
+            while (!ready) {
+                delay(1)
+            }
+            perform()
+        }
     }
 
 }

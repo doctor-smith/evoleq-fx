@@ -47,6 +47,9 @@ open class FxSceneComponentConfiguration<R: Parent, D> : Configuration<FxSceneCo
 
     var rootReady = false
 
+    private var ready: Boolean = false
+    private var readyTimeout: Long = 1_000
+
     override fun configure(): FxSceneComponent<R, D> = object: FxSceneComponent<R, D> {
 
         init{
@@ -69,13 +72,10 @@ open class FxSceneComponentConfiguration<R: Parent, D> : Configuration<FxSceneCo
                 rootReady = true
 
                 idDef = stubDef.id
+
+                ready = true
             }
-            runBlocking{withTimeout(1_000) {
-                while (!rootReady) {
-                    delay(1)
-                }
-            }
-            }
+
         }
 
         override val id: KClass<*>
@@ -135,6 +135,23 @@ open class FxSceneComponentConfiguration<R: Parent, D> : Configuration<FxSceneCo
 
     fun parentalStub(stub: Stub<*>) {
         parentalStub = stub
+    }
+
+    fun <T> whenReady(perform: ()->T) = Parallel<T> {
+        withTimeout(readyTimeout) {
+            while (!ready) {
+                delay(1)
+            }
+            perform()
+        }
+    }
+    fun <T> whenRootReady(perform: ()->T) = Parallel<T> {
+        withTimeout(readyTimeout) {
+            while (!rootReady) {
+                delay(1)
+            }
+            perform()
+        }
     }
 }
 

@@ -80,7 +80,7 @@ open class FxParentComponentConfiguration<P: Parent,D> : FxNodeComponentConfigur
         override suspend fun evolve(d: D): Evolving<D> = stubConfiguration.evolve(d)
     }
 
-    fun whenReady(perform:()->Unit) = Parallel<Unit>{
+    fun <T> whenReady(perform:()->T) = Parallel<T>{
         withTimeout(readyForCrossConfigurationTimeout) {
             while (!readyForCrossConfiguration) {
                 delay(1)

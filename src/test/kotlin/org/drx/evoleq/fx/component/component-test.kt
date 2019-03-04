@@ -407,10 +407,10 @@ class ComponentTest {
 
         class Data(val clicked : Boolean = false)
         val stageComponent = fxStage<Data> {
-
+            class ButtonStub
             scene(fxScene<StackPane,Data>{
                 root(fxPane{
-                    class ButtonStub
+
                     view{node<StackPane>()}
 
                     child(fxNode<Button,Boolean>{
@@ -423,7 +423,7 @@ class ComponentTest {
                             }
                             button = this
                         }}
-                        stub(observingStub<Boolean,Boolean> {
+                        stub(observingStub<Boolean,Boolean> buttonStub@{
                             id(ButtonStub::class)
                             gap{
                                 from{b -> Immediate{
@@ -432,7 +432,8 @@ class ComponentTest {
                                 }}
                                 to{ b,c ->  Parallel{
                                     println("button clicked")
-                                    //parent<Boolean>().evolve(c).get()
+                                    val res = parent<Boolean>().evolve(c).get()
+                                    println("stub@button: received: $res")
                                     true
                                     //
                                 }}
@@ -447,17 +448,28 @@ class ComponentTest {
                         })
                     })
 
-                    stub{
+                    stub rootStub@{
                         var buttonStub: Stub<Boolean>? = null
                         val U =
                         this@fxPane.whenReady {
-
+                            /*
                             child<ButtonStub, Boolean>().stubs[ParentStubKey::class] = stub<Boolean> {
                                 evolve { b -> parent<Boolean>().evolve(b) }
                             }
+                            */
+                            class TunnelStub
 
-                            buttonStub = this@fxPane.stubConfiguration.stubs[ButtonStub::class]!! as Stub<Boolean>
-
+                            val tunnel = stub<Boolean>{
+                                evolve { b ->
+                                    println("tunnel called: value = $b")
+                                    Immediate{b}
+                                    //parent<Boolean>().evolve(b)
+                                }
+                            }
+                            parentalStub(TunnelStub::class, tunnel)
+                            buttonStub = child<ButtonStub,Boolean>()//this@fxPane.stubConfiguration.stubs[ButtonStub::class]!! as Stub<Boolean>
+                            child(ButtonStub::class,buttonStub!!, TunnelStub::class)
+                            setupRelationsToChildren()
                         }
 
 
@@ -479,7 +491,8 @@ class ComponentTest {
 
                     }
                 })
-                stub{
+                stub sceneStub@{
+
                     parentalStub(stub<Boolean>{
                         evolve { b -> parent<Boolean>().evolve(b) }
                     })
@@ -491,7 +504,7 @@ class ComponentTest {
                 }
 
             })
-            stub{
+            stub stageStub@{
                 parentalStub(stub<Boolean>{
                     evolve { b -> Immediate{
                         println("@stage: button clicked")
@@ -501,6 +514,25 @@ class ComponentTest {
                 evolve{
                     println("evolving stageStub")
                     child<SceneStubKey, Data>().evolve(it)
+                }
+
+                this@fxStage.whenReady {
+                     this@stageStub.whenReady {
+                         class TunnelStub
+
+                         val tunnel = stub<Boolean>{
+                             evolve { b ->
+                                 println("stub@fxStage: tunnel called: value = $b")
+                                 Immediate{!b}
+                                 //parent<Boolean>().evolve(b)
+                             }
+                         }
+                         parentalStub(TunnelStub::class, tunnel)
+                         val buttonStub = find(ButtonStub::class)!!
+                         child(ButtonStub::class,buttonStub!!, TunnelStub::class)
+                         setupRelationsToChildren()
+                         //buttonStub
+                     }
                 }
             }
 
