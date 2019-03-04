@@ -35,14 +35,14 @@ import org.drx.evoleq.fx.application.BgAppManager
 import org.drx.evoleq.fx.dsl.*
 import org.drx.evoleq.fx.evolving.AsyncFx
 import org.drx.evoleq.fx.evolving.ParallelFx
-import org.drx.evoleq.stub.ParentStubKey
+import org.drx.evoleq.fx.test.showTestStage
 import org.drx.evoleq.stub.Stub
 import org.drx.evoleq.stub.toFlow
 import org.junit.Before
 import org.junit.Test
 import org.testfx.api.FxRobot
 import org.testfx.api.FxToolkit
-import kotlin.reflect.KClass
+import java.lang.Thread.sleep
 
 class ComponentTest {
 
@@ -322,7 +322,7 @@ class ComponentTest {
                 evolve{ x: Int-> AsyncFx<Int>{
                         val s = stage.show()
                         showStage(s)
-                        //sleep(500)
+                        sleep(500)
                         hideStage(s)
                         //sleep(500)
                         x+1
@@ -609,6 +609,34 @@ class ComponentTest {
 
         val res = appStub.evolve(Unit).get()
 
+    }
+
+    @Test fun runTime() = runBlocking {
+        class Data
+        val stageComponent = fxStage<Data> {
+            scene(fxScene<VBox, Data>{
+                root(fxPane{
+                    view{node<VBox>{
+
+                    }}
+                    child(fxNode<Button, Data>{
+                        view{node<Button>{
+                            text = "Button"
+                        }}
+                    })
+
+                    fxRunTime{
+                        //sleep(1_000)
+                        children.add(Button("new Button"))
+                    }
+
+                })
+            })
+        }
+
+        val stub = showTestStage(stageComponent).get()
+
+        delay (1_000)
     }
 
 }

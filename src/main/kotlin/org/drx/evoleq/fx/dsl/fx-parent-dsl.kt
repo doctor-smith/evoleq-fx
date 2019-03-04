@@ -23,6 +23,8 @@ import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.component.FxNodeComponent
 import org.drx.evoleq.fx.component.FxParentComponent
+import org.drx.evoleq.stub.DefaultIdentificationKey
+import org.drx.evoleq.stub.Keys
 import org.drx.evoleq.stub.Stub
 import kotlin.reflect.KClass
 
@@ -41,29 +43,38 @@ open class FxParentComponentConfiguration<P: Parent,D> : FxNodeComponentConfigur
 
     protected val childComponents = ArrayList<FxNodeComponent<*, *>>()
 
+    protected val usedDefaultKeys: ArrayList<KClass<*>> by lazy { arrayListOf<KClass<*>>() }
+
     fun<N : Node, E> child(component: FxNodeComponent<N, E>) {
         childComponents.add(component)
     }
-
+    private fun isDefaultLId(key: KClass<*>): Boolean = Keys.containsValue(key)
+    private fun nextDefaultKey(keys: ArrayList<KClass<*>>): KClass<*> = Keys.values.first{!keys.contains(it)}
     init{
         Parallel<Unit> {
             withTimeout(childComponentsTimeout) {
-                println("adding child stubs: using default-stub = ${!usingStub}")
                 whenStubIsReady {
                     // add child components as sub-stubs
                     childComponents.forEach {
-                        stubs[it.id] = it
-                        println("added ${it.id}")
+                        if(it.id == DefaultIdentificationKey::class){
+                            val key = nextDefaultKey(usedDefaultKeys)
+                            stubs[key] = it
+                        } else {
+                            stubs[it.id] = it
+                        }
                         //}
                         readyForCrossConfiguration = true
                     }
                 }
             }
         }
+
     }
 
 
     override fun configure(): FxParentComponent<P, D> = object: FxParentComponent<P, D>() {
+
+        init{ component = this }
 
         override val node = viewConfiguration
 
@@ -77,10 +88,18 @@ open class FxParentComponentConfiguration<P: Parent,D> : FxNodeComponentConfigur
         override val stubs: HashMap<KClass<*>, Stub<*>>
             get() = stubConfiguration.stubs
 
+        override suspend fun ready(): Boolean = Parallel<Boolean>{
+            performs.map{it.get()}
+            true
+        }.get()
+
         override suspend fun evolve(d: D): Evolving<D> = stubConfiguration.evolve(d)
     }
 
+
+    private val performs: ArrayList<Parallel<*>> by lazy{ arrayListOf<Parallel<*>>() }
     fun <T> whenReady(perform:()->T) = Parallel<T>{
+        performs.add(this@Parallel)
         withTimeout(readyForCrossConfigurationTimeout) {
             while (!readyForCrossConfiguration) {
                 delay(1)

@@ -29,7 +29,9 @@ import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.component.FxNodeComponent
+import org.drx.evoleq.fx.evolving.ParallelFx
 import org.drx.evoleq.stub.Stub
+import java.lang.Thread.sleep
 import kotlin.Exception
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
@@ -41,6 +43,8 @@ open class FxNodeComponentConfiguration< N: Node, D> : Configuration<FxNodeCompo
     lateinit var stubConfiguration: Stub<D>
     lateinit var idConfiguration: KClass<*>
 
+    var fxRunTimeAction: N.()->Unit = {}
+
     // data related to configuration process
     // states
     var viewReady : Boolean = false
@@ -51,6 +55,9 @@ open class FxNodeComponentConfiguration< N: Node, D> : Configuration<FxNodeCompo
     val stubTimeout: Long = 1_000
     val viewTimeout: Long = 1_000
     val idTimeout: Long = 1_000
+
+    lateinit var component: FxNodeComponent<N,D>
+    val componentInitializedTimeout: Long = 1_000
 
     init{
         Parallel<Unit> {
@@ -92,7 +99,7 @@ open class FxNodeComponentConfiguration< N: Node, D> : Configuration<FxNodeCompo
     override fun configure(): FxNodeComponent<N, D> = object: FxNodeComponent<N, D> {
         init{
             if(!usingStub) {
-                println("not using stub !!!")
+                //println("not using stub !!!")
                 stubConfiguration = object: Stub<D>{
                     override val id: KClass<*>
                         get() = this@FxNodeComponentConfiguration::class
@@ -102,8 +109,9 @@ open class FxNodeComponentConfiguration< N: Node, D> : Configuration<FxNodeCompo
                 //stubReady = true
                 //idSet = true
             } else {
-                println("using configured stub !!!")
+                //println("using configured stub !!!")
             }
+            component = this
         }
         override val id: KClass<*>
             get() = this@FxNodeComponentConfiguration.idConfiguration
@@ -112,6 +120,8 @@ open class FxNodeComponentConfiguration< N: Node, D> : Configuration<FxNodeCompo
 
         override val stubs: HashMap<KClass<*>, Stub<*>>
             get() = stubConfiguration.stubs
+
+        //override fun fxRunTime(N.() -> Unit)fxRunTimeAction
 
         override suspend fun evolve(d: D): Evolving<D> = stubConfiguration.evolve(d)
     }
@@ -140,8 +150,17 @@ open class FxNodeComponentConfiguration< N: Node, D> : Configuration<FxNodeCompo
         true
     }
 
+    fun fxRunTime(perform: N.()->Unit) : Parallel<Unit> = Parallel {
+        withTimeout(componentInitializedTimeout) {
+            while (!::component.isInitialized) {
+                delay(1)
+            }
+            component.fxRunTime(perform)
+        }
+    }
+
     fun whenStubIsReady(postConfigure: Stub<D>.()->Unit): Parallel<Boolean> = Parallel {
-        try{
+        //try{
             withTimeout(stubTimeout) {
                 while (!(stubReady )) { //&& idSet
                     delay(1)
@@ -149,9 +168,9 @@ open class FxNodeComponentConfiguration< N: Node, D> : Configuration<FxNodeCompo
                 stubConfiguration.postConfigure()
                 true
             }
-        } catch(exception: Exception) {
-            cancel(false).get()
-        }
+        //} catch(exception: Exception) {
+        //    cancel(false).get()
+        //}
     }
 
 

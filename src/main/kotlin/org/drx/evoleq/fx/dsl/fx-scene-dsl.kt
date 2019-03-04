@@ -29,10 +29,15 @@ import org.drx.evoleq.fx.component.FxParentComponent
 import org.drx.evoleq.fx.component.FxSceneComponent
 import org.drx.evoleq.fx.data.FxSceneConfigData
 import org.drx.evoleq.fx.data.fxSceneData
+import org.drx.evoleq.stub.DefaultIdentificationKey
 import org.drx.evoleq.stub.ParentStubKey
 import org.drx.evoleq.stub.Stub
 import kotlin.reflect.KClass
 
+/**
+ * Key of the rootComponent.
+ * Automatically set during setup
+ */
 class RootStubKey
 open class FxSceneComponentConfiguration<R: Parent, D> : Configuration<FxSceneComponent<R, D>> {
 
@@ -56,7 +61,7 @@ open class FxSceneComponentConfiguration<R: Parent, D> : Configuration<FxSceneCo
             if(!usingStub){
                 stubDef = object: Stub<D>{
                     override val id: KClass<*>
-                        get() = this@FxSceneComponentConfiguration::class
+                        get() = SceneStubKey::class
                     override val stubs: HashMap<KClass<*>, Stub<*>>
                         get() = HashMap()
                 }
@@ -65,7 +70,11 @@ open class FxSceneComponentConfiguration<R: Parent, D> : Configuration<FxSceneCo
                 while(!::stubDef.isInitialized){
                     delay(1)
                 }
-                stubDef.stubs[RootStubKey::class] = rootComponentDef
+                //if(rootComponentDef.id == DefaultIdentificationKey::class) {
+                    stubDef.stubs[RootStubKey::class] = rootComponentDef
+                //} else {
+                //    stubDef.stubs[rootComponentDef.id] = rootComponentDef
+                //}
                 if (parentalStub != null) {
                     rootComponentDef.stubs[ParentStubKey::class] = parentalStub!!
                 }
@@ -92,6 +101,11 @@ open class FxSceneComponentConfiguration<R: Parent, D> : Configuration<FxSceneCo
 
         override val stubs: HashMap<KClass<*>, Stub<*>>
             get() = stubDef.stubs
+
+        override suspend fun ready(): Boolean = Parallel<Boolean>{
+            performs.map{it.get()}
+            true
+        }.get()
 
         override suspend fun evolve(d: D): Evolving<D> = stubDef.evolve(d)
     }
@@ -137,7 +151,10 @@ open class FxSceneComponentConfiguration<R: Parent, D> : Configuration<FxSceneCo
         parentalStub = stub
     }
 
+
+    private val performs: ArrayList<Parallel<*>> by lazy{ arrayListOf<Parallel<*>>() }
     fun <T> whenReady(perform: ()->T) = Parallel<T> {
+        performs.add(this@Parallel)
         withTimeout(readyTimeout) {
             while (!ready) {
                 delay(1)
@@ -146,6 +163,7 @@ open class FxSceneComponentConfiguration<R: Parent, D> : Configuration<FxSceneCo
         }
     }
     fun <T> whenRootReady(perform: ()->T) = Parallel<T> {
+        performs.add(this@Parallel)
         withTimeout(readyTimeout) {
             while (!rootReady) {
                 delay(1)

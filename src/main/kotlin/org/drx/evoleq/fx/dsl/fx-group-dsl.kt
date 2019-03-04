@@ -29,6 +29,8 @@ open class FxGroupComponentConfiguration<G : Group, D> : FxParentComponentConfig
 
     override fun configure(): FxGroupComponent<G, D> = object: FxGroupComponent<G, D>(){
 
+        init{ component = this }
+
         override val node = viewConfiguration
 
         override val children = childComponents
@@ -47,3 +49,5 @@ open class FxGroupComponentConfiguration<G : Group, D> : FxParentComponentConfig
 }
 
 fun <G : Group, D> fxGroup(configuration: FxGroupComponentConfiguration<G, D>.()->Unit) : FxParentComponent<G, D> = configure(configuration) as FxGroupComponent<G,D>
+
+//fun <D> fxBaseGroup(configuration: FxGroupComponentConfiguration<Group, D>.()->Unit) = fxGroup(configuration)

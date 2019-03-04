@@ -28,6 +28,8 @@ open class FxAnchorPaneComponentConfiguration<A: AnchorPane, D> : FxParentCompon
 
     override fun configure(): FxAnchorPaneComponent<A, D> = object: FxAnchorPaneComponent<A, D>() {
 
+        init{ component = this }
+
         override val node = viewConfiguration
 
         override val children = childComponents

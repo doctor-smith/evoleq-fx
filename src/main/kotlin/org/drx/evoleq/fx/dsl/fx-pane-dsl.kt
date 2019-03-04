@@ -28,6 +28,8 @@ open class FxPaneComponentConfiguration<G : Pane, D> : FxParentComponentConfigur
 
     override fun configure(): FxPaneComponent<G, D> = object: FxPaneComponent<G, D>(){
 
+        init{ component = this }
+
         override val node = viewConfiguration
 
         override val children = childComponents
