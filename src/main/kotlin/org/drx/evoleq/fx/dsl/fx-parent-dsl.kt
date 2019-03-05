@@ -56,14 +56,25 @@ open class FxParentComponentConfiguration<P: Parent,D> : FxNodeComponentConfigur
                 whenStubIsReady {
                     // add child components as sub-stubs
                     childComponents.forEach {
-                        if(it.id == DefaultIdentificationKey::class){
-                            val key = nextDefaultKey(usedDefaultKeys)
-                            stubs[key] = it
-                        } else {
-                            stubs[it.id] = it
+                        Parallel<Unit> {
+                            var idSet = false
+                            while(!idSet) {
+                                try {
+                                    val id = it.id
+                                    idSet = true
+                                } catch (exception: Exception) {
+                                    kotlinx.coroutines.delay(1)
+                                }
+                            }
+                            if (it.id == DefaultIdentificationKey::class) {
+                                val key = nextDefaultKey(usedDefaultKeys)
+                                stubs[key] = it
+                            } else {
+                                stubs[it.id] = it
+                            }
+                            //}
+                            readyForCrossConfiguration = true
                         }
-                        //}
-                        readyForCrossConfiguration = true
                     }
                 }
             }
@@ -107,6 +118,8 @@ open class FxParentComponentConfiguration<P: Parent,D> : FxNodeComponentConfigur
             perform()
         }
     }
+
+
 
 
 }

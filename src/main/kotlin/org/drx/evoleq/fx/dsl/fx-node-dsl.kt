@@ -30,7 +30,7 @@ import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.component.FxNodeComponent
 import org.drx.evoleq.fx.evolving.ParallelFx
-import org.drx.evoleq.stub.Stub
+import org.drx.evoleq.stub.*
 import java.lang.Thread.sleep
 import kotlin.Exception
 import kotlin.reflect.KClass
@@ -102,12 +102,15 @@ open class FxNodeComponentConfiguration< N: Node, D> : Configuration<FxNodeCompo
                 //println("not using stub !!!")
                 stubConfiguration = object: Stub<D>{
                     override val id: KClass<*>
-                        get() = this@FxNodeComponentConfiguration::class
+                        get() = when(::idConfiguration.isInitialized){
+                            true -> idConfiguration
+                            false -> cyclicKeys.next()
+                        }
                     override val stubs: HashMap<KClass<*>, Stub<*>>
                         get() = HashMap()
                 }
-                //stubReady = true
-                //idSet = true
+                stubReady = true
+                idSet = true
             } else {
                 //println("using configured stub !!!")
             }
@@ -126,6 +129,10 @@ open class FxNodeComponentConfiguration< N: Node, D> : Configuration<FxNodeCompo
         override suspend fun evolve(d: D): Evolving<D> = stubConfiguration.evolve(d)
     }
 
+    fun id(id: KClass<*>) {
+        idConfiguration = id
+    }
+
     fun view(conf : FxNodeLazyConfiguration<N>.()->Unit) {
         viewConfiguration =  configure(conf)
     }
@@ -133,13 +140,18 @@ open class FxNodeComponentConfiguration< N: Node, D> : Configuration<FxNodeCompo
     fun stub(conf: StubConfiguration<D>.()->Unit) {
         usingStub = true
         stubConfiguration = configure(conf)
-        idConfiguration = stubConfiguration.id
+        if(!::idConfiguration.isInitialized) {
+            idConfiguration = stubConfiguration.id
+        }
+
     }
 
     fun stub(stub: Stub<D>) {
         usingStub = true
         stubConfiguration = stub
-        idConfiguration = stub.id
+        if(!::idConfiguration.isInitialized) {
+            idConfiguration = stub.id
+        }
     }
 
     fun whenViewIsReady(postConfigure: N.()->N): Parallel<Boolean> = Parallel{
@@ -156,6 +168,15 @@ open class FxNodeComponentConfiguration< N: Node, D> : Configuration<FxNodeCompo
                 delay(1)
             }
             component.fxRunTime(perform)
+        }
+    }
+    fun whenComponentReady(perform: FxNodeComponent<N,D>.()->Unit): Parallel<Unit> = Parallel{
+        withTimeout(componentInitializedTimeout) {
+            while (!::component.isInitialized && !component.ready()) {
+                delay(1)
+
+            }
+            component.perform()
         }
     }
 

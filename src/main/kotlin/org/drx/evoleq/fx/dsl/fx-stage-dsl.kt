@@ -53,6 +53,7 @@ open class FxStageComponentConfiguration<D> : Configuration<FxStageComponent<D>>
     private var readyTimeout: Long = 1_000
 
     lateinit var component: FxStageComponent<D>
+    val componentInitializedTimeout: Long = 1_000
 
     override fun configure(): FxStageComponent<D> = object: FxStageComponent<D> {
 
@@ -157,7 +158,15 @@ open class FxStageComponentConfiguration<D> : Configuration<FxStageComponent<D>>
         }
         component.fxRunTime(perform)
     }
+    fun whenComponentReady(perform: FxStageComponent<D>.()->Unit): Parallel<Unit> = Parallel{
+        withTimeout(componentInitializedTimeout) {
+            while (!::component.isInitialized && !component.ready()) {
+                delay(1)
 
+            }
+            component.perform()
+        }
+    }
 }
 
 /**
