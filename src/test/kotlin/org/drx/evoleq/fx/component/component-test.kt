@@ -478,7 +478,7 @@ class ComponentTest {
                             //assert(child<ButtonStub, Boolean>() != null)
                             println("evolving fxPaneStub")
 
-                            val b =buttonStub!!
+                            val b = buttonStub!!
                                     /*.toFlow<Boolean,Boolean>(conditions{
                                         testObject(true)
                                         check{b -> b}
