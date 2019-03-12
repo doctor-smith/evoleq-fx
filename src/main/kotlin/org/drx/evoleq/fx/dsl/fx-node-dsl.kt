@@ -43,7 +43,7 @@ open class FxNodeComponentConfiguration< N: Node, D> : Configuration<FxNodeCompo
     lateinit var stubConfiguration: Stub<D>
     lateinit var idConfiguration: KClass<*>
 
-    var fxRunTimeAction: N.()->Unit = {}
+    //var fxRunTimeAction: N.()->Unit = {}
 
     // data related to configuration process
     // states

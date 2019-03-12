@@ -28,6 +28,7 @@ import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.data.FxSceneConfigData
 import org.drx.evoleq.fx.data.toScene
 import org.drx.evoleq.fx.evolving.ParallelFx
+import org.drx.evoleq.fx.phase.FxComponentPhase
 import org.drx.evoleq.stub.Stub
 import java.lang.Thread.sleep
 
@@ -36,6 +37,8 @@ interface FxComponent<N, D> : Stub<D> {
     suspend fun ready() = true
     fun fxRunTime(action: N.()->Unit) { }
 }
+
+
 
 interface FxNodeComponent<N: Node, D> : FxComponent<N,D>
 

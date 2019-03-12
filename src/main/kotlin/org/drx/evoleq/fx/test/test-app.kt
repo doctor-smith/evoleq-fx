@@ -15,10 +15,12 @@
  */
 package org.drx.evoleq.fx.test
 
+import javafx.stage.Stage
 import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.application.AppManager
 import org.drx.evoleq.fx.application.SimpleAppManager
+import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.component.FxStageComponent
 import org.drx.evoleq.fx.evolving.ParallelFx
 import org.drx.evoleq.stub.Stub
@@ -27,6 +29,21 @@ import org.drx.evoleq.stub.Stub
  * Show the stageComponent and return it as a stub
  */
 fun <D> showTestStage(stageComponent: FxStageComponent<D>): Parallel<Stub<D>> = Parallel {
+
+    class TestApp<D> : SimpleAppManager<D>() {
+        init{
+            ParallelFx<Unit>{showStage(stageComponent.show())}
+        }
+        override fun configure(): Stub<D> = stageComponent as Stub<D>
+    }
+    val stub = AppManager.launch(TestApp<D>()).get()
+    stub
+}
+
+/**
+ * Show the stageComponent and return it as a stub
+ */
+fun <D> showTestStage(stageComponent: FxComponent<Stage, D>): Parallel<Stub<D>> = Parallel {
 
     class TestApp<D> : SimpleAppManager<D>() {
         init{
