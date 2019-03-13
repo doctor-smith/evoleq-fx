@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.evoleq.fx.dsl
+package org.drx.evoleq.fx.dsl.deprecated
 
 import javafx.event.ActionEvent
 import javafx.scene.Node
@@ -26,17 +26,16 @@ import org.drx.evoleq.dsl.Configuration
 import org.drx.evoleq.dsl.StubConfiguration
 import org.drx.evoleq.dsl.configure
 import org.drx.evoleq.evolving.Evolving
-import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.evolving.Parallel
-import org.drx.evoleq.fx.component.FxNodeComponent
-import org.drx.evoleq.fx.evolving.ParallelFx
+import org.drx.evoleq.fx.component.deprecated.FxNodeComponent
 import org.drx.evoleq.stub.*
-import java.lang.Thread.sleep
 import kotlin.Exception
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
-
+/**
+ * @deprecated
+ */
 open class FxNodeComponentConfiguration< N: Node, D> : Configuration<FxNodeComponent<N, D>> {
 
     lateinit var viewConfiguration: ()->N
@@ -56,7 +55,7 @@ open class FxNodeComponentConfiguration< N: Node, D> : Configuration<FxNodeCompo
     val viewTimeout: Long = 1_000
     val idTimeout: Long = 1_000
 
-    lateinit var component: FxNodeComponent<N,D>
+    lateinit var component: FxNodeComponent<N, D>
     val componentInitializedTimeout: Long = 1_000
 
     init{
@@ -170,7 +169,7 @@ open class FxNodeComponentConfiguration< N: Node, D> : Configuration<FxNodeCompo
             component.fxRunTime(perform)
         }
     }
-    fun whenComponentReady(perform: FxNodeComponent<N,D>.()->Unit): Parallel<Unit> = Parallel{
+    fun whenComponentReady(perform: FxNodeComponent<N, D>.()->Unit): Parallel<Unit> = Parallel{
         withTimeout(componentInitializedTimeout) {
             while (!::component.isInitialized && !component.ready()) {
                 delay(1)
@@ -198,8 +197,14 @@ open class FxNodeComponentConfiguration< N: Node, D> : Configuration<FxNodeCompo
 
 
 }
-fun <N: Node, D> fxNode(configuration: FxNodeComponentConfiguration<N,D>.()->Unit) = configure(configuration)
+/**
+ * @deprecated
+ */
+fun <N: Node, D> fxNode(configuration: FxNodeComponentConfiguration<N, D>.()->Unit) = configure(configuration)
 
+/**
+ * @deprecated
+ */
 open class FxNodeLazyConfiguration<N : Node> : Configuration<()->N> {
 
     //lateinit var view : N
@@ -246,7 +251,9 @@ open class FxNodeLazyConfiguration<N : Node> : Configuration<()->N> {
 
 
 
-
+/**
+ * @deprecated
+ */
 fun Button.action(action: ActionEvent.()->Unit): Button {
     this.setOnAction{
         it.action()

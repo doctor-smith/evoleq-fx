@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.evoleq.fx.dsl
+package org.drx.evoleq.fx.dsl.deprecated
 
 import javafx.scene.Node
 import javafx.scene.layout.BorderPane
@@ -21,9 +21,9 @@ import kotlinx.coroutines.delay
 import org.drx.evoleq.dsl.configure
 import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.evolving.Parallel
-import org.drx.evoleq.fx.component.FxBorderPaneComponent
-import org.drx.evoleq.fx.component.FxNodeComponent
-import org.drx.evoleq.fx.component.FxParentComponent
+import org.drx.evoleq.fx.component.deprecated.FxBorderPaneComponent
+import org.drx.evoleq.fx.component.deprecated.FxNodeComponent
+import org.drx.evoleq.fx.component.deprecated.FxParentComponent
 import org.drx.evoleq.stub.DefaultIdentificationKey
 import org.drx.evoleq.stub.Stub
 import kotlin.reflect.KClass
@@ -32,6 +32,9 @@ class BottomComponentKey
 class RightComponentKey
 class LeftComponentKey
 class CenterComponentKey
+/**
+ * @deprecated
+ */
 open class FxBorderPaneComponentConfiguration<B: BorderPane,D> : FxParentComponentConfiguration<B, D>() {
 
     var topComponent: FxNodeComponent<*, *>? = null
@@ -40,7 +43,7 @@ open class FxBorderPaneComponentConfiguration<B: BorderPane,D> : FxParentCompone
     var leftComponent: FxNodeComponent<*, *>? = null
     var centerComponent: FxNodeComponent<*, *>? = null
 
-    override fun configure(): FxBorderPaneComponent<B,D>  = object: FxBorderPaneComponent<B, D>(){
+    override fun configure(): FxBorderPaneComponent<B, D> = object: FxBorderPaneComponent<B, D>(){
 
         init{ component = this }
 
@@ -72,7 +75,7 @@ open class FxBorderPaneComponentConfiguration<B: BorderPane,D> : FxParentCompone
         override suspend fun evolve(d: D): Evolving<D> = stubConfiguration.evolve(d)
     }
 
-    fun <N : Node, D> top(component: FxNodeComponent<N,D>) {
+    fun <N : Node, D> top(component: FxNodeComponent<N, D>) {
         topComponent = component
         whenStubIsReady {
             Parallel<Unit> {
@@ -94,7 +97,7 @@ open class FxBorderPaneComponentConfiguration<B: BorderPane,D> : FxParentCompone
         }
     }
 
-    fun <N : Node, D> right(component: FxNodeComponent<N,D>) {
+    fun <N : Node, D> right(component: FxNodeComponent<N, D>) {
         rightComponent = component
         whenStubIsReady {
             Parallel<Unit> {
@@ -116,7 +119,7 @@ open class FxBorderPaneComponentConfiguration<B: BorderPane,D> : FxParentCompone
         }
     }
 
-    fun <N : Node, D> bottom(component: FxNodeComponent<N,D>) {
+    fun <N : Node, D> bottom(component: FxNodeComponent<N, D>) {
         bottomComponent = component
         whenStubIsReady {
             Parallel<Unit> {
@@ -138,7 +141,7 @@ open class FxBorderPaneComponentConfiguration<B: BorderPane,D> : FxParentCompone
         }
     }
 
-    fun <N : Node, D> left(component: FxNodeComponent<N,D>) {
+    fun <N : Node, D> left(component: FxNodeComponent<N, D>) {
         leftComponent = component
         whenStubIsReady {
             Parallel<Unit> {
@@ -160,7 +163,7 @@ open class FxBorderPaneComponentConfiguration<B: BorderPane,D> : FxParentCompone
         }
     }
 
-    fun <N : Node, D> center(component: FxNodeComponent<N,D>) {
+    fun <N : Node, D> center(component: FxNodeComponent<N, D>) {
         centerComponent = component
         whenStubIsReady {
             Parallel<Unit> {
@@ -183,5 +186,7 @@ open class FxBorderPaneComponentConfiguration<B: BorderPane,D> : FxParentCompone
     }
 }
 
-
-fun <G : BorderPane, D> fxBorderPane(configuration: FxBorderPaneComponentConfiguration<G, D>.()->Unit) : FxParentComponent<G, D> = configure(configuration) as FxBorderPaneComponent<G,D>
+/**
+ * @deprecated
+ */
+fun <G : BorderPane, D> fxBorderPane(configuration: FxBorderPaneComponentConfiguration<G, D>.()->Unit) : FxParentComponent<G, D> = configure(configuration) as FxBorderPaneComponent<G, D>

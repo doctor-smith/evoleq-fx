@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.evoleq.fx.dsl
+package org.drx.evoleq.fx.dsl.deprecated
 
 import javafx.scene.Node
 import javafx.scene.Parent
@@ -21,13 +21,15 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeout
 import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.evolving.Parallel
-import org.drx.evoleq.fx.component.FxNodeComponent
-import org.drx.evoleq.fx.component.FxParentComponent
+import org.drx.evoleq.fx.component.deprecated.FxNodeComponent
+import org.drx.evoleq.fx.component.deprecated.FxParentComponent
 import org.drx.evoleq.stub.DefaultIdentificationKey
 import org.drx.evoleq.stub.Keys
 import org.drx.evoleq.stub.Stub
 import kotlin.reflect.KClass
-
+/**
+ * @deprecated
+ */
 open class FxParentComponentConfiguration<P: Parent,D> : FxNodeComponentConfiguration<P, D>() {
 
     // data related to configuration process

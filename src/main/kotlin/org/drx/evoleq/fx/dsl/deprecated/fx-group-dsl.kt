@@ -13,20 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.evoleq.fx.dsl
+package org.drx.evoleq.fx.dsl.deprecated
 
-import javafx.scene.layout.Pane
+import javafx.scene.Group
 import org.drx.evoleq.dsl.configure
 import org.drx.evoleq.evolving.Evolving
-import org.drx.evoleq.fx.component.FxPaneComponent
-import org.drx.evoleq.fx.component.FxParentComponent
+import org.drx.evoleq.fx.component.deprecated.FxGroupComponent
+import org.drx.evoleq.fx.component.deprecated.FxParentComponent
 import org.drx.evoleq.stub.Stub
 import kotlin.reflect.KClass
+/**
+ * @deprecated
+ */
+open class FxGroupComponentConfiguration<G : Group, D> : FxParentComponentConfiguration<G, D>() {
 
-
-open class FxPaneComponentConfiguration<G : Pane, D> : FxParentComponentConfiguration<G, D>() {
-
-    override fun configure(): FxPaneComponent<G, D> = object: FxPaneComponent<G, D>(){
+    override fun configure(): FxGroupComponent<G, D> = object: FxGroupComponent<G, D>(){
 
         init{ component = this }
 
@@ -35,13 +36,20 @@ open class FxPaneComponentConfiguration<G : Pane, D> : FxParentComponentConfigur
         override val children = childComponents
 
         override val id: KClass<*>
-            get() = this@FxPaneComponentConfiguration.idConfiguration
+            get() = this@FxGroupComponentConfiguration.idConfiguration
 
         override val stubs: HashMap<KClass<*>, Stub<*>>
             get() = stubConfiguration.stubs
 
         override suspend fun evolve(d: D): Evolving<D> = stubConfiguration.evolve(d)
     }
-}
 
-fun <G : Pane, D> fxPane(configuration: FxPaneComponentConfiguration<G, D>.()->Unit) : FxParentComponent<G, D> = configure(configuration) as FxPaneComponent<G,D>
+
+
+}
+/**
+ * @deprecated
+ */
+fun <G : Group, D> fxGroup(configuration: FxGroupComponentConfiguration<G, D>.()->Unit) : FxParentComponent<G, D> = configure(configuration) as FxGroupComponent<G, D>
+
+//fun <D> fxBaseGroup(configuration: FxGroupComponentConfiguration<Group, D>.()->Unit) = fxGroup(configuration)

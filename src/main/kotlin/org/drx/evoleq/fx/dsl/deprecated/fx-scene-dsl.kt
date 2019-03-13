@@ -13,85 +13,94 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.evoleq.fx.dsl
+package org.drx.evoleq.fx.dsl.deprecated
 
 import javafx.scene.Parent
-import javafx.stage.Stage
+import javafx.scene.Scene
+import javafx.scene.SceneAntialiasing
+import javafx.scene.paint.Paint
 import kotlinx.coroutines.*
 import org.drx.evoleq.dsl.Configuration
 import org.drx.evoleq.dsl.StubConfiguration
 import org.drx.evoleq.dsl.configure
 import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.evolving.Parallel
-import org.drx.evoleq.fx.component.FxNodeComponent
-import org.drx.evoleq.fx.component.FxSceneComponent
-import org.drx.evoleq.fx.component.FxStageComponent
-import org.drx.evoleq.stub.DefaultIdentificationKey
+import org.drx.evoleq.fx.component.deprecated.FxParentComponent
+import org.drx.evoleq.fx.component.deprecated.FxSceneComponent
+import org.drx.evoleq.fx.data.FxSceneConfigData
+import org.drx.evoleq.fx.data.fxSceneData
 import org.drx.evoleq.stub.ParentStubKey
 import org.drx.evoleq.stub.Stub
 import kotlin.reflect.KClass
 
 /**
- * Key of the sceneComponents stub.
+ * Key of the rootComponent.
  * Automatically set during setup
  */
-class StageStubKey
-class SceneStubKey
-open class FxStageComponentConfiguration<D> : Configuration<FxStageComponent<D>> {
+class RootStubKey
+/**
+ * @deprecated
+ */
+open class FxSceneComponentConfiguration<R: Parent, D> : Configuration<FxSceneComponent<R, D>> {
 
-    private lateinit var idDef: KClass<*>
-    private val stage: Stage by lazy{ Stage() }
-    private lateinit var sceneComponentDef: FxSceneComponent<*, D>
     lateinit var stubDef: Stub<D>
+    lateinit var idDef: KClass<*>
+    lateinit var rootComponentDef: FxParentComponent<R, D>
+    var sceneConfigData: FxSceneConfigData = FxSceneConfigData.Empty
+    var configure: Scene.()-> Scene = { this }
     var parentalStub: Stub<*>? = null
 
-    var configure: Stage.()-> Stage = { this }
-
     var usingStub: Boolean = false
+
+    var rootReady = false
 
     private var ready: Boolean = false
     private var readyTimeout: Long = 1_000
 
-    lateinit var component: FxStageComponent<D>
-    val componentInitializedTimeout: Long = 1_000
-
-    override fun configure(): FxStageComponent<D> = object: FxStageComponent<D> {
+    override fun configure(): FxSceneComponent<R, D> = object: FxSceneComponent<R, D> {
 
         init{
             if(!usingStub){
                 stubDef = object: Stub<D>{
                     override val id: KClass<*>
-                        get() = StageStubKey::class
+                        get() = SceneStubKey::class
                     override val stubs: HashMap<KClass<*>, Stub<*>>
                         get() = HashMap()
                 }
             }
             Parallel<Unit> {
-                while (!::stubDef.isInitialized) {
+                while(!::stubDef.isInitialized){
                     delay(1)
                 }
-                //if(sceneComponentDef.id == DefaultIdentificationKey::class) {
-                    stubDef.stubs[SceneStubKey::class] = sceneComponentDef
+                //if(rootComponentDef.id == DefaultIdentificationKey::class) {
+                    stubDef.stubs[RootStubKey::class] = rootComponentDef
                 //} else {
-                //    stubDef.stubs[sceneComponentDef.id] = sceneComponentDef
+                //    stubDef.stubs[rootComponentDef.id] = rootComponentDef
                 //}
                 if (parentalStub != null) {
-                    sceneComponentDef.stubs[ParentStubKey::class] = parentalStub!!
+                    rootComponentDef.stubs[ParentStubKey::class] = parentalStub!!
                 }
+                rootReady = true
+
                 idDef = stubDef.id
+
                 ready = true
             }
-            component = this
+
         }
 
-        override val configure: Stage.() -> Stage
-            get() = this@FxStageComponentConfiguration.configure
-        override val sceneComponent: FxSceneComponent<*, D>
-            get() = this@FxStageComponentConfiguration.sceneComponentDef
-        override val stage: Stage
-            get() = this@FxStageComponentConfiguration.stage
         override val id: KClass<*>
-            get() = this@FxStageComponentConfiguration.idDef
+            get() = this@FxSceneComponentConfiguration.idDef
+
+        override val rootComponent: FxParentComponent<R, D>
+            get() = rootComponentDef
+
+        override val sceneData: FxSceneConfigData
+            get() = sceneConfigData
+
+        override val configure: Scene.() -> Scene
+            get() = this@FxSceneComponentConfiguration.configure
+
         override val stubs: HashMap<KClass<*>, Stub<*>>
             get() = stubDef.stubs
 
@@ -103,43 +112,47 @@ open class FxStageComponentConfiguration<D> : Configuration<FxStageComponent<D>>
         override suspend fun evolve(d: D): Evolving<D> = stubDef.evolve(d)
     }
 
-    /**
-     * scene configuration
-     */
-    fun <R : Parent> scene(component : FxSceneComponent<R, D>) {
-        this.sceneComponentDef = component
+    fun root(component: FxParentComponent<R, D>) {
+        rootComponentDef = component
     }
 
-    /**
-     * Configure the properties of the stage
-     */
-    fun configure(configuration: Stage.()->Unit) {
-        configure = {
+    fun sceneConstructorData(
+            width: Double? = null,
+            height: Double? = null,
+            depthBuffer: Boolean? = null,
+            antialiasing: SceneAntialiasing? = null,
+            fill: Paint? = null) {
+        sceneConfigData = fxSceneData(
+                width,
+                height,
+                depthBuffer,
+                antialiasing,
+                fill)
+    }
+
+    fun configure(configuration: Scene.()->Unit) {
+        this.configure = {
             this.configuration()
             this
         }
     }
 
-    /**
-     * Configure the components stub.
-     */
     fun stub(conf: StubConfiguration<D>.()->Unit) {
-        val stubConf = StubConfiguration<D>()
         usingStub = true
         stubDef = configure(conf)
         idDef = stubDef.id
     }
-
-    fun parentalStub(stub: Stub<*>) {
-        parentalStub = stub
-    }
-
 
     fun stub(stub: Stub<D>) {
         usingStub = true
         stubDef = stub
         idDef = stub.id
     }
+
+    fun parentalStub(stub: Stub<*>) {
+        parentalStub = stub
+    }
+
 
     private val performs: ArrayList<Parallel<*>> by lazy{ arrayListOf<Parallel<*>>() }
     fun <T> whenReady(perform: ()->T) = Parallel<T> {
@@ -151,25 +164,18 @@ open class FxStageComponentConfiguration<D> : Configuration<FxStageComponent<D>>
             perform()
         }
     }
-
-    fun fxRunTime(perform: Stage.()->Unit) : Parallel<Unit> = Parallel {
-        while (!::component.isInitialized ) {
-            delay(1)
-        }
-        component.fxRunTime(perform)
-    }
-    fun whenComponentReady(perform: FxStageComponent<D>.()->Unit): Parallel<Unit> = Parallel{
-        withTimeout(componentInitializedTimeout) {
-            while (!::component.isInitialized && !component.ready()) {
+    fun <T> whenRootReady(perform: ()->T) = Parallel<T> {
+        performs.add(this@Parallel)
+        withTimeout(readyTimeout) {
+            while (!rootReady) {
                 delay(1)
-
             }
-            component.perform()
+            perform()
         }
     }
 }
-
 /**
- * Configure an FxStageComponent
+ * @deprecated
  */
-fun <D> fxStage(configuration: FxStageComponentConfiguration<D>.()->Unit): FxStageComponent<D> = configure(configuration)
+fun <R: Parent, D> fxScene(configuration: FxSceneComponentConfiguration<R, D>.()->Unit): FxSceneComponent<R, D> = configure(configuration)
+

@@ -13,18 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.evoleq.fx.dsl
+package org.drx.evoleq.fx.dsl.deprecated
 
 import javafx.scene.Node
 import javafx.scene.layout.AnchorPane
 import org.drx.evoleq.dsl.configure
 import org.drx.evoleq.evolving.Evolving
-import org.drx.evoleq.fx.component.FxAnchorPaneComponent
-import org.drx.evoleq.fx.component.FxParentComponent
+import org.drx.evoleq.fx.component.deprecated.FxAnchorPaneComponent
+import org.drx.evoleq.fx.component.deprecated.FxParentComponent
 import org.drx.evoleq.stub.Stub
 import kotlin.reflect.KClass
-
-open class FxAnchorPaneComponentConfiguration<A: AnchorPane, D> : FxParentComponentConfiguration<A, D> () {
+/**
+ * @deprecated
+ */
+open class FxAnchorPaneComponentConfiguration<A: AnchorPane, D> : FxParentComponentConfiguration<A, D>() {
 
     override fun configure(): FxAnchorPaneComponent<A, D> = object: FxAnchorPaneComponent<A, D>() {
 
@@ -60,5 +62,7 @@ open class FxAnchorPaneComponentConfiguration<A: AnchorPane, D> : FxParentCompon
     }
 
 }
-
+/**
+ * @deprecated
+ */
 fun <A: AnchorPane, D> fxAnchorPane(configuration: FxAnchorPaneComponentConfiguration<A, D>.()->Unit): FxParentComponent<A, D> = configure(configuration) as FxAnchorPaneComponent<A, D>
