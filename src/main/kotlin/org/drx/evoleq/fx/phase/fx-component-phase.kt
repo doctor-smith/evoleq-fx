@@ -58,7 +58,7 @@ sealed class FxComponentPhase(val errors: ArrayList<Exception> = arrayListOf()) 
             val fxChildren: ArrayList<Parallel<FxComponent<*, *>>>,
             /**
              * Think of top, bottom, etc of BorderPane. The 'result' of these of must not be added to fxChildren,
-             * they have to be treated separately by the component, e.g in the show-function
+             * they have to be treated separately by the component
              */
             val fxSpecials: ArrayList<Parallel<FxComponent<*, *>>> = arrayListOf(),
             /**
@@ -104,7 +104,7 @@ sealed class FxComponentPhase(val errors: ArrayList<Exception> = arrayListOf()) 
             val fxChildren: ArrayList<Parallel<FxComponent<*, *>>>,
             /**
              * Think of top, bottom, etc of BorderPane. The 'result' of these of must not be added to fxChildren,
-             * they have to be treated separately by the component, e.g in the show-function
+             * they have to be treated separately by the component
              */
             val fxSpecials: ArrayList<Parallel<FxComponent<*, *>>>,
             /**
@@ -148,7 +148,7 @@ sealed class FxComponentPhase(val errors: ArrayList<Exception> = arrayListOf()) 
                 val fxChildren: ArrayList<Parallel<FxComponent<*, *>>>,
                 /**
                  * Think of top, bottom, etc of BorderPane. The 'result' of these of must not be added to fxChildren,
-                 * they have to be treated separately by the component, e.g in the show-function
+                 * they have to be treated separately by the component
                  */
                 val fxSpecials: ArrayList<Parallel<FxComponent<*, *>>>,
                 /**
@@ -189,7 +189,7 @@ sealed class FxComponentPhase(val errors: ArrayList<Exception> = arrayListOf()) 
                 val fxChildren: ArrayList<FxComponent<*, *>>,
                 /**
                  * Think of top, bottom, etc of BorderPane. The 'result' of these of must not be added to fxChildren,
-                 * they have to be treated separately by the component, e.g in the show-function
+                 * they have to be treated separately by the component
                  */
                 val fxSpecials: ArrayList<FxComponent<*, *>>,
                 /**
@@ -230,7 +230,7 @@ sealed class FxComponentPhase(val errors: ArrayList<Exception> = arrayListOf()) 
                 val fxChildren: ArrayList<FxComponent<*, *>>,
                 /**
                  * Think of top, bottom, etc of BorderPane. The 'result' of these of must not be added to fxChildren,
-                 * they have to be treated separately by the component, e.g in the show-function
+                 * they have to be treated separately by the component
                  */
                 val fxSpecials: ArrayList<FxComponent<*, *>>,
                 /**
@@ -271,7 +271,7 @@ sealed class FxComponentPhase(val errors: ArrayList<Exception> = arrayListOf()) 
                 val fxChildren: ArrayList<FxComponent<*, *>>,
                 /**
                  * Think of top, bottom, etc of BorderPane. The 'result' of these of must not be added to fxChildren,
-                 * they have to be treated separately by the component, e.g in the show-function
+                 * they have to be treated separately by the component
                  */
                 val fxSpecials:ArrayList<FxComponent<*, *>>,
                 /**
@@ -290,6 +290,7 @@ sealed class FxComponentPhase(val errors: ArrayList<Exception> = arrayListOf()) 
              * Children defined via child-function in sub-views
              */
             val fxChildren: ArrayList<FxComponent<*, *>>,
+            /* TODO think about managing parent-child-relations between fx-run-times within this phase. This would require the components to know their RxRunTime */
             val configuration: FxComponentConfiguration<N, D>
     ) : FxComponentPhase(), ConfigurationPhase
 
@@ -302,6 +303,6 @@ sealed class FxComponentPhase(val errors: ArrayList<Exception> = arrayListOf()) 
     }
 
 
-    class TerminateWitErrors : FxComponentPhase()
+    class TerminateWithErrors : FxComponentPhase()
     class Terminate : FxComponentPhase()
 }

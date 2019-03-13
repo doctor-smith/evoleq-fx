@@ -86,7 +86,7 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                     it.view.job().cancel()
                     it.configuration.cancel = true
                     //println(errors)
-                    FxComponentPhase.TerminateWitErrors()
+                    FxComponentPhase.TerminateWithErrors()
                     //FxComponentPhase.RunTimePhase.ShutDown<N,D>()
                 } else{
                 //withTimeout(it.timeout) {
@@ -164,7 +164,7 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                     }}
                     if(it.errors.isNotEmpty()) {
                         it.configuration.cancel = true
-                        FxComponentPhase.TerminateWitErrors()
+                        FxComponentPhase.TerminateWithErrors()
                     } else {
                         FxComponentPhase.Configuration.Configure<N, D>(
                                 configuration = it.configuration as FxComponentConfiguration<N, D>,
@@ -191,7 +191,7 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                     }
                     if(it.errors.isNotEmpty() ) {
                         it.configuration.cancel = true
-                        FxComponentPhase.TerminateWitErrors()
+                        FxComponentPhase.TerminateWithErrors()
                     }
                     else {
                         it.configuration.finish = true
@@ -248,6 +248,7 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                         get() = view
                     override val component: FxComponent<N, D>
                         get() = component
+
                 }
                 /**
                  * Configuration shall work into fxRunTime
@@ -280,7 +281,7 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
 
                 FxComponentPhase.Terminate()
             }
-            is FxComponentPhase.TerminateWitErrors -> Immediate{
+            is FxComponentPhase.TerminateWithErrors -> Immediate{
                 //println("Terminate with errors")
                 Parallel<Unit>{ it.errors.forEach { error -> println( error )  }}
                 FxComponentPhase.Terminate()
