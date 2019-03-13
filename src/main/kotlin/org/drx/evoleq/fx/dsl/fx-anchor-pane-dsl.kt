@@ -23,7 +23,7 @@ import org.drx.evoleq.fx.component.FxComponent
  * AnchorPane
  */
 fun <D> Any?.fxAnchorPane(configuration: FxComponentConfiguration<AnchorPane, D>.()->Unit): FxComponent<AnchorPane, D> {
-    return fxParentComponent(configuration)
+    return fxComponent(configuration)
 }
 fun Node.leftAnchor(anchor: Number) {
     AnchorPane.setLeftAnchor(this, anchor.toDouble())
