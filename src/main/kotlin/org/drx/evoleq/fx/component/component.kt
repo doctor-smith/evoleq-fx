@@ -19,5 +19,4 @@ import org.drx.evoleq.stub.Stub
 
 interface FxComponent<N, D> : Stub<D> {
     fun show(): N
-    //fun fxRunTime(action: N.()->Unit) { }
 }
