@@ -15,10 +15,10 @@
  */
 package org.drx.evoleq.fx.application
 
+import javafx.scene.Node
+import javafx.scene.Scene
 import javafx.stage.Stage
-import org.drx.evoleq.fx.component.FxNodeComponent
-import org.drx.evoleq.fx.component.FxSceneComponent
-import org.drx.evoleq.fx.component.FxStageComponent
+import org.drx.evoleq.fx.component.FxComponent
 import kotlin.reflect.KClass
 
 
@@ -27,14 +27,14 @@ abstract class SimpleAppManager<D> : AppManager<D>() {
     protected val stages: HashMap<KClass<*>, Stage> by lazy {
         HashMap<KClass<*>, Stage>()
     }
-    protected val stageComponents: HashMap<KClass<*>, FxStageComponent<*>> by lazy {
-        HashMap<KClass<*>, FxStageComponent<*>>()
+    protected val stageComponents: HashMap<KClass<*>, FxComponent<Stage, *>> by lazy {
+        HashMap<KClass<*>, FxComponent<Stage,*>>()
     }
-    protected val sceneComponents: HashMap<KClass<*>, FxSceneComponent<*, *>> by lazy {
-        HashMap<KClass<*>, FxSceneComponent<*, *>>()
+    protected val sceneComponents: HashMap<KClass<*>, FxComponent<Scene, *>> by lazy {
+        HashMap<KClass<*>, FxComponent<Scene, *>>()
     }
-    protected val nodeComponents: HashMap<KClass<*>, FxNodeComponent<*, *>> by lazy {
-        HashMap<KClass<*>, FxNodeComponent<*, *>>()
+    protected val nodeComponents: HashMap<KClass<*>, FxComponent<Node, *>> by lazy {
+        HashMap<KClass<*>, FxComponent<Node, *>>()
     }
 
     protected open fun showStage(id : KClass<*>) {

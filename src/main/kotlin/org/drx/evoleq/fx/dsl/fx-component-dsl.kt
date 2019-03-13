@@ -1,21 +1,33 @@
+/**
+ * Copyright (c) 2019 Dr. Florian Schmidt
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.drx.evoleq.fx.dsl
 
 import javafx.scene.Group
-import javafx.scene.Node
 import javafx.scene.Parent
-import javafx.scene.Scene
-import javafx.scene.layout.AnchorPane
-import javafx.scene.layout.BorderPane
-import javafx.scene.layout.Pane
-import javafx.stage.Stage
+import javafx.scene.layout.*
 import org.drx.evoleq.dsl.Configuration
+import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.component.FxComponent
-import org.drx.evoleq.fx.exception.FxConfigurationException
 import org.drx.evoleq.fx.flow.fxComponentFlow
 import org.drx.evoleq.fx.phase.FxComponentPhase
+import org.drx.evoleq.fx.phase.PhaseLauncher
 import org.drx.evoleq.fx.runtime.FxRunTime
 import org.drx.evoleq.fx.stub.NoStub
+import org.drx.evoleq.fx.stub.Tunnel
 import org.drx.evoleq.stub.Stub
 import java.lang.Thread.sleep
 import kotlin.reflect.KClass
@@ -37,43 +49,11 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
     var fxRunTime: FxRunTime<N, D>? = null
     var fxRunTimeView: N? = null
 
-    val launcher = Launcher<N,D>()
+    val launcher = PhaseLauncher<N,D>()
 
-    class Launcher<N,D> {
-        var id: ID? = null
-        var stub: Stub<D>? = null
-        var view: (()->N)? = null
-        val fxChildren = ArrayList<Parallel<FxComponent<*,*>>>()
-        val fxSpecials = ArrayList<Parallel<FxComponent<*,*>>>()
-        val stubActions = ArrayList<Parallel<Stub<D>.()->Unit>>()
-
-        fun launch(configuration: FxComponentConfiguration<N,D>): FxComponentPhase.Launch<N,D> = FxComponentPhase.Launch(
-                configuration = Parallel{configuration},
-                stub = Parallel{
-                    while( stub == null ) {
-                        kotlinx.coroutines.delay(1)
-                    }
-                    stub!!
-                },
-                view = Parallel{
-                    while( view == null ) {
-                        kotlinx.coroutines.delay(1)
-                    }
-                    view!!
-                },
-                id = Parallel{
-                    while( id == null  ) {
-                        kotlinx.coroutines.delay(1)
-                    }
-                    id!!
-                },
-                fxChildren = fxChildren,
-                fxSpecials = fxSpecials,
-                stubActions = stubActions
-
-        )
-    }
-
+    /**
+     *
+     */
     override fun configure(): FxComponent<N, D> {
         Parallel<Unit> {
             val l = launcher.launch(this@FxComponentConfiguration)
@@ -98,6 +78,8 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
                 return fxRunTimeView!!
             }
 
+            override suspend fun evolve(d: D): Evolving<D> = stubConfiguration.evolve(d)
+
         }
         component = comp
         return comp
@@ -109,42 +91,46 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
      *
      ******************************************************************************************************************/
 
-    fun Any?.id(id: ID) {
+    fun FxComponentConfiguration<N, D>.id(id: ID) : ID{
         launcher.id = id
+        return id
     }
-    inline fun <reified Id> Any?.id() {
+
+    inline fun <reified Id> FxComponentConfiguration<N, D>.id() {
         launcher.id = Id::class
     }
 
-    fun Any?.stub(stub: Stub<D>) {
+    fun FxComponentConfiguration<N, D>.stub(stub: Stub<D>) {
         launcher.stub = stub
     }
-    fun Any?.noStub() {
+
+    fun FxComponentConfiguration<N, D>.noStub() {
         launcher.stub = NoStub()
     }
-    fun Any?.view(view: ()->N) {
+
+    fun FxComponentConfiguration<N, D>.tunnel(){
+        launcher.stub = Tunnel()
+    }
+
+    fun FxComponentConfiguration<N, D>.view(view: ()->N) {
         launcher.view = view
     }
-    fun <M,E> Any?.child(child: FxComponent<M,E>) {
-        try {
-            launcher.fxChildren.add( Parallel { child } )
-        } catch(exception: Exception) {
-            throw FxConfigurationException.IdOfChildNotSet()
-        }
+    fun <M,E> FxComponentConfiguration<N, D>.child(child: FxComponent<M, E>) {
+        launcher.fxChildren.add( Parallel { child } )
     }
-    fun <M,E> Any?.fxSpecial(child: FxComponent<M,E>) {
+    fun <M,E> FxComponentConfiguration<N, D>.fxSpecial(child: FxComponent<M, E>) {
         launcher.fxSpecials.add( Parallel{child} )
     }
-    fun Any?.stubAction(action: Stub<D>.()->Unit) {
+    fun FxComponentConfiguration<N, D>.stubAction(action: Stub<D>.()->Unit) {
         launcher.stubActions.add(Parallel{action})
     }
-    fun Any?.fxRunTime(action: N.()->Unit) = Parallel<Unit>{
+    fun FxComponentConfiguration<N, D>.fxRunTime(action: N.()->Unit) = Parallel<Unit>{
         while(fxRunTime == null) {
             kotlinx.coroutines.delay(1)
         }
         fxRunTime!!.fxRunTime(action)
     }
-    fun Any?.shutdown() = Parallel<Unit> {
+    fun FxComponentConfiguration<N, D>.shutdown() = Parallel<Unit> {
         while(fxRunTime == null) {
             kotlinx.coroutines.delay(1)
         }
@@ -152,12 +138,22 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
     }
 }
 
-fun<N,D> Any?.fxComponent(configuration: FxComponentConfiguration<N,D>.()->Unit): FxComponent<N,D> {
+fun<N,D> Any?.fxComponent(configuration: FxComponentConfiguration<N,D>.()->Unit): FxComponent<N, D> {
     val conf = (object : FxComponentConfiguration<N, D>(){})
     conf.configuration()
     return conf.configure()
 }
-
+/*
+fun<N,D> Any?.fxParentComponent(configuration: FxComponentConfiguration<N,D>.()->Unit): FxComponent<N, D> {
+    val conf = (object : FxComponentConfiguration<N, D>(){
+        public override fun <M,E> FxComponentConfiguration<N, D>.child(child: FxComponent<M,E>) {
+            this.child(child)
+        }
+    })
+    conf.configuration()
+    return conf.configure()
+}
+*/
 /**
  * Generic
  */
@@ -173,96 +169,16 @@ inline fun <reified N : Any, D> FxComponentConfiguration<N, D>.configure(noinlin
 fun<V> V.isFxParent(): Boolean = when(this) {
     is Group,
     is Pane -> true
-
+    is Parent -> this.hasModifiableChildren()
     else -> false
-}
-/**
- * Stage
- */
-fun <D> FxComponentConfiguration<Stage, D>.scene(component: FxComponent<Scene, D>): FxComponentConfiguration<Stage, D> {
-    child(component)
-    fxRunTime { scene = component.show() }
-    return this
+
 }
 
-/**
- * Scene
- */
-fun <P: Parent, D> FxComponentConfiguration<Scene, D>.root(component: FxComponent<P, D>, inject:(P)->Scene = { p -> Scene(p)}) : FxComponentConfiguration<Scene, D> {
-    child(component)
-    val root = component.show()
-    val scene = inject(root)
-    view{scene}
-    return this
-}
-
-/**
- * AnchorPane
- */
-fun Node.leftAnchor(anchor: Number) {
-    AnchorPane.setLeftAnchor(this, anchor.toDouble())
-}
-fun Node.rightAnchor(anchor: Number) {
-    AnchorPane.setRightAnchor(this, anchor.toDouble())
-}
-fun Node.topAnchor(anchor: Number) {
-    AnchorPane.setTopAnchor(this, anchor.toDouble())
-}
-fun Node.bottomAnchor(anchor: Number) {
-    AnchorPane.setBottomAnchor(this, anchor.toDouble())
-}
-
-/**
- * BorderPane
- */
-fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.top(component: FxComponent<C, D>)  {
-    fxSpecial( component )
-    fxRunTime {
-        top =  component.show()
-    }
-}
-fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.bottom(component: FxComponent<C, D>)  {
-    fxSpecial( component )
-    fxRunTime {
-        bottom =  component.show()
-    }
-}
-fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.left(component: FxComponent<C, D>)  {
-    fxSpecial( component )
-    fxRunTime {
-        left =  component.show()
-    }
-}
-fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.right(component: FxComponent<C, D>)  {
-    fxSpecial( component )
-    fxRunTime {
-        right =  component.show()
-    }
-}
-fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.center(component: FxComponent<C, D>)  {
-    fxSpecial( component )
-    fxRunTime {
-        center =  component.show()
-    }
-}
-
-/*
-inline fun <reified N : Node, D> FxComponentConfiguration<N, D>.style(css: N.()->String): N {
-    val n = N::class.objectInstance!!
-    n.style = n.css()
-    return n
-}
-*/
+fun < P: Parent>P.hasModifiableChildren(): Boolean = try {
+    this::class.java.getMethod("getChildren") != null
+} catch(exception : Exception){ false }
 
 
-/**********************************************************************************************************************
- *
- * FxKeys
- *
- **********************************************************************************************************************/
-class BottomId
-class TopId
-class RightId
-class CenterId
-class LeftId
+
+
 

@@ -1,20 +1,35 @@
+/**
+ * Copyright (c) 2019 Dr. Florian Schmidt
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.drx.evoleq.fx.flow
 
+import javafx.collections.ObservableList
 import javafx.scene.Group
 import javafx.scene.Node
+import javafx.scene.Parent
 import javafx.scene.layout.Pane
 import kotlinx.coroutines.withTimeout
 import org.drx.evoleq.dsl.conditions
 import org.drx.evoleq.dsl.flow
 import org.drx.evoleq.dsl.stub
-import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.flow.SuspendedFlow
 import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.dsl.FxComponentConfiguration
 import org.drx.evoleq.fx.dsl.isFxParent
-import org.drx.evoleq.fx.evolving.ParallelFx
 import org.drx.evoleq.fx.exception.FxConfigurationException
 import org.drx.evoleq.fx.phase.FxComponentPhase
 import org.drx.evoleq.fx.runtime.FxRunTime
@@ -22,8 +37,6 @@ import org.drx.evoleq.fx.stub.NoStub
 import org.drx.evoleq.stub.DefaultIdentificationKey
 import org.drx.evoleq.stub.Stub
 import org.drx.evoleq.stub.toFlow
-import org.drx.evoleq.time.waitForValueToBeSet
-import kotlin.reflect.KClass
 
 class FxComponentFlow
 @Suppress("unchecked_cast")
@@ -34,6 +47,7 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
         when(it) {
             is FxComponentPhase.Launch<*,*> -> Parallel{
                 println("launch")
+                //kotlinx.coroutines.delay(10)
                 withTimeout(it.timeout){
                     val configuration = it.configuration.get() as FxComponentConfiguration<N,D>
                     FxComponentPhase.PreConfiguration(
@@ -113,10 +127,10 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                     println("AddChildren ${it.id}")
                     val stub = it.stub as Stub<D>
                     if(stub !is NoStub) {
-                        it.fxChildren.forEach { entry ->
+                        it.fxChildren.filter{child -> child !is NoStub<*> }.forEach { entry ->
                             stub.stubs[entry.id] = entry
                         }
-                        it.fxSpecials.forEach { entry ->
+                        it.fxSpecials.filter{child -> child !is NoStub<*> }.forEach { entry ->
                             stub.stubs[entry.id] = entry
                         }
                     }
@@ -220,6 +234,10 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                             is Node ->  when (view) {
                                 is Group -> (view as Group).children.add(childView)
                                 is Pane -> (view as Pane).children.add(childView)
+                                is Parent -> try{
+                                    val children = (view as Parent)::class.java.getMethod("getChildren")
+                                    (children.invoke(view) as ObservableList<Node>).add(childView)
+                                } catch(exception: Exception) { throw exception}
                             }
                         }
                     }

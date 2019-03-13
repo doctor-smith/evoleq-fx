@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.evoleq.fx.component
+package org.drx.evoleq.fx.component.deprecated
 
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.Insets
@@ -32,10 +32,12 @@ import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.application.AppManager
 import org.drx.evoleq.fx.application.BgAppManager
-import org.drx.evoleq.fx.dsl.*
+//import org.drx.evoleq.fx.dsl.*
+import org.drx.evoleq.fx.dsl.deprecated.*
+import org.drx.evoleq.fx.dsl.launchApplicationStub
 import org.drx.evoleq.fx.evolving.AsyncFx
 import org.drx.evoleq.fx.evolving.ParallelFx
-import org.drx.evoleq.fx.test.showTestStage
+import org.drx.evoleq.fx.test.deprecated.showTestStage
 import org.drx.evoleq.stub.Stub
 import org.drx.evoleq.stub.toFlow
 import org.junit.Before
@@ -63,8 +65,9 @@ class ComponentTest {
             override fun configure(): Stub<Data> = stub{
                 id(App::class)
 
-                val component = fxPane<VBox, Data>{
-                    view { node<VBox>{}
+                val component = fxPane<VBox, Data> {
+                    view {
+                        node<VBox> {}
                         style("""
                             -fx-color: green;
                             -fx-padding: 10 10 10 10;
@@ -72,36 +75,37 @@ class ComponentTest {
                     }
 
                     val defaultHeight = 30
-                    child( fxNode<Label,Unit> {
-                            //stub{}
-                            view{
-                                node<Label>{
-                                    text = "Hello World"
-                                }
-                                style("""
+                    child(fxNode<Label, Unit> {
+                        //stub{}
+                        view {
+                            node<Label> {
+                                text = "Hello World"
+                            }
+                            style("""
                                     -fx-text-align: left;
                                     -fx-pref-height: $defaultHeight;
                                 """.trimIndent()
-                                )
-                            }
+                            )
                         }
+                    }
                     )
-                    child( fxNode<Button,Data>{
-                            //stub{}
-                            view{ node<Button>{
-                                    text = "Text"
-                                }
-                                style("""
+                    child(fxNode<Button, Data> {
+                        //stub{}
+                        view {
+                            node<Button> {
+                                text = "Text"
+                            }
+                            style("""
                                     -fx-pref-height: $defaultHeight;
                                     -fx-pref-width: 500;
                                     -fx-color: gray;
                                 """.trimIndent()
-                                )
-                            }
+                            )
                         }
+                    }
                     )
                     //stub{}
-                } as FxParentComponent<VBox,Data>
+                } as FxParentComponent<VBox, Data>
                 lateinit var stage: Stage
                 evolve{ data -> when(data.message) {
                     "show" ->ParallelFx {
@@ -161,32 +165,37 @@ class ComponentTest {
 
     @Test
     fun parentComponent() = runBlocking {
-        val x = fxPane<VBox, Unit>{
+        val x = fxPane<VBox, Unit> {
 
             view {
-                node<VBox>{
+                node<VBox> {
                     spacing = 10.0
                 }
             }
-            child(fxNode<Button, Unit>{
-                view{node(Button("1"))
+            child(fxNode<Button, Unit> {
+                view {
+                    node(Button("1"))
                 }
             })
-            child(fxNode<Button, Unit>{
-                view{node(Button("2"))}
+            child(fxNode<Button, Unit> {
+                view { node(Button("2")) }
             })
-            child(fxNode<Button, Unit>{
-                view{node(Button("3")){
+            child(fxNode<Button, Unit> {
+                view {
+                    node(Button("3")) {
 
-                }}
+                    }
+                }
             })
-            child(fxPane<HBox,Unit> {
-                view{node(HBox()){
+            child(fxPane<HBox, Unit> {
+                view {
+                    node(HBox()) {
 
-                }}
-                child(fxNode<Label,Unit> { view{node(Label("1"))} })
-                child(fxNode<Label,Unit> { view{node(Label("2"))} })
-                child(fxNode<Label,Unit> { view{node(Label("3"))} })
+                    }
+                }
+                child(fxNode<Label, Unit> { view { node(Label("1")) } })
+                child(fxNode<Label, Unit> { view { node(Label("2")) } })
+                child(fxNode<Label, Unit> { view { node(Label("3")) } })
             })
         }
 
@@ -218,19 +227,19 @@ class ComponentTest {
     @Test
     fun sceneComponent() = runBlocking {
         val sceneComponent = fxScene<VBox, Unit> {
-            configure{ }
+            configure { }
             sceneConstructorData(width = 300.0, height = 200.0)
-            root( fxPane<VBox,Unit>{
-                view{
-                    node<VBox>{
+            root(fxPane<VBox, Unit> {
+                view {
+                    node<VBox> {
                         spacing = 2.0
-                        padding = Insets(5.0,5.0,5.0,5.0)
+                        padding = Insets(5.0, 5.0, 5.0, 5.0)
                     }
                 }
-                child(fxNode<Label,Unit>{view{node(Label("label 1"))}})
-                child(fxNode<Label,Unit>{view{node<Label>{ text = "label 2"}}})
-                child(fxNode<Label,Unit>{view{node(Label("label 3"))}})
-                child(fxNode<Button,Nothing>{view{node<Button>{text = "Button"}}})
+                child(fxNode<Label, Unit> { view { node(Label("label 1")) } })
+                child(fxNode<Label, Unit> { view { node<Label> { text = "label 2" } } })
+                child(fxNode<Label, Unit> { view { node(Label("label 3")) } })
+                child(fxNode<Button, Nothing> { view { node<Button> { text = "Button" } } })
             })
         }
 
@@ -262,21 +271,25 @@ class ComponentTest {
     @Test
     fun stageComponent() = runBlocking {
 
-        val stageComponent = fxStage<Unit>{
-            configure{
+        val stageComponent = fxStage<Unit> {
+            configure {
                 title = "Title"
             }
-            scene<VBox>( fxScene {
-                root(fxPane{
-                    view{
+            scene<VBox>(fxScene {
+                root(fxPane {
+                    view {
                         node<VBox>()
                     }
-                    child(fxNode<Label,Unit> { view{node<Label>{
-                        text = "HUHU"
-                        prefWidth = 200.0
-                    }} })
+                    child(fxNode<Label, Unit> {
+                        view {
+                            node<Label> {
+                                text = "HUHU"
+                                prefWidth = 200.0
+                            }
+                        }
+                    })
                 })
-            } )
+            })
 
         }
 
@@ -302,15 +315,17 @@ class ComponentTest {
     }
 
     @Test fun showStageTwice() = runBlocking {
-        val stage = fxStage<Nothing>{
+        val stage = fxStage<Nothing> {
             configure { initStyle(StageStyle.UNDECORATED) }
-            scene(fxScene<Pane,Nothing>{
-                root(fxPane{
-                    view{node<Pane>{
+            scene(fxScene<Pane, Nothing> {
+                root(fxPane {
+                    view {
+                        node<Pane> {
 
-                    }}
-                    child(fxNode<Button, Nothing>{
-                        view{node<Button>{text = "Hello"}}
+                        }
+                    }
+                    child(fxNode<Button, Nothing> {
+                        view { node<Button> { text = "Hello" } }
                     })
                 })
             })
@@ -351,26 +366,26 @@ class ComponentTest {
 
     @Test fun fxBorderPane() = runBlocking {
 
-        val stageComponent = fxStage<Unit>{
-            configure{
+        val stageComponent = fxStage<Unit> {
+            configure {
                 title = "BorderPaneComponent"
             }
-            scene<BorderPane>( fxScene {
+            scene<BorderPane>(fxScene {
                 root(fxBorderPane {
-                    view{  node<BorderPane>() }
+                    view { node<BorderPane>() }
 
-                    top( fxPane<StackPane, Nothing>{
-                        view{node<StackPane>()}
-                        child(fxNode<Button,Unit>{view{node<Button>{text = "1"}}} )
+                    top(fxPane<StackPane, Nothing> {
+                        view { node<StackPane>() }
+                        child(fxNode<Button, Unit> { view { node<Button> { text = "1" } } })
                     })
 
-                    right( fxNode<Button,Unit>{view{node<Button>{text = "1"}}} )
-                    bottom( fxNode<Button,Unit>{view{node<Button>{text = "1"}}} )
-                    left( fxNode<Button,Unit>{view{node<Button>{text = "1"}}} )
-                    center( fxNode<Button,Unit>{view{node<Button>{text = "1"}}} )
+                    right(fxNode<Button, Unit> { view { node<Button> { text = "1" } } })
+                    bottom(fxNode<Button, Unit> { view { node<Button> { text = "1" } } })
+                    left(fxNode<Button, Unit> { view { node<Button> { text = "1" } } })
+                    center(fxNode<Button, Unit> { view { node<Button> { text = "1" } } })
 
                 })
-            } )
+            })
 
         }
 
@@ -408,41 +423,47 @@ class ComponentTest {
         class Data(val clicked : Boolean = false)
         val stageComponent = fxStage<Data> {
             class ButtonStub
-            scene(fxScene<StackPane,Data>{
-                root(fxPane{
+            scene(fxScene<StackPane, Data> {
+                root(fxPane {
 
-                    view{node<StackPane>()}
+                    view { node<StackPane>() }
 
-                    child(fxNode<Button,Boolean>{
+                    child(fxNode<Button, Boolean> {
                         val nodeClicked = SimpleBooleanProperty()
-                        view{node<Button>{
-                            text = "ClickMe"
-                            setOnAction {
-                                nodeClicked.value = true
-                                //nodeClicked.value = false
+                        view {
+                            node<Button> {
+                                text = "ClickMe"
+                                setOnAction {
+                                    nodeClicked.value = true
+                                    //nodeClicked.value = false
+                                }
+                                button = this
                             }
-                            button = this
-                        }}
-                        stub(observingStub<Boolean,Boolean> buttonStub@{
+                        }
+                        stub(observingStub<Boolean, Boolean> buttonStub@{
                             id(ButtonStub::class)
-                            gap{
-                                from{b -> Immediate{
-                                    println("from")
-                                    b
-                                }}
-                                to{ b,c ->  Parallel{
-                                    println("button clicked")
-                                    val res = parent<Boolean>().evolve(c).get()
-                                    println("stub@button: received: $res")
-                                    true
-                                    //
-                                }}
+                            gap {
+                                from { b ->
+                                    Immediate {
+                                        println("from")
+                                        b
+                                    }
+                                }
+                                to { b, c ->
+                                    Parallel {
+                                        println("button clicked")
+                                        val res = parent<Boolean>().evolve(c).get()
+                                        println("stub@button: received: $res")
+                                        true
+                                        //
+                                    }
+                                }
                             }
-                            evolve{
+                            evolve {
                                 println("evolving button stub")
                                 delay(500)
                                 //nodeClicked.value = false
-                                Immediate{it}
+                                Immediate { it }
                             }
                             observe(nodeClicked)
                         })
@@ -451,29 +472,29 @@ class ComponentTest {
                     stub rootStub@{
                         var buttonStub: Stub<Boolean>? = null
                         val U =
-                        this@fxPane.whenReady {
-                            /*
-                            child<ButtonStub, Boolean>().stubs[ParentStubKey::class] = stub<Boolean> {
-                                evolve { b -> parent<Boolean>().evolve(b) }
-                            }
-                            */
-                            class TunnelStub
+                                this@fxPane.whenReady {
+                                    /*
+                                    child<ButtonStub, Boolean>().stubs[ParentStubKey::class] = stub<Boolean> {
+                                        evolve { b -> parent<Boolean>().evolve(b) }
+                                    }
+                                    */
+                                    class TunnelStub
 
-                            val tunnel = stub<Boolean>{
-                                evolve { b ->
-                                    println("tunnel called: value = $b")
-                                    Immediate{b}
-                                    //parent<Boolean>().evolve(b)
+                                    val tunnel = stub<Boolean> {
+                                        evolve { b ->
+                                            println("tunnel called: value = $b")
+                                            Immediate { b }
+                                            //parent<Boolean>().evolve(b)
+                                        }
+                                    }
+                                    parentalStub(TunnelStub::class, tunnel)
+                                    buttonStub = child<ButtonStub, Boolean>()//this@fxPane.stubConfiguration.stubs[ButtonStub::class]!! as Stub<Boolean>
+                                    child(ButtonStub::class, buttonStub!!, TunnelStub::class)
+                                    setupRelationsToChildren()
                                 }
-                            }
-                            parentalStub(TunnelStub::class, tunnel)
-                            buttonStub = child<ButtonStub,Boolean>()//this@fxPane.stubConfiguration.stubs[ButtonStub::class]!! as Stub<Boolean>
-                            child(ButtonStub::class,buttonStub!!, TunnelStub::class)
-                            setupRelationsToChildren()
-                        }
 
 
-                        evolve{
+                        evolve {
                             //U.get()
                             //assert(child<ButtonStub, Boolean>() != null)
                             println("evolving fxPaneStub")
@@ -486,18 +507,18 @@ class ComponentTest {
                                     })*/
                                     .evolve(false).get()
                             //parent<Boolean>().evolve(b)
-                            Immediate{Data(b)}
+                            Immediate { Data(b) }
                         }
 
                     }
                 })
                 stub sceneStub@{
 
-                    parentalStub(stub<Boolean>{
+                    parentalStub(stub<Boolean> {
                         evolve { b -> parent<Boolean>().evolve(b) }
                     })
 
-                    evolve{
+                    evolve {
                         println("rootStub.evolve, data: ${it.clicked}")
                         child<RootStubKey, Data>().evolve(it)
                     }
@@ -505,34 +526,36 @@ class ComponentTest {
 
             })
             stub stageStub@{
-                parentalStub(stub<Boolean>{
-                    evolve { b -> Immediate{
-                        println("@stage: button clicked")
-                        b
-                    } }
+                parentalStub(stub<Boolean> {
+                    evolve { b ->
+                        Immediate {
+                            println("@stage: button clicked")
+                            b
+                        }
+                    }
                 })
-                evolve{
+                evolve {
                     println("evolving stageStub")
                     child<SceneStubKey, Data>().evolve(it)
                 }
 
                 this@fxStage.whenReady {
-                     this@stageStub.whenReady {
-                         class TunnelStub
+                    this@stageStub.whenReady {
+                        class TunnelStub
 
-                         val tunnel = stub<Boolean>{
-                             evolve { b ->
-                                 println("stub@fxStage: tunnel called: value = $b")
-                                 Immediate{!b}
-                                 //parent<Boolean>().evolve(b)
-                             }
-                         }
-                         parentalStub(TunnelStub::class, tunnel)
-                         val buttonStub = find(ButtonStub::class)!!
-                         child(ButtonStub::class,buttonStub!!, TunnelStub::class)
-                         setupRelationsToChildren()
-                         //buttonStub
-                     }
+                        val tunnel = stub<Boolean> {
+                            evolve { b ->
+                                println("stub@fxStage: tunnel called: value = $b")
+                                Immediate { !b }
+                                //parent<Boolean>().evolve(b)
+                            }
+                        }
+                        parentalStub(TunnelStub::class, tunnel)
+                        val buttonStub = find(ButtonStub::class)!!
+                        child(ButtonStub::class, buttonStub!!, TunnelStub::class)
+                        setupRelationsToChildren()
+                        //buttonStub
+                    }
                 }
             }
 
@@ -574,18 +597,20 @@ class ComponentTest {
 
     @Test
     fun anchorPaneComponent() = runBlocking {
-        val stageComponent = fxStage<Nothing>{
-            scene(fxScene<AnchorPane,Nothing>{
+        val stageComponent = fxStage<Nothing> {
+            scene(fxScene<AnchorPane, Nothing> {
                 sceneConstructorData(width = 500.0, height = 600.0)
-                root( fxAnchorPane<AnchorPane, Nothing>{
-                    view{node<AnchorPane>()}
+                root(fxAnchorPane<AnchorPane, Nothing> {
+                    view { node<AnchorPane>() }
 
-                    child(fxNode<Button,Nothing>{
-                        view{node<Button>{
-                            text = "Hi there"
-                            leftAnchor(15.0)
-                            topAnchor(10.0)
-                        }}
+                    child(fxNode<Button, Nothing> {
+                        view {
+                            node<Button> {
+                                text = "Hi there"
+                                leftAnchor(15.0)
+                                topAnchor(10.0)
+                            }
+                        }
                     })
                 })
             })
@@ -614,18 +639,22 @@ class ComponentTest {
     @Test fun runTime() = runBlocking {
         class Data
         val stageComponent = fxStage<Data> {
-            scene(fxScene<VBox, Data>{
-                root(fxPane{
-                    view{node<VBox>{
+            scene(fxScene<VBox, Data> {
+                root(fxPane {
+                    view {
+                        node<VBox> {
 
-                    }}
-                    child(fxNode<Button, Data>{
-                        view{node<Button>{
-                            text = "Button"
-                        }}
+                        }
+                    }
+                    child(fxNode<Button, Data> {
+                        view {
+                            node<Button> {
+                                text = "Button"
+                            }
+                        }
                     })
 
-                    fxRunTime{
+                    fxRunTime {
                         //sleep(1_000)
                         children.add(Button("new Button"))
                     }

@@ -13,28 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.evoleq.fx.test
+package org.drx.evoleq.fx.dsl
 
+import javafx.scene.Scene
 import javafx.stage.Stage
-import org.drx.evoleq.evolving.Parallel
-import org.drx.evoleq.fx.application.AppManager
-import org.drx.evoleq.fx.application.deprecated.SimpleAppManager
+import javafx.stage.WindowEvent
 import org.drx.evoleq.fx.component.FxComponent
-import org.drx.evoleq.fx.evolving.ParallelFx
-import org.drx.evoleq.stub.Stub
-
 
 /**
- * Show the stageComponent and return it as a stub
+ * Stage
  */
-fun <D> showTestStage(stageComponent: FxComponent<Stage, D>): Parallel<Stub<D>> = Parallel {
+fun <D> Any?.fxStage(configuration: FxComponentConfiguration<Stage, D>.()->Unit): FxComponent<Stage, D> = fxComponent ( configuration )
 
-    class TestApp<D> : SimpleAppManager<D>() {
-        init{
-            ParallelFx<Unit>{showStage(stageComponent.show())}
-        }
-        override fun configure(): Stub<D> = stageComponent as Stub<D>
-    }
-    val stub = AppManager.launch(TestApp<D>()).get()
-    stub
+fun <D> FxComponentConfiguration<Stage, D>.scene(component: FxComponent<Scene, D>): FxComponentConfiguration<Stage, D> {
+    child(component)
+    fxRunTime { scene = component.show() }
+    return this
+}
+
+
+fun Stage.onCloseRequest(action: WindowEvent.()->Unit): Stage {
+    this.setOnCloseRequest(action)
+    return this
 }

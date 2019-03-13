@@ -13,16 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.evoleq.fx.stub
+package org.drx.evoleq.fx.dsl
 
-import org.drx.evoleq.evolving.Evolving
-import org.drx.evoleq.evolving.Immediate
-import org.drx.evoleq.stub.Stub
-import kotlin.reflect.KClass
+import javafx.scene.layout.StackPane
+import org.drx.evoleq.fx.component.FxComponent
 
-class NoStub<D> : Stub<D> {
-    override val id: KClass<*>
-        get() = this::class
-    override val stubs: HashMap<KClass<*>, Stub<*>>
-        get() = HashMap()
+/**
+ * StackPane
+ */
+fun <D> Any?.fxStackPane(configuration: FxComponentConfiguration<StackPane, D>.()->Unit): FxComponent<StackPane, D> {
+    return fxComponent(configuration)
 }

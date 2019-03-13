@@ -13,28 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.evoleq.fx.test
+package org.drx.evoleq.fx.dsl
 
+import javafx.scene.Parent
+import javafx.scene.Scene
+import javafx.scene.layout.VBox
 import javafx.stage.Stage
-import org.drx.evoleq.evolving.Parallel
-import org.drx.evoleq.fx.application.AppManager
-import org.drx.evoleq.fx.application.deprecated.SimpleAppManager
 import org.drx.evoleq.fx.component.FxComponent
-import org.drx.evoleq.fx.evolving.ParallelFx
-import org.drx.evoleq.stub.Stub
+import org.drx.evoleq.fx.dsl.deprecated.fxScene
 
+
+fun <D> FxComponentConfiguration<Stage, D>.fxScene(configuration: FxComponentConfiguration<Scene, D>.()->Unit): FxComponent<Scene, D> {
+    return fxComponent(configuration)
+}
 
 /**
- * Show the stageComponent and return it as a stub
+ * Scene
  */
-fun <D> showTestStage(stageComponent: FxComponent<Stage, D>): Parallel<Stub<D>> = Parallel {
-
-    class TestApp<D> : SimpleAppManager<D>() {
-        init{
-            ParallelFx<Unit>{showStage(stageComponent.show())}
-        }
-        override fun configure(): Stub<D> = stageComponent as Stub<D>
-    }
-    val stub = AppManager.launch(TestApp<D>()).get()
-    stub
+fun <P: Parent, D> FxComponentConfiguration<Scene, D>.root(component: FxComponent<P, D>, inject:(P)->Scene = { p -> Scene(p)}) : FxComponentConfiguration<Scene, D> {
+    child(component)
+    val root = component.show()
+    val scene = inject(root)
+    view{scene}
+    return this
 }

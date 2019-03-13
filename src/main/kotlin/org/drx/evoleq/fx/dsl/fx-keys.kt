@@ -13,16 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.evoleq.fx.stub
+package org.drx.evoleq.fx.dsl
 
-import org.drx.evoleq.evolving.Evolving
-import org.drx.evoleq.evolving.Immediate
-import org.drx.evoleq.stub.Stub
-import kotlin.reflect.KClass
+class BottomId
+class TopId
+class RightId
+class CenterId
+class LeftId
 
-class NoStub<D> : Stub<D> {
-    override val id: KClass<*>
-        get() = this::class
-    override val stubs: HashMap<KClass<*>, Stub<*>>
-        get() = HashMap()
-}
+class SceneId
+class StageId
+class RootId

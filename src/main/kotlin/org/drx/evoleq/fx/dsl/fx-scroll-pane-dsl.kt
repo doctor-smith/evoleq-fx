@@ -13,16 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.evoleq.fx.stub
+package org.drx.evoleq.fx.dsl
 
-import org.drx.evoleq.evolving.Evolving
-import org.drx.evoleq.evolving.Immediate
-import org.drx.evoleq.stub.Stub
-import kotlin.reflect.KClass
+import javafx.scene.Node
+import javafx.scene.control.ScrollPane
+import org.drx.evoleq.fx.component.FxComponent
 
-class NoStub<D> : Stub<D> {
-    override val id: KClass<*>
-        get() = this::class
-    override val stubs: HashMap<KClass<*>, Stub<*>>
-        get() = HashMap()
+
+/**
+ * ScrollPane
+ */
+fun <D> Any?.fxScrollPane(configuration: FxComponentConfiguration<ScrollPane, D>.()->Unit): FxComponent<ScrollPane, D> {
+    return fxComponent(configuration)
+}
+fun <C : Node, D> FxComponentConfiguration<ScrollPane, D>.content(component: FxComponent<C, D>)  {
+    fxSpecial( component )
+    fxRunTime {
+        content = component.show()
+    }
 }

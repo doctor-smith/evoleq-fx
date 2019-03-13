@@ -13,16 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.evoleq.fx.stub
+package org.drx.evoleq.fx.dsl
 
-import org.drx.evoleq.evolving.Evolving
-import org.drx.evoleq.evolving.Immediate
-import org.drx.evoleq.stub.Stub
-import kotlin.reflect.KClass
+import javafx.event.ActionEvent
+import javafx.scene.control.Button
+import org.drx.evoleq.fx.component.FxComponent
 
-class NoStub<D> : Stub<D> {
-    override val id: KClass<*>
-        get() = this::class
-    override val stubs: HashMap<KClass<*>, Stub<*>>
-        get() = HashMap()
+/**
+ * Button
+ */
+fun <D> Any?.fxButton(configuration: FxComponentConfiguration<Button, D>.()->Unit): FxComponent<Button, D> {
+    return fxComponent(configuration)
+}
+
+fun Button.action(action: ActionEvent.()->Unit): Button {
+    this.setOnAction{
+        it.action()
+    }
+    return this
 }
