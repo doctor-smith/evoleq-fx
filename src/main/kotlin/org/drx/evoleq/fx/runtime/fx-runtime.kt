@@ -36,19 +36,17 @@ abstract class  FxRunTime<N , D> {
         var nextPhase = phase
         try {
             while(actions.isNotEmpty()) {
-                var action = actions.first()
+                val action = actions.first()
                 actions.removeAt(0)
                 ParallelFx<Unit> {
                     view.action()
                 }.get()
-                //
-
             }
         } catch (exception: Exception) {
-            shutdown = true//ShutDown(view, component)
+            shutdown = true
         }
         if(shutdown){
-            nextPhase = FxComponentPhase.RunTimePhase.ShutDown<N,D>()
+            nextPhase = FxComponentPhase.RunTimePhase.ShutDown()
         }
         nextPhase
     }
@@ -57,13 +55,7 @@ abstract class  FxRunTime<N , D> {
 
     }
     fun shutdown() = Parallel<Unit>{
-        val action:N.()->Unit = {shutdown = true}//throw Exception("ShutDown")}
+        val action:N.()->Unit = {shutdown = true}
         actions.add(0, action)
     }
-    /*
-    fun runTime(action: FxComponent<N, D>.()->Unit) = Parallel<FxRunTime<N,D>>{
-        component.action()
-        this@FxRunTime
-    }
-    */
 }

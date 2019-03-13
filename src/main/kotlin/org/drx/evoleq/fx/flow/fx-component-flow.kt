@@ -46,8 +46,7 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
         //println("evolve $it")
         when(it) {
             is FxComponentPhase.Launch<*,*> -> Parallel{
-                println("launch")
-                //kotlinx.coroutines.delay(10)
+                //println("launch")
                 withTimeout(it.timeout){
                     val configuration = it.configuration.get() as FxComponentConfiguration<N,D>
                     FxComponentPhase.PreConfiguration(
@@ -63,22 +62,22 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                 }
             }
             is FxComponentPhase.PreConfiguration<*,*> -> Parallel{
-                println("pre-configure")
-                val errors: ArrayList<Exception> by lazy { arrayListOf<Exception>() }
+                //println("pre-configure")
+                //val errors: ArrayList<Exception> by lazy { arrayListOf<Exception>() }
                 val id = try {
                     withTimeout(it.timeout) { it.id.get() }
                 } catch (exception: Exception) {
-                    errors.add(FxConfigurationException.IdNotSet(it))
+                    it.errors.add(FxConfigurationException.IdNotSet(it))
                     DefaultIdentificationKey::class
                 }
                 val stub = try {
                     withTimeout(it.timeout) { it.stub.get() as Stub<D> }
                 } catch (exception: Exception) {
-                    errors.add(FxConfigurationException.StubNotSet(it))
+                    it.errors.add(FxConfigurationException.StubNotSet(it))
                     NoStub<D>()
                 }
                 val view =  it.view as Parallel<() -> N>
-                if(errors.isNotEmpty()){
+                if(it.errors.isNotEmpty()){
                     view.job().cancel()
                     it.fxChildren.forEach{child -> child.job().cancel()}
                     it.fxSpecials.forEach{child -> child.job().cancel()}
@@ -86,8 +85,8 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                     it.stubActions.forEach{child -> child.job().cancel()}
                     it.view.job().cancel()
                     it.configuration.cancel = true
-                    println(errors)
-                    FxComponentPhase.TerminateWitErrors(errors)
+                    //println(errors)
+                    FxComponentPhase.TerminateWitErrors()
                     //FxComponentPhase.RunTimePhase.ShutDown<N,D>()
                 } else{
                 //withTimeout(it.timeout) {
@@ -105,7 +104,7 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
             }
             is FxComponentPhase.Configuration -> when(it) {
                 is FxComponentPhase.Configuration.Setup<*,*> ->Parallel{
-                    println("Setup ${it.id}")
+                    //println("Setup ${it.id}")
                     withTimeout(it.timeout) {
                         // only take children with stubs
                         val fxChildren = arrayListOf(*it.fxChildren.map { c -> c.get() }.filter { child -> child.id != NoStub::class }.toTypedArray())
@@ -124,7 +123,7 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                 }
                 is FxComponentPhase.Configuration.AddFxChildren<*,*> ->Parallel{
                     /* TODO Error management -> Termination*/
-                    println("AddChildren ${it.id}")
+                    //println("AddChildren ${it.id}")
                     val stub = it.stub as Stub<D>
                     if(stub !is NoStub) {
                         it.fxChildren.filter{child -> child !is NoStub<*> }.forEach { entry ->
@@ -147,25 +146,25 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                     )
                 }
                 is FxComponentPhase.Configuration.ExtendStub<*,*> ->Parallel{
-                    println("ExtendStub ${it.id} ")
+                    //println("ExtendStub ${it.id} ")
                     val actions = it.stubActions.map { action -> action.get() as Stub<D>.()->Unit }
                     val stub = it.stub as Stub<D>
-                    val errors : ArrayList<Exception> by lazy { arrayListOf<Exception>() }
+                    //val errors : ArrayList<Exception> by lazy { arrayListOf<Exception>() }
                     if(stub !is NoStub) {
                         actions.forEach {
                             action -> try {
                                  stub.action()
                             } catch ( exception: Exception ) {
-                                errors.add(exception)
+                                it.errors.add(exception)
                             }
                         }
                     }
                     else { if ( actions.isNotEmpty() ) {
-                        errors.add( FxConfigurationException.IsNoStub(phase = it ,componentId =  it.id) )
+                        it.errors.add( FxConfigurationException.IsNoStub(phase = it ,componentId =  it.id) )
                     }}
-                    if(errors.isNotEmpty()) {
+                    if(it.errors.isNotEmpty()) {
                         it.configuration.cancel = true
-                        FxComponentPhase.TerminateWitErrors(errors)
+                        FxComponentPhase.TerminateWitErrors()
                     } else {
                         FxComponentPhase.Configuration.Configure<N, D>(
                                 configuration = it.configuration as FxComponentConfiguration<N, D>,
@@ -179,20 +178,20 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                     }
                 }
                 is FxComponentPhase.Configuration.Configure<*, *> -> Parallel{
-                    println("Configure ${it.id}")
+                    //println("Configure ${it.id}")
                     it.configuration.idConfiguration = it.id
                     (it.configuration as FxComponentConfiguration<N,D>).stubConfiguration = it.stub as Stub<D>
-                    var error : FxConfigurationException? = null
+                    //var error : FxConfigurationException? = null
                     try{
                         withTimeout(it.timeout) {
                             (it.configuration).viewConfiguration = (it.view as Parallel<() -> N>).get()
                         }
                     } catch(exception : Exception) {
-                        error = FxConfigurationException.ViewNotSet(phase = it, componentId =it.id)
+                        it.errors.add( FxConfigurationException.ViewNotSet(phase = it, componentId =it.id))
                     }
-                    if(error != null ) {
+                    if(it.errors.isNotEmpty() ) {
                         it.configuration.cancel = true
-                        FxComponentPhase.TerminateWitErrors(arrayListOf(error!!))
+                        FxComponentPhase.TerminateWitErrors()
                     }
                     else {
                         it.configuration.finish = true
@@ -214,7 +213,7 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                 /* TODO Error management -> Termination*/
                 val configuration = it.configuration as FxComponentConfiguration<N, D>
                 val component = configuration.component as FxComponent<N, D>
-                println("RunTimeConfiguration ${component.id}")
+                //println("RunTimeConfiguration ${component.id}")
                 val fxChildren = it.fxChildren
 
                 val view: N = withTimeout(it.timeout) {
@@ -237,7 +236,7 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                                 is Parent -> try{
                                     val children = (view as Parent)::class.java.getMethod("getChildren")
                                     (children.invoke(view) as ObservableList<Node>).add(childView)
-                                } catch(exception: Exception) { throw exception}
+                                } catch(exception: Exception) { it.errors.add( exception )}
                             }
                         }
                     }
@@ -261,7 +260,7 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
              */
             is FxComponentPhase.RunTimePhase.RunTime<*,*> -> {
                 /* TODO Error management -> Termination*/
-                println("RunTime ${it.fxRunTime.component.id}")
+                //println("RunTime ${it.fxRunTime.component.id}")
                 val runTimeFlow = flow<FxComponentPhase.RunTimePhase<N, D>, Boolean>{
                     conditions(org.drx.evoleq.dsl.conditions {
                         testObject ( true )
@@ -277,17 +276,17 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                 runTimeFlow.evolve(it as FxComponentPhase.RunTimePhase.RunTime<N,D>)
             }
             is FxComponentPhase.RunTimePhase.ShutDown<*, *> ->Parallel{
-                println("ShutDown")
+                //println("ShutDown")
 
                 FxComponentPhase.Terminate()
             }
             is FxComponentPhase.TerminateWitErrors -> Immediate{
-                println("Terminate with errors")
+                //println("Terminate with errors")
                 Parallel<Unit>{ it.errors.forEach { error -> println( error )  }}
                 FxComponentPhase.Terminate()
             }
             is FxComponentPhase.Terminate -> Immediate{
-                println("Terminate")
+                //println("Terminate")
                 FxComponentPhase.Terminate()
             }
         }
