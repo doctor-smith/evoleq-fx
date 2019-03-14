@@ -64,6 +64,7 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
             sleep(1)
         }
         if(cancel) {
+            /* TODO this is bad bad bad */
             throw Exception()
         }
         val comp = object : FxComponent<N, D> {
