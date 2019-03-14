@@ -30,12 +30,15 @@ abstract class  FxRunTime<N , D> {
     var shutdown: Boolean = false
 
     fun fxRun() : Parallel<FxComponentPhase.RunTimePhase<N, D>> = Parallel{
+
+        var nextPhase = phase
+
         while(actions.isEmpty()){
             delay(1)
         }
-        var nextPhase = phase
+
         try {
-            while(actions.isNotEmpty()) {
+            while(actions.isNotEmpty() &&!shutdown) {
                 val action = actions.first()
                 actions.removeAt(0)
                 ParallelFx<Unit> {
@@ -44,9 +47,11 @@ abstract class  FxRunTime<N , D> {
             }
         } catch (exception: Exception) {
             shutdown = true
+            phase.errors.add(exception)
         }
         if(shutdown){
             nextPhase = FxComponentPhase.RunTimePhase.ShutDown()
+            nextPhase.errors.addAll( phase.errors )
         }
         nextPhase
     }

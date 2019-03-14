@@ -20,6 +20,7 @@ import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.flow.Phase
 import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.dsl.FxComponentConfiguration
+import org.drx.evoleq.fx.dsl.ID
 import org.drx.evoleq.fx.runtime.FxRunTime
 import org.drx.evoleq.stub.Stub
 import kotlin.reflect.KClass
@@ -42,7 +43,7 @@ sealed class FxComponentPhase(val errors: ArrayList<Exception> = arrayListOf()) 
             /**
              * Id of the component
              */
-            val id: Parallel<KClass<*>>,
+            val id: Parallel<ID>,
             /**
              * Stub to be used by component
              */
@@ -88,7 +89,7 @@ sealed class FxComponentPhase(val errors: ArrayList<Exception> = arrayListOf()) 
             /**
              * Id of the component
              */
-            val id: Parallel<KClass<*>>,
+            val id: Parallel<ID>,
             /**
              * Stub to be used by component
              */
@@ -132,7 +133,7 @@ sealed class FxComponentPhase(val errors: ArrayList<Exception> = arrayListOf()) 
                 /**
                  * Id of the component
                  */
-                val id: KClass<*>,
+                val id: ID,
                 /**
                  * Stub to be used by component
                  */
@@ -173,7 +174,7 @@ sealed class FxComponentPhase(val errors: ArrayList<Exception> = arrayListOf()) 
                 /**
                  * Id of the component
                  */
-                val id: KClass<*>,
+                val id: ID,
                 /**
                  * Stub to be used by component
                  */
@@ -214,7 +215,7 @@ sealed class FxComponentPhase(val errors: ArrayList<Exception> = arrayListOf()) 
                 /**
                  * Id of the component
                  */
-                val id: KClass<*>,
+                val id: ID,
                 /**
                  * Stub to be used by component
                  */
@@ -255,7 +256,7 @@ sealed class FxComponentPhase(val errors: ArrayList<Exception> = arrayListOf()) 
                 /**
                  * Id of the component
                  */
-                val id: KClass<*>,
+                val id: ID,
                 /**
                  * Stub to be used by component
                  */
