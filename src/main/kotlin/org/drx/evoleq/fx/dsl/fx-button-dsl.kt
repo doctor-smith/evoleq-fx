@@ -17,6 +17,7 @@ package org.drx.evoleq.fx.dsl
 
 import javafx.event.ActionEvent
 import javafx.scene.control.Button
+import javafx.scene.control.ButtonBase
 import org.drx.evoleq.fx.component.FxComponent
 import java.lang.Exception
 
@@ -25,7 +26,7 @@ import java.lang.Exception
  */
 fun <D> Any?.fxButton(configuration: FxComponentConfiguration<Button, D>.()->Unit): FxComponent<Button, D> = fxComponent(configuration)
 
-fun Button.action(action: ActionEvent.()->Unit): Button {
+fun <B : ButtonBase> B.action(action: ActionEvent.()->Unit): B {
     this.setOnAction{
         it.action()
     }
