@@ -20,10 +20,6 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.Node
 import javafx.scene.Scene
 import javafx.scene.control.Button
-import javafx.scene.layout.AnchorPane
-import javafx.scene.layout.StackPane
-import javafx.stage.Stage
-import javafx.stage.StageStyle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.drx.evoleq.dsl.stub
@@ -32,9 +28,6 @@ import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.application.BgAppManager
 import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.dsl.*
-import org.drx.evoleq.fx.dsl.deprecated.RootStubKey
-import org.drx.evoleq.fx.dsl.deprecated.SceneStubKey
-import org.drx.evoleq.fx.dsl.deprecated.StageStubKey
 import org.drx.evoleq.fx.flow.Config.style1
 import org.drx.evoleq.fx.test.showTestStage
 import org.drx.evoleq.stub.*
@@ -112,6 +105,13 @@ class FxComponentFlowTest {
                                         Platform.exit()
                                     }
                                 }}
+                                tooltip(fxTooltip{
+                                    id<Key6>()
+                                    view{configure{
+                                        text = "Da werden Sie geholfen!"
+                                    }}
+                                    noStub()
+                                })
                                 noStub()
                             })
                             noStub()
