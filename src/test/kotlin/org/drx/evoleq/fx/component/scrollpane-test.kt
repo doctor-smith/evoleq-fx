@@ -71,6 +71,6 @@ class ScrollPaneTest {
         }
         showTestStage(stageComponent)
 
-        delay(15_000)
+        delay(1_000)
     }
 }

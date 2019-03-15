@@ -16,6 +16,7 @@
 package org.drx.evoleq.fx.dsl
 
 import javafx.scene.Group
+import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.layout.*
 import org.drx.evoleq.dsl.Configuration
@@ -45,6 +46,8 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
     lateinit var idConfiguration: KClass<*>
     lateinit var stubConfiguration: Stub<D>
     lateinit var viewConfiguration: ()->N
+
+    var style = ""
 
     val launcher = PhaseLauncher<N,D>()
     var fxRunTime: FxRunTime<N, D>? = null
@@ -107,6 +110,12 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
     fun FxComponentConfiguration<N, D>.view(view: ()->N) {
         launcher.view = view
     }
+    /*
+    fun N.style(css: String): N {
+        style += css
+        return this
+    }
+    */
     fun <M,E> FxComponentConfiguration<N, D>.child(child: FxComponent<M, E>) {
         launcher.fxChildren.add( Parallel { child } )
     }
@@ -202,7 +211,12 @@ inline fun <reified N : Any, D> FxComponentConfiguration<N, D>.configure(noinlin
     n.configure()
     return n
 }
-
+fun <N> N.style(css: String): N {
+    when(this) {
+        is Node -> this.style = css
+    }
+    return this
+}
 /**
  * Generic
  */

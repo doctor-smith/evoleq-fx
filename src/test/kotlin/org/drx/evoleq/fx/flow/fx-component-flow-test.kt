@@ -35,6 +35,7 @@ import org.drx.evoleq.fx.dsl.*
 import org.drx.evoleq.fx.dsl.deprecated.RootStubKey
 import org.drx.evoleq.fx.dsl.deprecated.SceneStubKey
 import org.drx.evoleq.fx.dsl.deprecated.StageStubKey
+import org.drx.evoleq.fx.flow.Config.style1
 import org.drx.evoleq.fx.test.showTestStage
 import org.drx.evoleq.stub.*
 import org.junit.Before
@@ -66,6 +67,7 @@ class FxComponentFlowTest {
             }
             scene(fxScene {
                 id<SceneId>()
+                stylesheet(style1)
                 root(fxAnchorPane{
                     id<RootId>()
                     view{ configure{} }
@@ -78,8 +80,10 @@ class FxComponentFlowTest {
                                 text = "text"
                                 leftAnchor(20)
                                 bottomAnchor(10)
-                            }
-
+                            }.
+                            style(
+                                """-fx-color: green;"""
+                            )
                         }
                         stub(org.drx.evoleq.dsl.stub {
                             evolve{
@@ -147,7 +151,8 @@ class FxComponentFlowTest {
         delay(5_000)
     }
 
-    @Test fun exception() = runBlocking {
+    //@Test
+     fun exception() = runBlocking {
         val component = fxComponent<Node, Int> {  }
         //delay(5_000)
 

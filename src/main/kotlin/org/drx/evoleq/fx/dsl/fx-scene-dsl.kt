@@ -37,3 +37,13 @@ fun <P: Parent, D> FxComponentConfiguration<Scene, D>.root(component: FxComponen
     view{scene}
     return this
 }
+fun < D> FxComponentConfiguration<Scene, D>.stylesheet(stylesheet: String) {
+    fxRunTime {
+        stylesheets.add(stylesheet)
+    }
+}
+fun < D> FxComponentConfiguration<Scene, D>.stylesheets(stylesheets: ArrayList<String>) {
+    fxRunTime {
+        stylesheets.addAll(stylesheets)
+    }
+}
