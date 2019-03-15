@@ -31,6 +31,7 @@ import org.drx.evoleq.fx.runtime.FxRunTime
 import org.drx.evoleq.fx.stub.NoStub
 import org.drx.evoleq.fx.stub.Tunnel
 import org.drx.evoleq.stub.Stub
+import org.drx.evoleq.stub.cyclicKeys
 import org.drx.evoleq.time.Keeper
 import org.drx.evoleq.time.waitForValueToBeSet
 import java.lang.Thread.sleep
@@ -47,7 +48,7 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
     lateinit var stubConfiguration: Stub<D>
     lateinit var viewConfiguration: ()->N
 
-    var style = ""
+    //var style = ""
 
     val launcher = PhaseLauncher<N,D>()
     var fxRunTime: FxRunTime<N, D>? = null
@@ -100,37 +101,40 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
     }
 
     fun FxComponentConfiguration<N, D>.noStub() {
-        launcher.stub = NoStub()
+        val stub = NoStub<D>()
+        launcher.stub = stub
+        launcher.id = stub.id
     }
 
     fun FxComponentConfiguration<N, D>.tunnel(){
-        launcher.stub = Tunnel()
+        val stub = Tunnel<D>()
+        launcher.stub = stub
+        launcher.id = cyclicKeys.next()
     }
 
     fun FxComponentConfiguration<N, D>.view(view: ()->N) {
         launcher.view = view
     }
-    /*
-    fun N.style(css: String): N {
-        style += css
-        return this
-    }
-    */
+
     fun <M,E> FxComponentConfiguration<N, D>.child(child: FxComponent<M, E>) {
         launcher.fxChildren.add( Parallel { child } )
     }
+
     fun <M,E> FxComponentConfiguration<N, D>.fxSpecial(child: FxComponent<M, E>) {
         launcher.fxSpecials.add( Parallel{child} )
     }
+
     fun FxComponentConfiguration<N, D>.stubAction(action: Stub<D>.()->Unit) {
         launcher.stubActions.add(Parallel{action})
     }
+
     fun FxComponentConfiguration<N, D>.fxRunTime(action: N.()->Unit) = Parallel<Unit>{
         while(fxRunTime == null) {
             kotlinx.coroutines.delay(1)
         }
         fxRunTime!!.fxRunTime(action)
     }
+
     fun FxComponentConfiguration<N, D>.shutdown() = Parallel<Unit> {
         while(fxRunTime == null) {
             kotlinx.coroutines.delay(1)
@@ -174,7 +178,7 @@ fun<N,D> Any?.fxComponent(configuration: FxComponentConfiguration<N,D>.()->Unit)
         sleep(1)
     }
     if(conf.cancel) {
-        //sleep(100)
+        sleep(100)
         throw FxConfigurationException.ConfigurationCancelled()
     }
     return component!!

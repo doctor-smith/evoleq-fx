@@ -43,14 +43,15 @@ class ScrollPaneTest {
             id(StageStubKey::class)
             view{configure{title = "ScrollPane"}}
             scene(fxScene {
-                id(SceneStubKey::class)
+                id(SceneId::class)
                 root(fxScrollPane {
-                    id(Key1::class)
-                    view{ configure{} }
+                    //id(Key1::class)
+                    view{ configure{
+
+                    } }
                     content(fxComponent<VBox, Nothing> {
                         id(Key2::class)
                         view{
-
                             configure{
                                 IntRange(1,20).forEach {
                                     val button = Button("$it")
@@ -71,6 +72,6 @@ class ScrollPaneTest {
         }
         showTestStage(stageComponent)
 
-        delay(1_000)
+        delay(15_000)
     }
 }
