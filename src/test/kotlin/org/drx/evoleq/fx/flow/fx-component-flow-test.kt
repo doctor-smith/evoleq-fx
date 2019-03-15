@@ -15,6 +15,7 @@
  */
 package org.drx.evoleq.fx.flow
 
+import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.Node
 import javafx.scene.Scene
@@ -104,6 +105,7 @@ class FxComponentFlowTest {
                                     text = "TOP"
                                     action{
                                         this@stage.shutdown()
+                                        Platform.exit()
                                     }
                                 }}
                                 noStub()

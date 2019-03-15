@@ -22,6 +22,7 @@ import org.drx.evoleq.dsl.Configuration
 import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.component.FxComponent
+import org.drx.evoleq.fx.exception.FxConfigurationException
 import org.drx.evoleq.fx.flow.fxComponentFlow
 import org.drx.evoleq.fx.phase.FxComponentPhase
 import org.drx.evoleq.fx.phase.PhaseLauncher
@@ -29,6 +30,8 @@ import org.drx.evoleq.fx.runtime.FxRunTime
 import org.drx.evoleq.fx.stub.NoStub
 import org.drx.evoleq.fx.stub.Tunnel
 import org.drx.evoleq.stub.Stub
+import org.drx.evoleq.time.Keeper
+import org.drx.evoleq.time.waitForValueToBeSet
 import java.lang.Thread.sleep
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
@@ -43,30 +46,19 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
     lateinit var stubConfiguration: Stub<D>
     lateinit var viewConfiguration: ()->N
 
+    val launcher = PhaseLauncher<N,D>()
+    var fxRunTime: FxRunTime<N, D>? = null
+
     var finish: Boolean = false
     var cancel: Boolean = false
     var component: FxComponent<N, D>? = null
-    var fxRunTime: FxRunTime<N, D>? = null
+
     var fxRunTimeView: N? = null
-
-    val launcher = PhaseLauncher<N,D>()
-
     /**
      *
      */
     override fun configure(): FxComponent<N, D> {
-        Parallel<Unit> {
-            val l = launcher.launch(this@FxComponentConfiguration)
-            val terminate = fxComponentFlow<N, D>().evolve(l).get()
-            assert(terminate is FxComponentPhase.Terminate)
-        }
-        while (!(finish || cancel) ) {
-            sleep(1)
-        }
-        if(cancel) {
-            /* TODO this is bad bad bad */
-            throw Exception()
-        }
+
         val comp = object : FxComponent<N, D> {
 
             override val id: ID
@@ -82,7 +74,6 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
             override suspend fun evolve(d: D): Evolving<D> = stubConfiguration.evolve(d)
 
         }
-        component = comp
         return comp
     }
 
@@ -141,9 +132,57 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
 
 fun<N,D> Any?.fxComponent(configuration: FxComponentConfiguration<N,D>.()->Unit): FxComponent<N, D> {
     val conf = (object : FxComponentConfiguration<N, D>(){})
+
     conf.configuration()
-    return conf.configure()
+    var component : FxComponent<N, D>? = null
+    Parallel<Unit> {
+        val l = conf.launcher.launch(conf)
+        val terminate =
+                fxComponentFlow<N, D>().evolve(l).get()
+        assert(
+                terminate is FxComponentPhase.TerminationPhase.TerminateWithErrors
+                        || terminate is FxComponentPhase.TerminationPhase.Terminate
+        )
+
+        if(terminate is FxComponentPhase.TerminationPhase.TerminateWithErrors){
+            //terminate.errors.forEach { println( it )}
+            conf.cancel = true
+            throw FxConfigurationException.ConfigurationFailed(errors = terminate.errors)
+        }
+
+
+    }
+    Parallel<Unit>{
+        while(!conf.finish && !conf.cancel){
+            kotlinx.coroutines.delay(1)
+        }
+        if(!conf.cancel) {
+            component = conf.component
+        }
+    }
+
+    while(component == null && !conf.cancel){
+        sleep(1)
+    }
+    if(conf.cancel) {
+        //sleep(100)
+        throw FxConfigurationException.ConfigurationCancelled()
+    }
+    return component!!
 }
+/*
+fun <N,D> Any?.gxComponent(configuration: FxComponentConfiguration<N, D>.()->Unit): FxComponent<N, D> {
+    val conf = (object : FxComponentConfiguration<N, D>() {
+
+    })
+    conf.configuration()
+    val launcher = conf.launcher
+
+    val component = conf.configure()
+
+    return component
+}
+*/
 /*
 fun<N,D> Any?.fxParentComponent(configuration: FxComponentConfiguration<N,D>.()->Unit): FxComponent<N, D> {
     val conf = (object : FxComponentConfiguration<N, D>(){

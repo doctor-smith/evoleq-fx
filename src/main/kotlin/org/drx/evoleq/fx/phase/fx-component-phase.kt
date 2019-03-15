@@ -25,7 +25,7 @@ import org.drx.evoleq.fx.runtime.FxRunTime
 import org.drx.evoleq.stub.Stub
 import kotlin.reflect.KClass
 const val  fxComponentPhaseTimeout: Long = 1_000
-sealed class FxComponentPhase(val errors: ArrayList<Exception> = arrayListOf()) : Phase {
+sealed class FxComponentPhase(open val errors: ArrayList<Exception> = arrayListOf()) : Phase {
     val defaultTimeout: Long = 100
     /**
      * To be called when the component-configuration class is initialized
@@ -303,7 +303,8 @@ sealed class FxComponentPhase(val errors: ArrayList<Exception> = arrayListOf()) 
         class ShutDown<N, D> : RunTimePhase<N, D>()
     }
 
-
-    class TerminateWithErrors : FxComponentPhase()
-    class Terminate : FxComponentPhase()
+    sealed class TerminationPhase : FxComponentPhase() {
+        class TerminateWithErrors(override val errors: ArrayList<Exception>) : FxComponentPhase(errors)
+        class Terminate : FxComponentPhase()
+    }
 }

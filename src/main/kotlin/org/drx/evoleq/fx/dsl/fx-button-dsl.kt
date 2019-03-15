@@ -18,13 +18,12 @@ package org.drx.evoleq.fx.dsl
 import javafx.event.ActionEvent
 import javafx.scene.control.Button
 import org.drx.evoleq.fx.component.FxComponent
+import java.lang.Exception
 
 /**
  * Button
  */
-fun <D> Any?.fxButton(configuration: FxComponentConfiguration<Button, D>.()->Unit): FxComponent<Button, D> {
-    return fxComponent(configuration)
-}
+fun <D> Any?.fxButton(configuration: FxComponentConfiguration<Button, D>.()->Unit): FxComponent<Button, D> = fxComponent(configuration)
 
 fun Button.action(action: ActionEvent.()->Unit): Button {
     this.setOnAction{

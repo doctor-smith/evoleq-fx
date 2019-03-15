@@ -26,4 +26,12 @@ sealed class FxConfigurationException(open val phase: FxComponentPhase? = null, 
     class ViewNotSet(override val phase: FxComponentPhase? = null, val componentId: ID) : FxConfigurationException(phase, "View not set")
     class IsNoStub(override val phase: FxComponentPhase? = null, val componentId: ID) : FxConfigurationException(phase, "FxComponent \"$componentId\" is configured to be no stub")
 
+    class ConfigurationFailed(override val phase: FxComponentPhase? = null, val errors: ArrayList<Exception>) : FxConfigurationException(phase, "Configuration Failure: \n ${renderErrors(errors)}")
+    class ConfigurationCancelled() : FxConfigurationException(message = "Configuration cancelled")
+}
+
+fun renderErrors(errors: ArrayList<Exception>): String {
+    var res = """"""
+    errors.forEach { res += "|- ${it.message} \n" }
+    return res.trimMargin()
 }

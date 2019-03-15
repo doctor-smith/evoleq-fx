@@ -43,7 +43,7 @@ class FxComponentFlow
 fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
     id(FxComponentFlow::class)
     evolve{
-        //println("evolve $it")
+       // println("evolve $it")
         when(it) {
             is FxComponentPhase.Launch<*,*> -> Parallel{
                 //println("launch")
@@ -84,9 +84,9 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                     it.fxRunTime.forEach{child -> child.job().cancel()}
                     it.stubActions.forEach{child -> child.job().cancel()}
                     it.view.job().cancel()
-                    it.configuration.cancel = true
+                    //it.configuration.cancel = true
                     //println(errors)
-                    FxComponentPhase.TerminateWithErrors()
+                    FxComponentPhase.TerminationPhase.TerminateWithErrors(it.errors)
                     //FxComponentPhase.RunTimePhase.ShutDown<N,D>()
                 } else{
                 //withTimeout(it.timeout) {
@@ -163,8 +163,8 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                         it.errors.add( FxConfigurationException.IsNoStub(phase = it ,componentId =  it.id) )
                     }}
                     if(it.errors.isNotEmpty()) {
-                        it.configuration.cancel = true
-                        FxComponentPhase.TerminateWithErrors()
+                        //it.configuration.cancel = true
+                        FxComponentPhase.TerminationPhase.TerminateWithErrors(it.errors)
                     } else {
                         FxComponentPhase.Configuration.Configure<N, D>(
                                 configuration = it.configuration as FxComponentConfiguration<N, D>,
@@ -190,14 +190,15 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                         it.errors.add( FxConfigurationException.ViewNotSet(phase = it, componentId =it.id))
                     }
                     if(it.errors.isNotEmpty() ) {
-                        it.configuration.cancel = true
-                        FxComponentPhase.TerminateWithErrors()
+                        //it.configuration.cancel = true
+                        FxComponentPhase.TerminationPhase.TerminateWithErrors(it.errors)
                     }
                     else {
+                       // it.configuration.finish = true
+                        val component = it.configuration.configure()
+                        it.configuration.component = component
                         it.configuration.finish = true
-                        while ((it.configuration).component == null) {
-                            kotlinx.coroutines.delay(1)
-                        }
+
                         FxComponentPhase.RunTimeConfiguration<N, D>(
                                 fxChildren = it.fxChildren,
                                 configuration = it.configuration
@@ -279,16 +280,16 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
             is FxComponentPhase.RunTimePhase.ShutDown<*, *> ->Parallel{
                 //println("ShutDown")
 
-                FxComponentPhase.Terminate()
+                FxComponentPhase.TerminationPhase.Terminate()
             }
-            is FxComponentPhase.TerminateWithErrors -> Immediate{
-                //println("Terminate with errors")
+            is FxComponentPhase.TerminationPhase.TerminateWithErrors -> Immediate{
+                println("Terminate with errors")
                 Parallel<Unit>{ it.errors.forEach { error -> println( error )  }}
-                FxComponentPhase.Terminate()
+                FxComponentPhase.TerminationPhase.Terminate()
             }
-            is FxComponentPhase.Terminate -> Immediate{
+            is FxComponentPhase.TerminationPhase.Terminate -> Immediate{
                 //println("Terminate")
-                FxComponentPhase.Terminate()
+                FxComponentPhase.TerminationPhase.Terminate()
             }
         }
     }
@@ -298,6 +299,6 @@ fun <N,D> fxComponentFlow(): SuspendedFlow<FxComponentPhase, Boolean> = fxCompon
         .toFlow( conditions {
             testObject(true)
             check{ b -> b}
-            updateCondition{phase -> phase !is FxComponentPhase.Terminate}
+            updateCondition{phase -> phase !is FxComponentPhase.TerminationPhase.TerminateWithErrors && phase !is FxComponentPhase.TerminationPhase.Terminate}
         }
 )
