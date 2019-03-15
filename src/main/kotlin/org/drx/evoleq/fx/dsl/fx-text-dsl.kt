@@ -1,6 +1,5 @@
 package org.drx.evoleq.fx.dsl
 
-import javafx.scene.control.Label
 import javafx.scene.text.Text
 import org.drx.evoleq.fx.component.FxComponent
 

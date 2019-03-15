@@ -32,7 +32,3 @@ fun <D> FxComponentConfiguration<Stage, D>.scene(component: FxComponent<Scene, D
 }
 
 
-fun Stage.onCloseRequest(action: WindowEvent.()->Unit): Stage {
-    this.setOnCloseRequest(action)
-    return this
-}
