@@ -59,15 +59,15 @@ class FxComponentFlowTest {
 
             }
             scene(fxScene {
-                id<SceneId>()
-                stylesheet(style1)
+                //id<SceneId>()
+                //stylesheet(style1)
                 root(fxAnchorPane{
                     id<RootId>()
                     view{ configure{} }
                     tunnel()
 
                     child(fxButton<Int> {
-                        id<Key1>()
+                        id<Button>()
                         view{
                             configure{
                                 text = "text"
@@ -85,7 +85,6 @@ class FxComponentFlowTest {
                         })
                     })
                     child(fxBorderPane<Nothing> {
-                        id<Key2>()
                         view{
                             configure{
                                 leftAnchor( 10)
@@ -93,11 +92,12 @@ class FxComponentFlowTest {
                                 topAnchor(10)
                             }
                         }
+
                         top(fxStackPane {
                             id<TopId>()
                             view{configure{}}
-                            child<Button,Nothing>(fxComponent {
-                                id<Key5>()
+                            child<Button,Nothing>(fxButton {
+                                //id<Key5>()
                                 view{ configure{
                                     text = "TOP"
                                     action{
@@ -106,15 +106,14 @@ class FxComponentFlowTest {
                                     }
                                 }}
                                 tooltip(fxTooltip{
-                                    id<Key6>()
                                     view{configure{
                                         text = "Da werden Sie geholfen!"
                                     }}
                                     noStub()
                                 })
-                                noStub()
+                                tunnel()
                             })
-                            noStub()
+                            tunnel()
                         })
                         bottom( fxButton {
                             id<BottomId>()
@@ -122,8 +121,7 @@ class FxComponentFlowTest {
 
                             noStub()
                         })
-
-                        noStub()
+                        tunnel()
                     })
                 }){
                     root -> Scene(root, 300.0, 200.0)
@@ -137,18 +135,19 @@ class FxComponentFlowTest {
 
             stub(stub{})
             this@stage.stubAction {
-                val s = findByKey(Key1::class)!! as FxComponent<Button, Int>
+                val s = findByKey(Button::class)!! as FxComponent<Button, Int>
                 Parallel<Unit>{
                     val x = s.evolve(0).get()
                     println(">>>result = $x")
                 }
+                this.stubs[Button::class]!!
             }
 
         }
 
         val stub = showTestStage(stageConfiguration).get()
         //FxRobot().clickOn()
-        delay(5_000)
+        delay(1_000)
     }
 
     //@Test

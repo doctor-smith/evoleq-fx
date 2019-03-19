@@ -18,4 +18,5 @@ package org.drx.evoleq.fx.dsl
 import javafx.scene.layout.HBox
 import org.drx.evoleq.fx.component.FxComponent
 
+@Suppress("unused")
 fun <D> Any?.fxHBox(configuration: FxComponentConfiguration<HBox, D>.()->Unit): FxComponent<HBox, D> = fxComponent(configuration)

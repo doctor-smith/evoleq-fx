@@ -22,7 +22,7 @@ import org.drx.evoleq.fx.dsl.FxComponentConfiguration
 import org.drx.evoleq.fx.dsl.ID
 import org.drx.evoleq.stub.Stub
 
-class PhaseLauncher<N,D> {
+class ComponentPhaseLauncher<N,D> {
     var id: ID? = null
     var stub: Stub<D>? = null
     var view: (()->N)? = null
@@ -53,6 +53,5 @@ class PhaseLauncher<N,D> {
             fxChildren = fxChildren,
             fxSpecials = fxSpecials,
             stubActions = stubActions
-
     )
 }

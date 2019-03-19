@@ -28,12 +28,14 @@ import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.flow.SuspendedFlow
 import org.drx.evoleq.fx.component.FxComponent
+import org.drx.evoleq.fx.component.FxTunnelComponent
 import org.drx.evoleq.fx.dsl.FxComponentConfiguration
 import org.drx.evoleq.fx.dsl.isFxParent
 import org.drx.evoleq.fx.exception.FxConfigurationException
 import org.drx.evoleq.fx.phase.FxComponentPhase
 import org.drx.evoleq.fx.runtime.FxRunTime
 import org.drx.evoleq.fx.stub.NoStub
+import org.drx.evoleq.fx.stub.Tunnel
 import org.drx.evoleq.stub.DefaultIdentificationKey
 import org.drx.evoleq.stub.Stub
 import org.drx.evoleq.stub.toFlow
@@ -43,10 +45,8 @@ class FxComponentFlow
 fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
     id(FxComponentFlow::class)
     evolve{
-       // println("evolve $it")
         when(it) {
             is FxComponentPhase.Launch<*,*> -> Parallel{
-                //println("launch")
                 withTimeout(it.timeout){
                     val configuration = it.configuration.get() as FxComponentConfiguration<N,D>
                     FxComponentPhase.PreConfiguration(
@@ -62,8 +62,6 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                 }
             }
             is FxComponentPhase.PreConfiguration<*,*> -> Parallel{
-                //println("pre-configure")
-                //val errors: ArrayList<Exception> by lazy { arrayListOf<Exception>() }
                 val id = try {
                     withTimeout(it.timeout) { it.id.get() }
                 } catch (exception: Exception) {
@@ -84,12 +82,8 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                     it.fxRunTime.forEach{child -> child.job().cancel()}
                     it.stubActions.forEach{child -> child.job().cancel()}
                     it.view.job().cancel()
-                    //it.configuration.cancel = true
-                    //println(errors)
                     FxComponentPhase.TerminationPhase.TerminateWithErrors(it.errors)
-                    //FxComponentPhase.RunTimePhase.ShutDown<N,D>()
                 } else{
-                //withTimeout(it.timeout) {
                     FxComponentPhase.Configuration.Setup(
                             configuration = it.configuration as FxComponentConfiguration<N, D>,
                             id = id,
@@ -104,7 +98,6 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
             }
             is FxComponentPhase.Configuration -> when(it) {
                 is FxComponentPhase.Configuration.Setup<*,*> ->Parallel{
-                    //println("Setup ${it.id}")
                     withTimeout(it.timeout) {
                         // only take children with stubs
                         val fxChildren = arrayListOf(*it.fxChildren.map { c -> c.get() }.filter { child -> child.id != NoStub::class }.toTypedArray())
@@ -123,17 +116,27 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                 }
                 is FxComponentPhase.Configuration.AddFxChildren<*,*> ->Parallel{
                     /* TODO Error management -> Termination*/
-                    //println("AddChildren ${it.id}")
                     val stub = it.stub as Stub<D>
                     if(stub !is NoStub) {
-                        it.fxChildren.filter{child -> child !is NoStub<*> }.forEach { entry ->
-                            stub.stubs[entry.id] = entry
+                        it.fxChildren.filter{child -> child !is NoStub<*> }.forEach { child ->
+                            // forward all children of tunnels
+                            if(child is FxTunnelComponent){
+                                child.stubs.forEach { t, u -> stub.stubs[t] = u }
+                            }
+                            else {
+                                stub.stubs[child.id] = child
+                            }
                         }
-                        it.fxSpecials.filter{child -> child !is NoStub<*> }.forEach { entry ->
-                            stub.stubs[entry.id] = entry
+                        it.fxSpecials.filter{child -> child !is NoStub<*> }.forEach { child ->
+                            // forward all children of tunnels
+                            if(child is FxTunnelComponent){
+                                child.stubs.forEach { t, u -> stub.stubs[t] = u }
+                            }
+                            else {
+                                stub.stubs[child.id] = child
+                            }
                         }
                     }
-                    //}.get()
                     FxComponentPhase.Configuration.ExtendStub<N, D>(
                             configuration = it.configuration as FxComponentConfiguration<N,D>,
                             id = it.id,
@@ -146,7 +149,6 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                     )
                 }
                 is FxComponentPhase.Configuration.ExtendStub<*,*> ->Parallel{
-                    //println("ExtendStub ${it.id} ")
                     val actions = it.stubActions.map { action -> action.get() as Stub<D>.()->Unit }
                     val stub = it.stub as Stub<D>
                     //val errors : ArrayList<Exception> by lazy { arrayListOf<Exception>() }
@@ -163,7 +165,6 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                         it.errors.add( FxConfigurationException.IsNoStub(phase = it ,componentId =  it.id) )
                     }}
                     if(it.errors.isNotEmpty()) {
-                        //it.configuration.cancel = true
                         FxComponentPhase.TerminationPhase.TerminateWithErrors(it.errors)
                     } else {
                         FxComponentPhase.Configuration.Configure<N, D>(
@@ -178,10 +179,8 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                     }
                 }
                 is FxComponentPhase.Configuration.Configure<*, *> -> Parallel{
-                    //println("Configure ${it.id}")
                     it.configuration.idConfiguration = it.id
                     (it.configuration as FxComponentConfiguration<N,D>).stubConfiguration = it.stub as Stub<D>
-                    //var error : FxConfigurationException? = null
                     try{
                         withTimeout(it.timeout) {
                             (it.configuration).viewConfiguration = (it.view as Parallel<() -> N>).get()
@@ -190,11 +189,9 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                         it.errors.add( FxConfigurationException.ViewNotSet(phase = it, componentId =it.id))
                     }
                     if(it.errors.isNotEmpty() ) {
-                        //it.configuration.cancel = true
                         FxComponentPhase.TerminationPhase.TerminateWithErrors(it.errors)
                     }
                     else {
-                       // it.configuration.finish = true
                         val component = it.configuration.configure()
                         it.configuration.component = component
                         it.configuration.finish = true
@@ -204,7 +201,6 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                                 configuration = it.configuration
                         )
                     }
-
                 }
             }
             /**
@@ -214,7 +210,6 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                 /* TODO Error management -> Termination*/
                 val configuration = it.configuration as FxComponentConfiguration<N, D>
                 val component = configuration.component as FxComponent<N, D>
-                //println("RunTimeConfiguration ${component.id}")
                 val fxChildren = it.fxChildren
 
                 val view: N = withTimeout(it.timeout) {
@@ -251,18 +246,11 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                         get() = component
 
                 }
-                /**
-                 * Configuration shall work into fxRunTime
-                 */
                 configuration.fxRunTime = fxRunTime
-                FxComponentPhase.RunTimePhase.RunTime<N,D>(fxRunTime)
+                FxComponentPhase.RunTimePhase.RunTime( fxRunTime )
             }
-            /**
-             * Site!
-             */
             is FxComponentPhase.RunTimePhase.RunTime<*,*> -> {
                 /* TODO Error management -> Termination*/
-                //println("RunTime ${it.fxRunTime.component.id}")
                 val runTimeFlow = flow<FxComponentPhase.RunTimePhase<N, D>, Boolean>{
                     conditions(org.drx.evoleq.dsl.conditions {
                         testObject ( true )
@@ -278,17 +266,13 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                 runTimeFlow.evolve(it as FxComponentPhase.RunTimePhase.RunTime<N,D>)
             }
             is FxComponentPhase.RunTimePhase.ShutDown<*, *> ->Parallel{
-                //println("ShutDown")
-
                 FxComponentPhase.TerminationPhase.Terminate()
             }
             is FxComponentPhase.TerminationPhase.TerminateWithErrors -> Immediate{
-                println("Terminate with errors")
                 Parallel<Unit>{ it.errors.forEach { error -> println( error )  }}
                 FxComponentPhase.TerminationPhase.Terminate()
             }
             is FxComponentPhase.TerminationPhase.Terminate -> Immediate{
-                //println("Terminate")
                 FxComponentPhase.TerminationPhase.Terminate()
             }
         }

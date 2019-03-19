@@ -20,3 +20,7 @@ import org.drx.evoleq.stub.Stub
 interface FxComponent<N, D> : Stub<D> {
     fun show(): N
 }
+
+interface FxNoStubComponent<N, D> : FxComponent<N, D>
+
+interface FxTunnelComponent<N, D> : FxComponent<N, D>

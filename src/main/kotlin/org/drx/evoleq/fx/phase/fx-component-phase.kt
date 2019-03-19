@@ -23,8 +23,8 @@ import org.drx.evoleq.fx.dsl.FxComponentConfiguration
 import org.drx.evoleq.fx.dsl.ID
 import org.drx.evoleq.fx.runtime.FxRunTime
 import org.drx.evoleq.stub.Stub
-import kotlin.reflect.KClass
-const val  fxComponentPhaseTimeout: Long = 1_000
+
+const val  FX_COMPONENT_PHASE_TIMEOUT: Long = 1_000
 sealed class FxComponentPhase(open val errors: ArrayList<Exception> = arrayListOf()) : Phase {
     val defaultTimeout: Long = 100
     /**
@@ -34,12 +34,11 @@ sealed class FxComponentPhase(open val errors: ArrayList<Exception> = arrayListO
             /**
              * After this time the phase will terminate
              */
-            val timeout: Long = fxComponentPhaseTimeout,
+            val timeout: Long = FX_COMPONENT_PHASE_TIMEOUT,
             /**
              * Configuration - launched
              */
             val configuration: Parallel<FxComponentConfiguration<N,Data>>,
-            // common to all fx-components
             /**
              * Id of the component
              */
@@ -52,7 +51,6 @@ sealed class FxComponentPhase(open val errors: ArrayList<Exception> = arrayListO
              * View to be shown
              */
             val view: Parallel<()->N>,
-            // needed for components implementing FxParentComponent
             /**
              * Children defined via child-function in sub-views
              */
@@ -80,12 +78,11 @@ sealed class FxComponentPhase(open val errors: ArrayList<Exception> = arrayListO
             /**
              * After this time the phase will terminate
              */
-            val timeout: Long = fxComponentPhaseTimeout,
+            val timeout: Long = FX_COMPONENT_PHASE_TIMEOUT,
             /**
              * Configuration - launched
              */
             val configuration: FxComponentConfiguration<N,Data>,
-            // common to all fx-components
             /**
              * Id of the component
              */
@@ -98,7 +95,6 @@ sealed class FxComponentPhase(open val errors: ArrayList<Exception> = arrayListO
              * View to be shown
              */
             val view: Parallel<()->N>,
-            // needed for components implementing FxParentComponent
             /**
              * Children defined via child-function in sub-views
              */
@@ -124,12 +120,11 @@ sealed class FxComponentPhase(open val errors: ArrayList<Exception> = arrayListO
                 /**
                  * After this time the phase will terminate
                  */
-                val timeout: Long = fxComponentPhaseTimeout,
+                val timeout: Long = FX_COMPONENT_PHASE_TIMEOUT,
                 /**
                  * Configuration - launched
                  */
                 val configuration: FxComponentConfiguration<N,Data>,
-                // common to all fx-components
                 /**
                  * Id of the component
                  */
@@ -142,7 +137,6 @@ sealed class FxComponentPhase(open val errors: ArrayList<Exception> = arrayListO
                  * View to be shown
                  */
                 val view: Parallel<()->N>,
-                // needed for components implementing FxParentComponent
                 /**
                  * Children defined via child-function in sub-views
                  */
@@ -165,12 +159,11 @@ sealed class FxComponentPhase(open val errors: ArrayList<Exception> = arrayListO
                 /**
                  * After this time the phase will terminate
                  */
-                val timeout: Long = fxComponentPhaseTimeout,
+                val timeout: Long = FX_COMPONENT_PHASE_TIMEOUT,
                 /**
                  * Configuration - launched
                  */
                 val configuration: FxComponentConfiguration<N,Data>,
-                // common to all fx-components
                 /**
                  * Id of the component
                  */
@@ -183,7 +176,6 @@ sealed class FxComponentPhase(open val errors: ArrayList<Exception> = arrayListO
                  * View to be shown
                  */
                 val view: Parallel<()->N>,
-                // needed for components implementing FxParentComponent
                 /**
                  * Children defined via child-function in sub-views
                  */
@@ -206,12 +198,11 @@ sealed class FxComponentPhase(open val errors: ArrayList<Exception> = arrayListO
                 /**
                  * After this time the phase will terminate
                  */
-                val timeout: Long = fxComponentPhaseTimeout,
+                val timeout: Long = FX_COMPONENT_PHASE_TIMEOUT,
                 /**
                  * Configuration - launched
                  */
                 val configuration: FxComponentConfiguration<N,Data>,
-                // common to all fx-components
                 /**
                  * Id of the component
                  */
@@ -224,7 +215,6 @@ sealed class FxComponentPhase(open val errors: ArrayList<Exception> = arrayListO
                  * View to be shown
                  */
                 val view: Parallel<()->N>,
-                // needed for components implementing FxParentComponent
                 /**
                  * Children defined via child-function in sub-views
                  */
@@ -247,12 +237,11 @@ sealed class FxComponentPhase(open val errors: ArrayList<Exception> = arrayListO
                 /**
                  * After this time the phase will terminate
                  */
-                val timeout: Long = fxComponentPhaseTimeout,
+                val timeout: Long = FX_COMPONENT_PHASE_TIMEOUT,
                 /**
                  * Configuration - launched
                  */
                 val configuration: FxComponentConfiguration<N,Data>,
-                // common to all fx-components
                 /**
                  * Id of the component
                  */
@@ -265,7 +254,6 @@ sealed class FxComponentPhase(open val errors: ArrayList<Exception> = arrayListO
                  * View to be shown
                  */
                 val view: Parallel<()->N>,
-                // needed for components implementing FxParentComponent
                 /**
                  * Children defined via child-function in sub-views
                  */
@@ -286,12 +274,12 @@ sealed class FxComponentPhase(open val errors: ArrayList<Exception> = arrayListO
      * Perform actions like borderPane.top = ...
      */
     data class RunTimeConfiguration<N, D>(
-            val timeout: Long = fxComponentPhaseTimeout,
+            val timeout: Long = FX_COMPONENT_PHASE_TIMEOUT,
             /**
              * Children defined via child-function in sub-views
              */
             val fxChildren: ArrayList<FxComponent<*, *>>,
-            /* TODO think about managing parent-child-relations between fx-run-times within this phase. This would require the components to know their RxRunTime */
+            /* TODO think about managing parent-child-relations between fx-run-times within this phase. This would require the components to know their FxRunTime */
             val configuration: FxComponentConfiguration<N, D>
     ) : FxComponentPhase(), ConfigurationPhase
 

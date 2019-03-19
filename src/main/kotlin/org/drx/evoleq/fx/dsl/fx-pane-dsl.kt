@@ -21,6 +21,7 @@ import org.drx.evoleq.fx.component.FxComponent
 /**
  * Pane
  */
+@Suppress("unused")
 fun <D> Any?.fxPane(configuration: FxComponentConfiguration<Pane, D>.()->Unit): FxComponent<Pane, D> {
     return fxComponent(configuration)
 }

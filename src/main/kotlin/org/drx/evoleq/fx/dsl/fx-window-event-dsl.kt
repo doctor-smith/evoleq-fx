@@ -15,7 +15,6 @@
  */
 package org.drx.evoleq.fx.dsl
 
-import javafx.stage.Stage
 import javafx.stage.Window
 import javafx.stage.WindowEvent
 

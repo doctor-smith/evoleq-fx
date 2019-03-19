@@ -1,7 +1,6 @@
 ##Versions
-
 1.1.0: Component-flow and Stable configuration-process
-* Former dsl will still work. Related classes moved to ./deprecated and will be removed in version 1.2
+* Former dsl will still work until version 1.2.0. Related classes moved to ./deprecated and will be removed in version 1.2
 
 1.0.2: AppManager, FxComponents
 * AppManager: <br>Use JavaFX-Application class to

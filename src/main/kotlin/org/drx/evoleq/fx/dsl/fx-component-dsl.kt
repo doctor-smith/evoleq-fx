@@ -23,17 +23,17 @@ import org.drx.evoleq.dsl.Configuration
 import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.component.FxComponent
+import org.drx.evoleq.fx.component.FxNoStubComponent
+import org.drx.evoleq.fx.component.FxTunnelComponent
 import org.drx.evoleq.fx.exception.FxConfigurationException
 import org.drx.evoleq.fx.flow.fxComponentFlow
 import org.drx.evoleq.fx.phase.FxComponentPhase
-import org.drx.evoleq.fx.phase.PhaseLauncher
+import org.drx.evoleq.fx.phase.ComponentPhaseLauncher
 import org.drx.evoleq.fx.runtime.FxRunTime
 import org.drx.evoleq.fx.stub.NoStub
 import org.drx.evoleq.fx.stub.Tunnel
 import org.drx.evoleq.stub.Stub
 import org.drx.evoleq.stub.cyclicKeys
-import org.drx.evoleq.time.Keeper
-import org.drx.evoleq.time.waitForValueToBeSet
 import java.lang.Thread.sleep
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
@@ -43,14 +43,13 @@ typealias ID = KClass<*>
 
 
 abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>> {
-    //
+    // Component Data
     lateinit var idConfiguration: KClass<*>
     lateinit var stubConfiguration: Stub<D>
     lateinit var viewConfiguration: ()->N
 
-    //var style = ""
-
-    val launcher = PhaseLauncher<N,D>()
+    // Data related to configuration process
+    val launcher = ComponentPhaseLauncher<N,D>()
     var fxRunTime: FxRunTime<N, D>? = null
 
     var finish: Boolean = false
@@ -58,27 +57,53 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
     var component: FxComponent<N, D>? = null
 
     var fxRunTimeView: N? = null
-    /**
-     *
-     */
-    override fun configure(): FxComponent<N, D> {
 
-        val comp = object : FxComponent<N, D> {
+    override fun configure(): FxComponent<N, D> = when(stubConfiguration) {
+        is Tunnel<D> ->  object : FxTunnelComponent<N, D> {
 
             override val id: ID
                 get() = idConfiguration
+
             override val stubs: HashMap<ID, Stub<*>>
                 get() = stubConfiguration.stubs
 
-            override fun show(): N  {
+            override fun show(): N {
                 fxRunTimeView = viewConfiguration()
                 return fxRunTimeView!!
             }
 
             override suspend fun evolve(d: D): Evolving<D> = stubConfiguration.evolve(d)
-
         }
-        return comp
+        is NoStub<D> ->  object : FxNoStubComponent<N, D> {
+
+            override val id: ID
+                get() = idConfiguration
+
+            override val stubs: HashMap<ID, Stub<*>>
+                get() = stubConfiguration.stubs
+
+            override fun show(): N {
+                fxRunTimeView = viewConfiguration()
+                return fxRunTimeView!!
+            }
+
+            override suspend fun evolve(d: D): Evolving<D> = stubConfiguration.evolve(d)
+        }
+        else ->  object : FxComponent<N, D> {
+
+            override val id: ID
+                get() = idConfiguration
+
+            override val stubs: HashMap<ID, Stub<*>>
+                get() = stubConfiguration.stubs
+
+            override fun show(): N {
+                fxRunTimeView = viewConfiguration()
+                return fxRunTimeView!!
+            }
+
+            override suspend fun evolve(d: D): Evolving<D> = stubConfiguration.evolve(d)
+        }
     }
 
     /******************************************************************************************************************
@@ -87,47 +112,88 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
      *
      ******************************************************************************************************************/
 
+    /**
+     * Set id
+     */
+    @Suppress("unused")
     fun FxComponentConfiguration<N, D>.id(id: ID) : ID{
         launcher.id = id
         return id
     }
 
+    /**
+     * Set Id
+     */
+    @Suppress("unused")
     inline fun <reified Id> FxComponentConfiguration<N, D>.id() {
         launcher.id = Id::class
     }
 
+    /**
+     * Configure stub
+     */
+    @Suppress("unused")
     fun FxComponentConfiguration<N, D>.stub(stub: Stub<D>) {
         launcher.stub = stub
     }
 
+    /**
+     * No stub configuration
+     */
+    @Suppress("unused")
     fun FxComponentConfiguration<N, D>.noStub() {
         val stub = NoStub<D>()
         launcher.stub = stub
         launcher.id = stub.id
     }
 
+    /**
+     * Underlying stub is a tunnel
+     */
+    @Suppress("unused")
     fun FxComponentConfiguration<N, D>.tunnel(){
         val stub = Tunnel<D>()
         launcher.stub = stub
         launcher.id = cyclicKeys.next()
     }
 
+
+    /**
+     * Configure the view
+     */
+    @Suppress("unused")
     fun FxComponentConfiguration<N, D>.view(view: ()->N) {
         launcher.view = view
     }
 
+    /**
+     * Add a child-component
+     */
+    @Suppress("unused")
     fun <M,E> FxComponentConfiguration<N, D>.child(child: FxComponent<M, E>) {
         launcher.fxChildren.add( Parallel { child } )
     }
 
+    /**
+     * Add an fx-specia component
+     */
+    @Suppress("unused")
     fun <M,E> FxComponentConfiguration<N, D>.fxSpecial(child: FxComponent<M, E>) {
         launcher.fxSpecials.add( Parallel{child} )
     }
 
+    /**
+     * Perform an action on the stub and its children
+     */
+    @Suppress("unused")
     fun FxComponentConfiguration<N, D>.stubAction(action: Stub<D>.()->Unit) {
         launcher.stubActions.add(Parallel{action})
     }
 
+    /**
+     * Perform an action on the component during fx-runtime
+     */
+    @Suppress("unused")
     fun FxComponentConfiguration<N, D>.fxRunTime(action: N.()->Unit) = Parallel<Unit>{
         while(fxRunTime == null) {
             kotlinx.coroutines.delay(1)
@@ -135,6 +201,10 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
         fxRunTime!!.fxRunTime(action)
     }
 
+    /**
+     * Shutdow the component-flow
+     */
+    @Suppress("unused")
     fun FxComponentConfiguration<N, D>.shutdown() = Parallel<Unit> {
         while(fxRunTime == null) {
             kotlinx.coroutines.delay(1)
@@ -143,6 +213,10 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
     }
 }
 
+/**
+ * Configure an FxComponent
+ */
+@Suppress("unused")
 fun<N,D> Any?.fxComponent(configuration: FxComponentConfiguration<N,D>.()->Unit): FxComponent<N, D> {
     val conf = (object : FxComponentConfiguration<N, D>(){})
 
@@ -150,15 +224,13 @@ fun<N,D> Any?.fxComponent(configuration: FxComponentConfiguration<N,D>.()->Unit)
     var component : FxComponent<N, D>? = null
     Parallel<Unit> {
         val l = conf.launcher.launch(conf)
-        val terminate =
-                fxComponentFlow<N, D>().evolve(l).get()
+        val terminate = fxComponentFlow<N, D>().evolve(l).get()
         assert(
                 terminate is FxComponentPhase.TerminationPhase.TerminateWithErrors
                         || terminate is FxComponentPhase.TerminationPhase.Terminate
         )
 
         if(terminate is FxComponentPhase.TerminationPhase.TerminateWithErrors){
-            //terminate.errors.forEach { println( it )}
             conf.cancel = true
             throw FxConfigurationException.ConfigurationFailed(errors = terminate.errors)
         }
@@ -183,33 +255,11 @@ fun<N,D> Any?.fxComponent(configuration: FxComponentConfiguration<N,D>.()->Unit)
     }
     return component!!
 }
-/*
-fun <N,D> Any?.gxComponent(configuration: FxComponentConfiguration<N, D>.()->Unit): FxComponent<N, D> {
-    val conf = (object : FxComponentConfiguration<N, D>() {
 
-    })
-    conf.configuration()
-    val launcher = conf.launcher
-
-    val component = conf.configure()
-
-    return component
-}
-*/
-/*
-fun<N,D> Any?.fxParentComponent(configuration: FxComponentConfiguration<N,D>.()->Unit): FxComponent<N, D> {
-    val conf = (object : FxComponentConfiguration<N, D>(){
-        public override fun <M,E> FxComponentConfiguration<N, D>.child(child: FxComponent<M,E>) {
-            this.child(child)
-        }
-    })
-    conf.configuration()
-    return conf.configure()
-}
-*/
 /**
- * Generic
+ * Configure the view
  */
+@Suppress("unused")
 inline fun <reified N : Any, D> FxComponentConfiguration<N, D>.configure(noinline configure: N.()->Unit): N {
     val n = N::class.createInstance()
     n.configure()

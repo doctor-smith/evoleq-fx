@@ -19,6 +19,8 @@ import javafx.scene.Node
 import javafx.scene.Scene
 import javafx.stage.Stage
 import org.drx.evoleq.fx.component.FxComponent
+import org.drx.evoleq.fx.dsl.ID
+import org.drx.evoleq.fx.runtime.FxRunTime
 import kotlin.reflect.KClass
 
 

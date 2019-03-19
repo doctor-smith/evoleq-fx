@@ -17,10 +17,8 @@ package org.drx.evoleq.fx.dsl
 
 import javafx.scene.Parent
 import javafx.scene.Scene
-import javafx.scene.layout.VBox
 import javafx.stage.Stage
 import org.drx.evoleq.fx.component.FxComponent
-import org.drx.evoleq.fx.dsl.deprecated.fxScene
 
 
 fun <D> FxComponentConfiguration<Stage, D>.fxScene(configuration: FxComponentConfiguration<Scene, D>.()->Unit): FxComponent<Scene, D> {
