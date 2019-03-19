@@ -107,8 +107,8 @@ fun <D> Stub<D>.reconfigure(configuration: StubConfiguration<D>.()->Unit): Stub<
 ```
 
 ```kotlin
-fun <N: Node, D> FxNodeComponent<N,D>.reconfigure(configuration: FxNodeComponentConfiguration<N, D>.()->Unit): FxNodeComponent<N,D> 7
-
+fun <N: Node, D> FxNodeComponent<N,D>.reconfigure(configuration: FxNodeComponentConfiguration<N, D>.()->Unit): FxNodeComponent<N,D> 
+{}
 
 ```
 
