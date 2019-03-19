@@ -51,7 +51,6 @@ abstract class AppManager<D> : Application(), Configuration<Stub<D>> {
         var CALLED = -1
 
         fun waitingForToolkit(): Boolean = !TOOLKIT_INITIALIZED
-        //fun waitingForStub(): Boolean = !STUB_INITIALIZED
         /**
          * Launch an application ( and register it ).
          * Calling this function a second time with a second app will not launch the entire
@@ -65,8 +64,7 @@ abstract class AppManager<D> : Application(), Configuration<Stub<D>> {
             var STUB_INITIALIZED = false
 
             // eventually launch app
-            if(/*CALLED == 0 &&*/ waitingForToolkit()) {
-                //CALLED++
+            if( waitingForToolkit()) {
                 scope.launch {
                     coroutineScope {
                         launch(app::class.java)
@@ -74,7 +72,6 @@ abstract class AppManager<D> : Application(), Configuration<Stub<D>> {
                 }
             }
             while(waitingForToolkit()){
-                //println("waiting for toolkit ...")
                 kotlinx.coroutines.delay(1)
             }
 
@@ -101,26 +98,6 @@ abstract class AppManager<D> : Application(), Configuration<Stub<D>> {
         fun <E> appStub(id: KClass<*>): Stub<E>? = REGISTRY[id] as Stub<E>?
 
         fun appStubs() = REGISTRY.values
-/*
-        fun shutDown(idConfiguration: KClass<*>) : Boolean {
-            val stubConfiguration = REGISTRY[idConfiguration]
-            if(stubConfiguration != null){
-                REGISTRY.remove(idConfiguration)
-            }
-            return true
-        }
-*/
-        /*
-        fun <D, A: AppManager<D>> restart(app: A): Parallel<Stub<D>> = when(AppManager.TOOLKIT_INITIALIZED){
-            true -> Parallel {
-                AppManager.STUB = app.configure()
-
-                AppManager.STUB as Stub<D>
-            }
-            false ->  AppManager.launch(app)
-        }
-        */
-
     }
 
 
