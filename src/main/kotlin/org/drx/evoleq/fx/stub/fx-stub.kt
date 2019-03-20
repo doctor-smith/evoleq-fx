@@ -15,6 +15,7 @@
  */
 package org.drx.evoleq.fx.stub
 
+import org.drx.evoleq.fx.dsl.ID
 import org.drx.evoleq.stub.Stub
 import kotlin.reflect.KClass
 
@@ -22,13 +23,13 @@ abstract class FxStub<D> : Stub<D> {
     /**
      * Stubs to be called by children
      */
-    abstract val parentalStubs: HashMap<KClass<*>, Stub<*>>// by lazy { HashMap<KClass<*>, Stub<*>>() }
+    abstract val parentalStubs: HashMap<ID, Stub<*>>// by lazy { HashMap<KClass<*>, Stub<*>>() }
 
-    abstract val parentalStubsMap: HashMap<KClass<*>, KClass<*>>// by lazy { HashMap<KClass<*>, KClass<*>>() }
+    abstract val parentalStubsMap: HashMap<ID, ID>// by lazy { HashMap<KClass<*>, KClass<*>>() }
     /**
      * key: 'Key of a child class'
      * val: 'list of stub identifiers accessible to key-stub'
      */
-    abstract val crossChildAccessMap: HashMap<KClass<*>, ArrayList<KClass<*>>>// by lazy{ HashMap<KClass<*>, ArrayList<KClass<*>>>() }
+    abstract val crossChildAccessMap: HashMap<ID, ArrayList<ID>>// by lazy{ HashMap<KClass<*>, ArrayList<KClass<*>>>() }
 
 }

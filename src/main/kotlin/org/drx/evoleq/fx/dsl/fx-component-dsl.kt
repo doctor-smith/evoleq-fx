@@ -44,7 +44,7 @@ typealias ID = KClass<*>
 
 abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>> {
     // Component Data
-    lateinit var idConfiguration: KClass<*>
+    lateinit var idConfiguration: ID
     lateinit var stubConfiguration: Stub<D>
     lateinit var viewConfiguration: ()->N
 
