@@ -65,7 +65,7 @@ abstract class AppManager<D> : Application(), Configuration<Stub<D>> {
             var STUB_INITIALIZED = false
 
             // eventually launch app
-            if( waitingForToolkit()) {
+            if( waitingForToolkit() ) {
                 scope.launch {
                     coroutineScope {
                         launch(app::class.java)
@@ -100,7 +100,6 @@ abstract class AppManager<D> : Application(), Configuration<Stub<D>> {
 
         fun appStubs() = REGISTRY.values
     }
-
 
     /******************************************************
      *
