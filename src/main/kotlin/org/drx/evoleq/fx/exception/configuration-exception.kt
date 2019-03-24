@@ -18,6 +18,8 @@ package org.drx.evoleq.fx.exception
 import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.dsl.ID
 import org.drx.evoleq.fx.phase.FxComponentPhase
+import org.drx.evoleq.fx.runtime.FxRunTime
+import kotlin.reflect.KClass
 
 sealed class FxConfigurationException(open val phase: FxComponentPhase? = null, override val  message: String) : Exception(message) {
     class IdNotSet(override val phase: FxComponentPhase? = null) : FxConfigurationException(phase, "Id not set")
@@ -28,6 +30,9 @@ sealed class FxConfigurationException(open val phase: FxComponentPhase? = null, 
     class IsNoStub(override val phase: FxComponentPhase? = null, val componentId: ID) : FxConfigurationException(phase, "FxComponent \"$componentId\" is configured to be no stub")
 
     class RunTimeViewTimeout(override val phase: FxComponentPhase? = null, val componentId: ID, val component: FxComponent<*, *>) : FxConfigurationException(phase, "FxComponent \"$componentId\" \n ${component::class} \nhas no available runtimeView")
+    class FxRunTime(val componentId: ID, val runtime: org.drx.evoleq.fx.runtime.FxRunTime<*,*>, val view: KClass<*>,val exception: Exception
+    ) : FxConfigurationException(message="FxComponent \n$componentId\n produced runtime-error on view: \n$view \n. The exception is: \n $exception")
+
 
     class ConfigurationFailed(override val phase: FxComponentPhase? = null, val errors: ArrayList<Exception>) : FxConfigurationException(phase, "Configuration Failure: \n ${renderErrors(errors)}")
     class ConfigurationCancelled() : FxConfigurationException(message = "Configuration cancelled")

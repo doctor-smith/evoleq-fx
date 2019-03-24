@@ -19,6 +19,7 @@ import kotlinx.coroutines.delay
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.evolving.ParallelFx
+import org.drx.evoleq.fx.exception.FxConfigurationException
 import org.drx.evoleq.fx.phase.FxComponentPhase
 
 abstract class  FxRunTime<N , D> {
@@ -44,6 +45,8 @@ abstract class  FxRunTime<N , D> {
                 view.action()
             }}.get()
         } catch (exception: Exception) {
+            val n: Any = view!!
+            phase.errors.add(FxConfigurationException.FxRunTime(component.id, this@FxRunTime, n::class,  exception))
             phase.errors.add(exception)
             shutdown = true
         }
