@@ -3,6 +3,7 @@ package org.drx.evoleq.fx.application
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import org.drx.evoleq.dsl.conditions
 import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.evolving.Parallel
@@ -11,6 +12,8 @@ import org.drx.evoleq.stub.Keys
 import org.drx.evoleq.stub.Stub
 import org.drx.evoleq.stub.toFlow
 import kotlin.reflect.KClass
+
+class PreId
 
 class IdProvider  {
     private val requests: ArrayList<SimpleObjectProperty<ID>> by lazy{ ArrayList<SimpleObjectProperty<ID>>() }
@@ -35,19 +38,20 @@ class IdProvider  {
                 delay(1)
             }
             while(requests.isNotEmpty() && !cancel) {
-                val id = currentId.value
-                if(id == numberOfKeys -1){
-                    currentId.value = 0
+                synchronized(requests) {
+                    val id = currentId.value
+                    if (id == numberOfKeys - 1) {
+                        currentId.value = 0
+                    } else {
+                        currentId.value = id + 1
+                    }
+                    val req = requests.first()
+                    requests.removeAt(0)
+                    req!!
+                    req.value = Keys[id]
                 }
-                else {
-                    currentId.value = id + 1
-                }
-                val req = requests.first()
-                requests.removeAt(0)
-                req.value = Keys[id]
-
             }
-            true
+            !cancel
         }
     }
 
@@ -58,7 +62,7 @@ class IdProvider  {
     })
 
 
-    fun add( request: SimpleObjectProperty<ID>)  {
+    @Synchronized fun add( request: SimpleObjectProperty<ID>)  {
         requests.add(request)
     }
 
