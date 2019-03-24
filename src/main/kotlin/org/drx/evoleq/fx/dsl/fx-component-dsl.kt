@@ -15,19 +15,17 @@
  */
 package org.drx.evoleq.fx.dsl
 
-import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.Group
 import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.layout.*
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.drx.evoleq.dsl.Configuration
 import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.application.IdProvider
+import org.drx.evoleq.fx.application.PreId
 import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.component.FxNoStubComponent
 import org.drx.evoleq.fx.component.FxTunnelComponent
@@ -39,11 +37,7 @@ import org.drx.evoleq.fx.runtime.FxRunTime
 import org.drx.evoleq.fx.stub.NoStub
 import org.drx.evoleq.fx.stub.Tunnel
 import org.drx.evoleq.stub.Stub
-import org.drx.evoleq.stub.cyclicKeys
-import org.drx.evoleq.time.WaitForProperty
-import java.lang.Thread.currentThread
 import java.lang.Thread.sleep
-import javax.xml.bind.JAXBElement
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
@@ -159,15 +153,14 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
     fun FxComponentConfiguration<N, D>.noStub() {
         val stub = NoStub<D>()
         launcher.stub = stub
-        launcher.id = cyclicKeys.next()
-        /*
+        val id = SimpleObjectProperty<ID>(PreId::class)
+        idProvider.add(id)
         Parallel<Unit> {
-            val id = SimpleObjectProperty<ID>()
-            val deferred = WaitForProperty(id).toChange()
-            idProvider.add(id)
-            launcher.id = deferred.get()
+            while(id.value == PreId::class) {
+                delay(1)
+            }
+            launcher.id = id.get()
         }
-        */
     }
 
     /**
@@ -177,15 +170,14 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
     fun FxComponentConfiguration<N, D>.tunnel(){
         val stub = Tunnel<D>()
         launcher.stub = stub
-        launcher.id = cyclicKeys.next()
-        /*
+        val id = SimpleObjectProperty<ID>(PreId::class)
+        idProvider.add(id)
         Parallel<Unit> {
-            val id = SimpleObjectProperty<ID>()
-            val deferred = WaitForProperty(id).toChange()
-            idProvider.add(id)
-            launcher.id = deferred.get()
+            while(id.value == PreId::class) {
+                delay(1)
+            }
+            launcher.id = id.get()
         }
-        */
     }
 
 
