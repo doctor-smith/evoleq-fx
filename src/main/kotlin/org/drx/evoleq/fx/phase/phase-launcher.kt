@@ -29,6 +29,7 @@ class ComponentPhaseLauncher<N,D> {
     val fxChildren = ArrayList<Parallel<FxComponent<*, *>>>()
     val fxSpecials = ArrayList<Parallel<FxComponent<*, *>>>()
     val stubActions = ArrayList<Parallel<Stub<D>.() -> Unit>>()
+    val fxRunTime = ArrayList<Parallel<N.() -> Unit>>()
 
     fun launch(configuration: FxComponentConfiguration<N, D>): FxComponentPhase.Launch<N,D> = FxComponentPhase.Launch(
             configuration = Parallel{configuration},
