@@ -21,8 +21,11 @@ import javafx.scene.control.Tab
 import javafx.scene.control.TabPane
 import org.drx.evoleq.fx.component.FxComponent
 
+@Suppress("unused")
+fun <D> FxComponentConfiguration<out Any, *>.fxTabPane(configuration: FxComponentConfiguration<TabPane, D>.()->Unit): FxComponent<TabPane, D> = fxComponent(configuration)
 
-fun <D> Any?.fxTabPane(configuration: FxComponentConfiguration<TabPane, D>.()->Unit): FxComponent<TabPane, D> = fxComponent(configuration)
+fun <D> fxTabPane(configuration: FxComponentConfiguration<TabPane, D>.()->Unit): FxComponent<TabPane, D> = fxComponent(configuration)
+
 
 fun <D> FxComponentConfiguration<TabPane, D>.tab(component: FxComponent<Tab, D>) {
     fxSpecial(component)

@@ -19,4 +19,6 @@ import javafx.scene.text.Text
 import org.drx.evoleq.fx.component.FxComponent
 
 @Suppress("unused")
-fun <D> Any?.fxText(configuration: FxComponentConfiguration<Text, D>.()->Unit): FxComponent<Text, D> = fxComponent(configuration)
+fun <D> FxComponentConfiguration<out Any, *>.fxText(configuration: FxComponentConfiguration<Text, D>.()->Unit): FxComponent<Text, D> = fxComponent(configuration)
+
+fun <D> fxText(configuration: FxComponentConfiguration<Text, D>.()->Unit): FxComponent<Text, D> = fxComponent(configuration)

@@ -15,13 +15,19 @@
  */
 package org.drx.evoleq.fx.dsl
 
+import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.Group
 import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.layout.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.drx.evoleq.dsl.Configuration
 import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.evolving.Parallel
+import org.drx.evoleq.fx.application.IdProvider
 import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.component.FxNoStubComponent
 import org.drx.evoleq.fx.component.FxTunnelComponent
@@ -34,7 +40,10 @@ import org.drx.evoleq.fx.stub.NoStub
 import org.drx.evoleq.fx.stub.Tunnel
 import org.drx.evoleq.stub.Stub
 import org.drx.evoleq.stub.cyclicKeys
+import org.drx.evoleq.time.WaitForProperty
+import java.lang.Thread.currentThread
 import java.lang.Thread.sleep
+import javax.xml.bind.JAXBElement
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
@@ -57,6 +66,12 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
     var component: FxComponent<N, D>? = null
 
     var fxRunTimeView: N? = null
+
+    val idProvider = IdProvider()
+
+    init{
+        idProvider.run()
+    }
 
     override fun configure(): FxComponent<N, D> = when(stubConfiguration) {
         is Tunnel<D> ->  object : FxTunnelComponent<N, D> {
@@ -144,7 +159,15 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
     fun FxComponentConfiguration<N, D>.noStub() {
         val stub = NoStub<D>()
         launcher.stub = stub
-        launcher.id = stub.id
+        launcher.id = cyclicKeys.next()
+        /*
+        Parallel<Unit> {
+            val id = SimpleObjectProperty<ID>()
+            val deferred = WaitForProperty(id).toChange()
+            idProvider.add(id)
+            launcher.id = deferred.get()
+        }
+        */
     }
 
     /**
@@ -155,6 +178,14 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
         val stub = Tunnel<D>()
         launcher.stub = stub
         launcher.id = cyclicKeys.next()
+        /*
+        Parallel<Unit> {
+            val id = SimpleObjectProperty<ID>()
+            val deferred = WaitForProperty(id).toChange()
+            idProvider.add(id)
+            launcher.id = deferred.get()
+        }
+        */
     }
 
 
@@ -201,6 +232,12 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
         fxRunTime!!.fxRunTime(action)
     }
 
+    @Suppress("unused")
+    fun FxComponentConfiguration<N, D>.fxRunTimeConfig(action: N.()->Unit) = Parallel<Unit>{
+        launcher.fxRunTime.add(Parallel{action})
+    }
+
+
     /**
      * Shutdow the component-flow
      */
@@ -217,7 +254,9 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
  * Configure an FxComponent
  */
 @Suppress("unused")
-fun<N,D> Any?.fxComponent(configuration: FxComponentConfiguration<N,D>.()->Unit): FxComponent<N, D> {
+//fun<N,D> FxComponentConfiguration<out Any, *>.fxComponent(configuration: FxComponentConfiguration<N,D>.()->Unit): FxComponent<N, D> = fxComponent(configuration)
+
+fun <N,D> fxComponent(configuration: FxComponentConfiguration<N,D>.()->Unit): FxComponent<N, D> {
     val conf = (object : FxComponentConfiguration<N, D>(){})
 
     conf.configuration()
@@ -225,10 +264,16 @@ fun<N,D> Any?.fxComponent(configuration: FxComponentConfiguration<N,D>.()->Unit)
     Parallel<Unit> {
         val l = conf.launcher.launch(conf)
         val terminate = fxComponentFlow<N, D>().evolve(l).get()
+        // print log
+        terminate.log.forEach {
+            println(it)
+        }
         assert(
                 terminate is FxComponentPhase.TerminationPhase.TerminateWithErrors
                         || terminate is FxComponentPhase.TerminationPhase.Terminate
         )
+
+
 
         if(terminate is FxComponentPhase.TerminationPhase.TerminateWithErrors){
             conf.cancel = true
@@ -242,12 +287,14 @@ fun<N,D> Any?.fxComponent(configuration: FxComponentConfiguration<N,D>.()->Unit)
             kotlinx.coroutines.delay(1)
         }
         if(!conf.cancel) {
+            //println("finished: ${conf.idConfiguration}")
             component = conf.component
         }
     }
 
     while(component == null && !conf.cancel){
         sleep(1)
+        //delay(1)
     }
     if(conf.cancel) {
         sleep(100)

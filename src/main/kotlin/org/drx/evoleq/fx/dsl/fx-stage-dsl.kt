@@ -23,7 +23,10 @@ import org.drx.evoleq.fx.component.FxComponent
 /**
  * Stage
  */
+@Suppress("unused")
 fun <D> Any?.fxStage(configuration: FxComponentConfiguration<Stage, D>.()->Unit): FxComponent<Stage, D> = fxComponent ( configuration )
+
+fun <D> fxStage(configuration: FxComponentConfiguration<Stage, D>.()->Unit): FxComponent<Stage, D> = fxComponent ( configuration )
 
 fun <D> FxComponentConfiguration<Stage, D>.scene(component: FxComponent<Scene, D>): FxComponentConfiguration<Stage, D> {
     child(component)
