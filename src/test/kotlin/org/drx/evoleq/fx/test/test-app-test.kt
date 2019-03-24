@@ -66,12 +66,13 @@ class TestAppTest{
             id<StageId>()
             view{configure{}}
             scene(fxScene {
-
-                root(fxStackPane {
-                    view { configure{} }
-                    noStub()
-                })
                 noStub()
+                root(fxStackPane {
+                    noStub()
+                    view { configure{} }
+
+                })
+
             })
             stub(stub {
                 evolve { b ->
