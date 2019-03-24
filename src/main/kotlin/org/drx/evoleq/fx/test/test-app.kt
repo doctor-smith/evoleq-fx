@@ -20,6 +20,8 @@ import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.application.AppManager
 import org.drx.evoleq.fx.application.deprecated.SimpleAppManager
 import org.drx.evoleq.fx.component.FxComponent
+import org.drx.evoleq.fx.dsl.launchApplicationStub
+import org.drx.evoleq.fx.dsl.launchApplicationStubFromClass
 import org.drx.evoleq.fx.evolving.ParallelFx
 import org.drx.evoleq.stub.Stub
 
@@ -36,5 +38,22 @@ fun <D> showTestStage(stageComponent: FxComponent<Stage, D>): Parallel<Stub<D>> 
         override fun configure(): Stub<D> = stageComponent as Stub<D>
     }
     val stub = AppManager.launch(TestApp<D>()).get()
+    stub
+}
+
+fun <D> launchTestStage(stageComponent: FxComponent<Stage,D>): Parallel<Stub<D>> = Parallel{
+
+    class TestApp<D> : SimpleAppManager<D>() {
+        init{
+            ParallelFx<Unit>{showStage(stageComponent.show())}
+        }
+        override fun configure(): Stub<D> = stageComponent as Stub<D>
+    }
+
+
+    val stubLauncher = launchApplicationStub<D, TestApp<D>> {
+        application(TestApp())
+    }
+    val stub = stubLauncher.evolve(null).get()!!
     stub
 }
