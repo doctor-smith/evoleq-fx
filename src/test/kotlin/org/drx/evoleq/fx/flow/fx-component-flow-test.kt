@@ -62,25 +62,23 @@ class FxComponentFlowTest {
                 //id<SceneId>()
                 //stylesheet(style1)
                 root(fxAnchorPane{
-                    id<RootId>()
+                    //id<RootId>()
                     view{ configure{} }
                     tunnel()
 
-                    child(fxButton<Int> {
+                    child(fxButton<Int>{
                         id<Button>()
                         view{
                             configure{
                                 text = "text"
                                 leftAnchor(20)
                                 bottomAnchor(10)
-                            }.
-                            style(
-                                """-fx-color: green;"""
+                            }.style(
+                                    """-fx-color: green;"""
                             )
                         }
                         stub(org.drx.evoleq.dsl.stub {
-                            evolve{
-                                x -> Immediate{x+1}
+                            evolve{ x -> Immediate{x+1}
                             }
                         })
                     })
