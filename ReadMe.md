@@ -1,3 +1,4 @@
+[ ![Download](https://api.bintray.com/packages/drx/maven/evoleq-fx/images/download.svg?version=1.1.0) ](https://bintray.com/drx/maven/evoleq-fx/1.1.0/link)
 #EvoleqFX
 Combine evoleq with JavaFX. 
 
