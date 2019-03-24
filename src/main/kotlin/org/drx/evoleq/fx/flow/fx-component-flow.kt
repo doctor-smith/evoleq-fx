@@ -15,6 +15,7 @@
  */
 package org.drx.evoleq.fx.flow
 
+import javafx.application.Platform
 import javafx.collections.ObservableList
 import javafx.scene.Group
 import javafx.scene.Node
@@ -28,6 +29,7 @@ import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.flow.SuspendedFlow
 import org.drx.evoleq.fx.component.FxComponent
+import org.drx.evoleq.fx.component.FxNoStubComponent
 import org.drx.evoleq.fx.component.FxTunnelComponent
 import org.drx.evoleq.fx.dsl.FxComponentConfiguration
 import org.drx.evoleq.fx.dsl.isFxParent
@@ -35,7 +37,6 @@ import org.drx.evoleq.fx.exception.FxConfigurationException
 import org.drx.evoleq.fx.phase.FxComponentPhase
 import org.drx.evoleq.fx.runtime.FxRunTime
 import org.drx.evoleq.fx.stub.NoStub
-import org.drx.evoleq.fx.stub.Tunnel
 import org.drx.evoleq.stub.DefaultIdentificationKey
 import org.drx.evoleq.stub.Stub
 import org.drx.evoleq.stub.toFlow
@@ -46,6 +47,9 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
     id(FxComponentFlow::class)
     evolve{
         when(it) {
+            /**
+             * launching phase
+             */
             is FxComponentPhase.Launch<*,*> -> Parallel{
                 withTimeout(it.timeout){
                     val configuration = it.configuration.get() as FxComponentConfiguration<N,D>
@@ -57,10 +61,14 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                             fxChildren = it.fxChildren,
                             fxSpecials = it.fxSpecials,
                             fxRunTime =  it.fxRunTime as ArrayList<Parallel<N.()->Unit>>,
-                            stubActions = it.stubActions as ArrayList<Parallel<Stub<D>.() -> Unit>>
+                            stubActions = it.stubActions as ArrayList<Parallel<Stub<D>.() -> Unit>>,
+                            log = it.log
                     )
                 }
             }
+            /**
+             * PreConfiguration
+             */
             is FxComponentPhase.PreConfiguration<*,*> -> Parallel{
                 val id = try {
                     withTimeout(it.timeout) { it.id.get() }
@@ -82,8 +90,9 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                     it.fxRunTime.forEach{child -> child.job().cancel()}
                     it.stubActions.forEach{child -> child.job().cancel()}
                     it.view.job().cancel()
-                    FxComponentPhase.TerminationPhase.TerminateWithErrors(it.errors)
+                    FxComponentPhase.TerminationPhase.TerminateWithErrors(it.errors, it.log)
                 } else{
+                    it.log.add("$id")
                     FxComponentPhase.Configuration.Setup(
                             configuration = it.configuration as FxComponentConfiguration<N, D>,
                             id = id,
@@ -92,15 +101,21 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                             fxChildren = it.fxChildren,
                             fxSpecials = it.fxSpecials,
                             fxRunTime = it.fxRunTime as ArrayList<Parallel<N.() -> Unit>>,
-                            stubActions = it.stubActions as ArrayList<Parallel<Stub<D>.() -> Unit>>
+                            stubActions = it.stubActions as ArrayList<Parallel<Stub<D>.() -> Unit>>,
+                            log = it.log
                     )
                 }
             }
+            /**
+             * Configuration
+             */
             is FxComponentPhase.Configuration -> when(it) {
+                /**
+                 * Setup
+                 */
                 is FxComponentPhase.Configuration.Setup<*,*> ->Parallel{
                     withTimeout(it.timeout) {
-                        // only take children with stubs
-                        val fxChildren = arrayListOf(*it.fxChildren.map { c -> c.get() }.filter { child -> child.id != NoStub::class }.toTypedArray())
+                        val fxChildren = arrayListOf(*it.fxChildren.map { c -> c.get() }.toTypedArray()) //.filter { child -> child.id != NoStub::class }
                         val fxSpecials = arrayListOf(*it.fxSpecials.map { c -> c.get() }.toTypedArray())
                         FxComponentPhase.Configuration.AddFxChildren<N, D>(
                                 configuration = it.configuration as FxComponentConfiguration<N, D>,
@@ -110,15 +125,19 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                                 fxChildren = fxChildren,
                                 fxSpecials = fxSpecials,
                                 fxRunTime = it.fxRunTime as ArrayList<Parallel<N.() -> Unit>>,
-                                stubActions = it.stubActions as ArrayList<Parallel<Stub<D>.() -> Unit>>
+                                stubActions = it.stubActions as ArrayList<Parallel<Stub<D>.() -> Unit>>,
+                                log = it.log
                         )
                     }
                 }
+                /**
+                 * AddFxChildren
+                 */
                 is FxComponentPhase.Configuration.AddFxChildren<*,*> ->Parallel{
                     /* TODO Error management -> Termination*/
                     val stub = it.stub as Stub<D>
                     if(stub !is NoStub) {
-                        it.fxChildren.filter{child -> child !is NoStub<*> }.forEach { child ->
+                        it.fxChildren.filter{child -> child !is FxNoStubComponent<*, *> }.forEach { child ->
                             // forward all children of tunnels
                             if(child is FxTunnelComponent){
                                 child.stubs.forEach { t, u -> stub.stubs[t] = u }
@@ -127,7 +146,7 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                                 stub.stubs[child.id] = child
                             }
                         }
-                        it.fxSpecials.filter{child -> child !is NoStub<*> }.forEach { child ->
+                        it.fxSpecials.filter{child -> child !is FxNoStubComponent<*, *> }.forEach { child ->
                             // forward all children of tunnels
                             if(child is FxTunnelComponent){
                                 child.stubs.forEach { t, u -> stub.stubs[t] = u }
@@ -145,9 +164,13 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                             fxChildren = it.fxChildren,
                             fxSpecials = it.fxSpecials,
                             fxRunTime =  it.fxRunTime as ArrayList<Parallel<N.()->Unit>>,
-                            stubActions = it.stubActions as ArrayList<Parallel<Stub<D>.() -> Unit>>
+                            stubActions = it.stubActions as ArrayList<Parallel<Stub<D>.() -> Unit>>,
+                            log = it.log
                     )
                 }
+                /**
+                 * ExtendStub
+                 */
                 is FxComponentPhase.Configuration.ExtendStub<*,*> ->Parallel{
                     val actions = it.stubActions.map { action -> action.get() as Stub<D>.()->Unit }
                     val stub = it.stub as Stub<D>
@@ -165,7 +188,7 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                         it.errors.add( FxConfigurationException.IsNoStub(phase = it ,componentId =  it.id) )
                     }}
                     if(it.errors.isNotEmpty()) {
-                        FxComponentPhase.TerminationPhase.TerminateWithErrors(it.errors)
+                        FxComponentPhase.TerminationPhase.TerminateWithErrors(it.errors, it.log)
                     } else {
                         FxComponentPhase.Configuration.Configure<N, D>(
                                 configuration = it.configuration as FxComponentConfiguration<N, D>,
@@ -174,11 +197,16 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                                 view = it.view as Parallel<() -> N>,
                                 fxChildren = it.fxChildren,
                                 fxSpecials = it.fxSpecials,
-                                fxRunTime = it.fxRunTime as ArrayList<Parallel<N.() -> Unit>>
+                                fxRunTime = it.fxRunTime as ArrayList<Parallel<N.() -> Unit>>,
+                                log = it.log
                         )
                     }
                 }
+                /**
+                 * Configure
+                 */
                 is FxComponentPhase.Configuration.Configure<*, *> -> Parallel{
+                    // collect data
                     it.configuration.idConfiguration = it.id
                     (it.configuration as FxComponentConfiguration<N,D>).stubConfiguration = it.stub as Stub<D>
                     try{
@@ -188,8 +216,9 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                     } catch(exception : Exception) {
                         it.errors.add( FxConfigurationException.ViewNotSet(phase = it, componentId =it.id))
                     }
+                    // treat errors
                     if(it.errors.isNotEmpty() ) {
-                        FxComponentPhase.TerminationPhase.TerminateWithErrors(it.errors)
+                        FxComponentPhase.TerminationPhase.TerminateWithErrors(it.errors, it.log)
                     }
                     else {
                         val component = it.configuration.configure()
@@ -198,7 +227,9 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
 
                         FxComponentPhase.RunTimeConfiguration<N, D>(
                                 fxChildren = it.fxChildren,
-                                configuration = it.configuration
+                                configuration = it.configuration,
+                                fxRunTime = it.fxRunTime as ArrayList<Parallel<N.()->Unit>>,
+                                log = it.log
                         )
                     }
                 }
@@ -212,42 +243,68 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                 val component = configuration.component as FxComponent<N, D>
                 val fxChildren = it.fxChildren
 
-                val view: N = withTimeout(it.timeout) {
-                    Parallel<N> {
-                        while (configuration.fxRunTimeView == null) {
-                            kotlinx.coroutines.delay(1)
-                        }
-                        configuration.fxRunTimeView!!
-                    }.get()
-                }
-
-                /* TODO Error management -> Termination*/
-                if(view.isFxParent()) {
-                    fxChildren.forEach { child ->
-                        val childView = child.show()
-                        when(childView) {
-                            is Node ->  when (view) {
-                                is Group -> (view as Group).children.add(childView)
-                                is Pane -> (view as Pane).children.add(childView)
-                                is Parent -> try{
-                                    val children = (view as Parent)::class.java.getMethod("getChildren")
-                                    (children.invoke(view) as ObservableList<Node>).add(childView)
-                                } catch(exception: Exception) { it.errors.add( exception )}
+                // wait for fxRuntimeView
+                // fxRuntimeView is set when the show-function of the component is called
+                var view: N? = null
+                try{
+                     view = withTimeout(it.timeout) {
+                        Parallel<N> {
+                            while (configuration.fxRunTimeView == null) {
+                                kotlinx.coroutines.delay(1)
                             }
+                            configuration.fxRunTimeView!!
+                        }.get()
+                    }
+                } catch(exception: Exception){
+                    it.errors.add(FxConfigurationException.RunTimeViewTimeout(componentId = component.id, component = component))
+                    it.errors.add(exception)
+
+                }
+                if(it.errors.isNotEmpty()){
+                    FxComponentPhase.TerminationPhase.TerminateWithErrors(it.errors, it.log)
+                }
+                else {
+                    // setup fxRuntime
+                    val fxRunTime = object : FxRunTime<N, D>() {
+                        override val phase: FxComponentPhase.RunTimePhase<N, D>
+                            get() = FxComponentPhase.RunTimePhase.RunTime(this, it.log)
+                        override val view: N
+                            get() = view!!
+                        override val component: FxComponent<N, D>
+                            get() = component
+
+                    }
+
+                    // add children
+                    if (view!!.isFxParent()) {
+                        fxRunTime.fxRunTime {
+                            fxChildren.forEach { child ->
+                                // call child.show()
+                                // This also sets the runTimeView of the child and
+                                // hence the child-configuration enters the runtime-phase
+                                val childView = child.show()
+                                when (childView) {
+                                    is Node -> when (view!!) {
+                                        is Group -> (view!! as Group).children.add(childView)
+                                        is Pane -> (view!! as Pane).children.add(childView)
+                                        is Parent -> try {
+                                            val children = (view!! as Parent)::class.java.getMethod("getChildren")
+                                            (children.invoke(this) as ObservableList<Node>).add(childView)
+                                        } catch (exception: Exception) {
+                                            it.errors.add(exception)
+                                        }
+                                    }
+                                }
+                            }
+
                         }
                     }
+                    // set handleRequests time variable of configuration
+                    // -
+                    configuration.fxRunTime = fxRunTime
+                    //}
+                    FxComponentPhase.RunTimePhase.RunTime(fxRunTime, it.log)
                 }
-                val fxRunTime = object : FxRunTime<N, D>() {
-                    override val phase: FxComponentPhase.RunTimePhase<N, D>
-                        get() = FxComponentPhase.RunTimePhase.RunTime<N,D>(this)
-                    override val view: N
-                        get() = view
-                    override val component: FxComponent<N, D>
-                        get() = component
-
-                }
-                configuration.fxRunTime = fxRunTime
-                FxComponentPhase.RunTimePhase.RunTime( fxRunTime )
             }
             is FxComponentPhase.RunTimePhase.RunTime<*,*> -> {
                 /* TODO Error management -> Termination*/
@@ -266,14 +323,17 @@ fun<N,D> fxComponentStub(): Stub<FxComponentPhase> = stub{
                 runTimeFlow.evolve(it as FxComponentPhase.RunTimePhase.RunTime<N,D>)
             }
             is FxComponentPhase.RunTimePhase.ShutDown<*, *> ->Parallel{
-                FxComponentPhase.TerminationPhase.Terminate()
+                FxComponentPhase.TerminationPhase.Terminate(log = it.log)
             }
             is FxComponentPhase.TerminationPhase.TerminateWithErrors -> Immediate{
-                Parallel<Unit>{ it.errors.forEach { error -> println( error )  }}
-                FxComponentPhase.TerminationPhase.Terminate()
+                Parallel<Unit>{
+                    it.log.forEach { println(it) }
+                    it.errors.forEach { error -> println( error )
+                }}
+                FxComponentPhase.TerminationPhase.Terminate(log = it.log)
             }
             is FxComponentPhase.TerminationPhase.Terminate -> Immediate{
-                FxComponentPhase.TerminationPhase.Terminate()
+                FxComponentPhase.TerminationPhase.Terminate(log = it.log)
             }
         }
     }

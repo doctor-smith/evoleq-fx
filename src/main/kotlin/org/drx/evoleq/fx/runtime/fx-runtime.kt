@@ -19,6 +19,7 @@ import kotlinx.coroutines.delay
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.evolving.ParallelFx
+import org.drx.evoleq.fx.exception.FxConfigurationException
 import org.drx.evoleq.fx.phase.FxComponentPhase
 
 abstract class  FxRunTime<N , D> {
@@ -37,27 +38,26 @@ abstract class  FxRunTime<N , D> {
             delay(1)
         }
 
-        try {
-            while(actions.isNotEmpty() &&!shutdown) {
+        try { ParallelFx<Unit> {
+            while(actions.isNotEmpty() && !shutdown) {
                 val action = actions.first()
                 actions.removeAt(0)
-                ParallelFx<Unit> {
-                    view.action()
-                }.get()
-            }
+                view.action()
+            }}.get()
         } catch (exception: Exception) {
-            shutdown = true
+            val n: Any = view!!
+            phase.errors.add(FxConfigurationException.FxRunTime(component.id, this@FxRunTime, n::class,  exception))
             phase.errors.add(exception)
+            shutdown = true
         }
         if(shutdown){
-            nextPhase = FxComponentPhase.RunTimePhase.ShutDown()
+            nextPhase = FxComponentPhase.RunTimePhase.ShutDown(phase.log)
             nextPhase.errors.addAll( phase.errors )
         }
         nextPhase
     }
-    fun fxRunTime(action: N.() -> Unit) = Parallel<Unit>{
+    fun fxRunTime(action: N.() -> Unit) {
         actions.add(action)
-
     }
     fun shutdown() = Parallel<Unit>{
         val action:N.()->Unit = {shutdown = true}

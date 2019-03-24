@@ -15,41 +15,48 @@
  */
 package org.drx.evoleq.fx.application
 
+import javafx.application.Platform
 import javafx.scene.Node
 import javafx.scene.Scene
 import javafx.stage.Stage
+import kotlinx.coroutines.delay
+import org.drx.evoleq.evolving.Evolving
+import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.dsl.ID
-import org.drx.evoleq.fx.runtime.FxRunTime
-import kotlin.reflect.KClass
-
+import org.drx.evoleq.fx.evolving.ParallelFx
+import java.lang.Thread.sleep
 
 abstract class SimpleAppManager<D> : AppManager<D>() {
 
-    protected val stages: HashMap<KClass<*>, Stage> by lazy {
-        HashMap<KClass<*>, Stage>()
+    protected val stages: HashMap<ID, Stage> by lazy {
+        HashMap<ID, Stage>()
     }
-    protected val stageComponents: HashMap<KClass<*>, FxComponent<Stage, *>> by lazy {
-        HashMap<KClass<*>, FxComponent<Stage,*>>()
+    protected val stageComponents: HashMap<ID, ()->FxComponent<Stage, *>> by lazy {
+        HashMap<ID, ()->FxComponent<Stage,*>>()
     }
-    protected val sceneComponents: HashMap<KClass<*>, FxComponent<Scene, *>> by lazy {
-        HashMap<KClass<*>, FxComponent<Scene, *>>()
+    protected val sceneComponents: HashMap<ID, ()->FxComponent<Scene, *>> by lazy {
+        HashMap<ID, ()->FxComponent<Scene, *>>()
     }
-    protected val nodeComponents: HashMap<KClass<*>, FxComponent<Node, *>> by lazy {
-        HashMap<KClass<*>, FxComponent<Node, *>>()
-    }
-
-    protected open fun showStage(id : KClass<*>) {
-        val stage = stageComponents[id]!!.show()
-        stages[id] = stage
-        showStage(stage)
+    protected val nodeComponents: HashMap<ID, ()->FxComponent<Node, *>> by lazy {
+        HashMap<ID, ()->FxComponent<Node, *>>()
     }
 
-    protected open fun hideStage(id: KClass<*>) {
-        val stage = stages[id]
-        if(stage != null){
-            stages.remove(id)
-            hideStage(stage)
+    protected open fun showStage(id : ID): Evolving<FxComponent<Stage, *>> = ParallelFx<FxComponent<Stage, *>> {
+            val component = stageComponents[id]!!()
+            val stage = component.show()
+            stages[id] = stage
+            showStage(stage)
+            component
         }
-    }
+
+    protected open fun hideStage(id: ID) =
+        ParallelFx<Unit> {
+            val stage = stages[id]
+            if (stage != null) {
+                stages.remove(id)
+                hideStage(stage)
+            }
+        }
+
 }

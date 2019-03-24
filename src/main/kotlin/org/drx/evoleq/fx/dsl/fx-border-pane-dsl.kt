@@ -16,17 +16,18 @@
 package org.drx.evoleq.fx.dsl
 
 import javafx.scene.Node
+import javafx.scene.Scene
 import javafx.scene.layout.BorderPane
 import org.drx.evoleq.fx.component.FxComponent
 
 /**
  * BorderPane
  */
-
-fun <D> FxComponentConfiguration<out Node, *>.fxBorderPane(configuration: FxComponentConfiguration<BorderPane,D>.()->Unit): FxComponent<BorderPane, D> {
+@Suppress("unused")
+fun <D> FxComponentConfiguration<out Any, *>.fxBorderPane(configuration: FxComponentConfiguration<BorderPane,D>.()->Unit): FxComponent<BorderPane, D> {
     return fxComponent(configuration)
 }
-fun <D> Any?.fxBorderPane(configuration: FxComponentConfiguration<BorderPane,D>.()->Unit): FxComponent<BorderPane, D> {
+fun <D> fxBorderPane(configuration: FxComponentConfiguration<BorderPane,D>.()->Unit): FxComponent<BorderPane, D> {
     return fxComponent(configuration)
 }
 fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.top(component: FxComponent<C, D>)  {

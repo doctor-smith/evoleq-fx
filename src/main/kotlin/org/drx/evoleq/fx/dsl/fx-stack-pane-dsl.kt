@@ -21,6 +21,11 @@ import org.drx.evoleq.fx.component.FxComponent
 /**
  * StackPane
  */
-fun <D> Any?.fxStackPane(configuration: FxComponentConfiguration<StackPane, D>.()->Unit): FxComponent<StackPane, D> {
+@Suppress("unused")
+fun <D> FxComponentConfiguration<out Any, *>.fxStackPane(configuration: FxComponentConfiguration<StackPane, D>.()->Unit): FxComponent<StackPane, D> {
+    return fxComponent(configuration)
+}
+
+fun <D> fxStackPane(configuration: FxComponentConfiguration<StackPane, D>.()->Unit): FxComponent<StackPane, D> {
     return fxComponent(configuration)
 }

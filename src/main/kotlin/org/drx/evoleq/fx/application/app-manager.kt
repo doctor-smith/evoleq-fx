@@ -25,6 +25,7 @@ import org.drx.evoleq.dsl.StubConfiguration
 import org.drx.evoleq.dsl.configure
 import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.evolving.Parallel
+import org.drx.evoleq.fx.dsl.ID
 import org.drx.evoleq.stub.Stub
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
@@ -47,7 +48,7 @@ abstract class AppManager<D> : Application(), Configuration<Stub<D>> {
         private lateinit var STUB: Stub<*>
         private var TOOLKIT_INITIALIZED: Boolean = false
         //private var STUB_INITIALIZED = false
-        protected val REGISTRY: HashMap<KClass<*>, Stub<*>> by lazy { HashMap<KClass<*>, Stub<*>>() }
+        protected val REGISTRY: HashMap<ID, Stub<*>> by lazy { HashMap<ID, Stub<*>>() }
         var CALLED = -1
 
         fun waitingForToolkit(): Boolean = !TOOLKIT_INITIALIZED
@@ -64,7 +65,7 @@ abstract class AppManager<D> : Application(), Configuration<Stub<D>> {
             var STUB_INITIALIZED = false
 
             // eventually launch app
-            if( waitingForToolkit()) {
+            if( waitingForToolkit() ) {
                 scope.launch {
                     coroutineScope {
                         launch(app::class.java)
@@ -95,11 +96,10 @@ abstract class AppManager<D> : Application(), Configuration<Stub<D>> {
         }
 
         @Suppress("UNCHECKED_CAST")
-        fun <E> appStub(id: KClass<*>): Stub<E>? = REGISTRY[id] as Stub<E>?
+        fun <E> appStub(id: ID): Stub<E>? = REGISTRY[id] as Stub<E>?
 
         fun appStubs() = REGISTRY.values
     }
-
 
     /******************************************************
      *

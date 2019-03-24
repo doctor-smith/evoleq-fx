@@ -55,7 +55,7 @@ class ComponentTest {
     }
 
 
-    @Test
+    //@Test
     fun component() = runBlocking  {
         class Data(val message: String = "", val passedStates: ArrayList<String> = arrayListOf<String>())
 
@@ -163,7 +163,7 @@ class ComponentTest {
     }
 
 
-    @Test
+    //@Test
     fun parentComponent() = runBlocking {
         val x = fxPane<VBox, Unit> {
 
@@ -224,7 +224,7 @@ class ComponentTest {
     }
 
 
-    @Test
+    //@Test
     fun sceneComponent() = runBlocking {
         val sceneComponent = fxScene<VBox, Unit> {
             configure { }
@@ -268,7 +268,7 @@ class ComponentTest {
 
     }
 
-    @Test
+    //@Test
     fun stageComponent() = runBlocking {
 
         val stageComponent = fxStage<Unit> {
@@ -314,7 +314,8 @@ class ComponentTest {
         delay(2_000)
     }
 
-    @Test fun showStageTwice() = runBlocking {
+    //@Test
+    fun showStageTwice() = runBlocking {
         val stage = fxStage<Nothing> {
             configure { initStyle(StageStyle.UNDECORATED) }
             scene(fxScene<Pane, Nothing> {
@@ -364,7 +365,8 @@ class ComponentTest {
 
     }
 
-    @Test fun fxBorderPane() = runBlocking {
+    //@Test
+    fun fxBorderPane() = runBlocking {
 
         val stageComponent = fxStage<Unit> {
             configure {
@@ -411,7 +413,7 @@ class ComponentTest {
     }
 
 
-    @Test
+    //@Test
     fun parentChildRelations() = runBlocking {
         // button to be clicked by FxRobot
         var button: Button? = null
@@ -595,7 +597,7 @@ class ComponentTest {
         //delay(10_000)
     }
 
-    @Test
+    //@Test
     fun anchorPaneComponent() = runBlocking {
         val stageComponent = fxStage<Nothing> {
             scene(fxScene<AnchorPane, Nothing> {
@@ -636,7 +638,8 @@ class ComponentTest {
 
     }
 
-    @Test fun runTime() = runBlocking {
+    //@Test
+    fun runTime() = runBlocking {
         class Data
         val stageComponent = fxStage<Data> {
             scene(fxScene<VBox, Data> {

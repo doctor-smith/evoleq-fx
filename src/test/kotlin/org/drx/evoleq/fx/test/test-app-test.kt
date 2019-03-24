@@ -18,11 +18,10 @@ package org.drx.evoleq.fx.test
 import javafx.scene.layout.StackPane
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.fx.application.BgAppManager
-import org.drx.evoleq.fx.dsl.deprecated.fxPane
-import org.drx.evoleq.fx.dsl.deprecated.fxScene
-import org.drx.evoleq.fx.dsl.deprecated.fxStage
+import org.drx.evoleq.fx.dsl.*
 import org.drx.evoleq.fx.test.deprecated.showTestStage
 import org.junit.Before
 import org.testfx.api.FxToolkit
@@ -38,19 +37,51 @@ class TestAppTest{
     @Test fun testApp() = runBlocking{
 
         val stageComponent = fxStage<Boolean> {
-            scene(fxScene<StackPane, Boolean> {
-                root(fxPane {
-                    view { node<StackPane>() }
+            id<StageId>()
+            view{configure{}}
+            scene(fxScene {
+
+                root(fxStackPane {
+                    view { configure{} }
+                    noStub()
                 })
+                noStub()
             })
-            stub {
+            stub(stub {
                 evolve { b ->
                     Immediate { !b }
                 }
-            }
+            })
         }
 
         val stub = showTestStage(stageComponent).get()
+        assert(stub.evolve(false).get())
+        assert(stageComponent.evolve(false ).get())
+        delay(1_000)
+    }
+
+    @Test fun testApp2() = runBlocking{
+
+        val stageComponent = fxStage<Boolean> {
+            id<StageId>()
+            view{configure{}}
+            scene(fxScene {
+                noStub()
+                root(fxStackPane {
+                    noStub()
+                    view { configure{} }
+
+                })
+
+            })
+            stub(stub {
+                evolve { b ->
+                    Immediate { !b }
+                }
+            })
+        }
+
+        val stub = launchTestStage(stageComponent).get()
         assert(stub.evolve(false).get())
         assert(stageComponent.evolve(false ).get())
         delay(1_000)

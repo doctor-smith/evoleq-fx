@@ -20,8 +20,12 @@ import javafx.scene.Scene
 import javafx.stage.Stage
 import org.drx.evoleq.fx.component.FxComponent
 
-
+@Suppress("unused")
 fun <D> FxComponentConfiguration<Stage, D>.fxScene(configuration: FxComponentConfiguration<Scene, D>.()->Unit): FxComponent<Scene, D> {
+    return fxComponent(configuration)
+}
+
+fun <D> fxScene(configuration: FxComponentConfiguration<Scene, D>.()->Unit): FxComponent<Scene, D> {
     return fxComponent(configuration)
 }
 

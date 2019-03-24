@@ -24,7 +24,15 @@ import java.lang.Exception
 /**
  * Button
  */
-fun <D> Any?.fxButton(configuration: FxComponentConfiguration<Button, D>.()->Unit): FxComponent<Button, D> = fxComponent(configuration)
+@Suppress("unused")
+fun <D> FxComponentConfiguration<out Any, D>.fxButton(configuration: FxComponentConfiguration<Button, D>.()->Unit): FxComponent<Button, D> {
+    return  fxComponent(configuration)
+}
+
+
+fun <D> fxButton(configuration: FxComponentConfiguration<Button, D>.()->Unit): FxComponent<Button, D> {
+    return fxComponent(configuration)
+}
 
 fun <B : ButtonBase> B.action(action: ActionEvent.()->Unit): B {
     this.setOnAction{

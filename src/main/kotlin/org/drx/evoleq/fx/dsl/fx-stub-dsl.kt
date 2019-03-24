@@ -29,15 +29,15 @@ open class FxStubConfiguration<D> : StubConfiguration<D>() {
         val stub = super.configure()
 
         val fxStub = object: FxStub<D>() {
-            override val id: KClass<*>
+            override val id: ID
                 get() = stub.id
-            override val stubs: HashMap<KClass<*>, Stub<*>>
+            override val stubs: HashMap<ID, Stub<*>>
                 get() = stub.stubs
-            override val parentalStubsMap: HashMap<KClass<*>, KClass<*>>
+            override val parentalStubsMap: HashMap<ID, ID>
                 get() = this@FxStubConfiguration.parentalStubsMap
-            override val crossChildAccessMap: HashMap<KClass<*>, ArrayList<KClass<*>>>
+            override val crossChildAccessMap: HashMap<ID, ArrayList<ID>>
                 get() = this@FxStubConfiguration.crossChildAccessMap
-            override val parentalStubs: HashMap<KClass<*>, Stub<*>>
+            override val parentalStubs: HashMap<ID, Stub<*>>
                 get() = this@FxStubConfiguration.parentalStubs
         }
         return fxStub

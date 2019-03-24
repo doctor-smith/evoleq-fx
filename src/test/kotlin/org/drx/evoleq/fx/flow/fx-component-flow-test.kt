@@ -20,6 +20,8 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.Node
 import javafx.scene.Scene
 import javafx.scene.control.Button
+import javafx.scene.control.Label
+import javafx.scene.text.Text
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.drx.evoleq.dsl.stub
@@ -62,25 +64,23 @@ class FxComponentFlowTest {
                 //id<SceneId>()
                 //stylesheet(style1)
                 root(fxAnchorPane{
-                    id<RootId>()
+                    //id<RootId>()
                     view{ configure{} }
                     tunnel()
 
-                    child(fxButton<Int> {
+                    child(fxButton<Int>{
                         id<Button>()
                         view{
                             configure{
                                 text = "text"
                                 leftAnchor(20)
                                 bottomAnchor(10)
-                            }.
-                            style(
-                                """-fx-color: green;"""
+                            }.style(
+                                    """-fx-color: green;"""
                             )
                         }
                         stub(org.drx.evoleq.dsl.stub {
-                            evolve{
-                                x -> Immediate{x+1}
+                            evolve{ x -> Immediate{x+1}
                             }
                         })
                     })
@@ -157,4 +157,57 @@ class FxComponentFlowTest {
 
     }
 
+
+    @Test fun tunnelsAndNoStubs() = runBlocking{
+        val stageComponent = fxStage<Unit> {
+            id<StageId>()
+            view{configure{}}
+            stub(stub{})
+
+            scene(fxScene{
+                tunnel()
+                root(fxPane{
+                    tunnel()
+                    view{configure{}}
+
+                    child(fxButton{
+                        id<Button>()
+                        view{configure{text = "Button"}}
+                        stub(stub{})
+                    })
+                    child(fxButton{
+                        noStub()
+                        view{configure{}}
+                    })
+                    child(fxVBox<Nothing>{
+                        tunnel()
+                        view{configure{}}
+                        child(fxLabel<Nothing> {
+                            id<Label>()
+                            view{configure{}}
+                            stub(stub{})
+                        })
+                        child(fxVBox<Nothing>{
+                            noStub()
+                            view{configure{}}
+                            // this child shall not appear as a sub-stub of the fx-stage-component
+                            child(fxText<Nothing> {
+                                id<Text>()
+                                view{configure{}}
+                                stub(stub{})
+                            })
+                        })
+                    })
+                })
+            })
+
+            stubAction{
+                stubs[Button::class]!!
+                stubs[Label::class]!!
+            }
+        }
+
+        assert(stageComponent.stubs.size ==2)
+
+    }
 }

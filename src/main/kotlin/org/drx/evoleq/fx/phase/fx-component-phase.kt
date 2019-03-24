@@ -24,9 +24,9 @@ import org.drx.evoleq.fx.dsl.ID
 import org.drx.evoleq.fx.runtime.FxRunTime
 import org.drx.evoleq.stub.Stub
 
-const val  FX_COMPONENT_PHASE_TIMEOUT: Long = 1_000
-sealed class FxComponentPhase(open val errors: ArrayList<Exception> = arrayListOf()) : Phase {
-    val defaultTimeout: Long = 100
+const val  FX_COMPONENT_PHASE_TIMEOUT: Long = 5_000
+sealed class FxComponentPhase(open val log: ArrayList<String> = arrayListOf(),open val errors: ArrayList<Exception> = arrayListOf()) : Phase {
+    val defaultTimeout: Long = FX_COMPONENT_PHASE_TIMEOUT
     /**
      * To be called when the component-configuration class is initialized
      */
@@ -67,12 +67,18 @@ sealed class FxComponentPhase(open val errors: ArrayList<Exception> = arrayListO
             /**
              * Actions to be performed on the stub
              */
-            val stubActions: ArrayList<Parallel<Stub<Data>.()->Unit>> = arrayListOf()
+            val stubActions: ArrayList<Parallel<Stub<Data>.()->Unit>> = arrayListOf(),
+            /**
+             * log
+             */
+            override val log: ArrayList<String> = arrayListOf()
 
-    ) : FxComponentPhase()
+    ) : FxComponentPhase(log = log)
 
     /**
      * Collect all data defined before the configure-function is called
+     *
+     * Within this phase, the id and the stub will be set
      */
     data class PreConfiguration<N, Data>(
             /**
@@ -111,11 +117,21 @@ sealed class FxComponentPhase(open val errors: ArrayList<Exception> = arrayListO
             /**
              * Actions to be performed on the stub
              */
-            val stubActions: ArrayList<Parallel<Stub<Data>.()->Unit>>
+            val stubActions: ArrayList<Parallel<Stub<Data>.()->Unit>>,
+            /**
+             * log
+             */
+            override val log: ArrayList<String> = arrayListOf()
 
-    ) : FxComponentPhase(), ConfigurationPhase
+    ) : FxComponentPhase(log = log), ConfigurationPhase
 
-    sealed class Configuration: FxComponentPhase(), ConfigurationPhase {
+    /**
+     * Configure the component
+     */
+    sealed class Configuration(override val log: ArrayList<String>): FxComponentPhase(log = log), ConfigurationPhase {
+        /**
+         * Collect fxChildren and fxSpecials
+         */
         data class Setup<N, Data>(
                 /**
                  * After this time the phase will terminate
@@ -153,8 +169,16 @@ sealed class FxComponentPhase(open val errors: ArrayList<Exception> = arrayListO
                 /**
                  * Actions to be performed on the stub
                  */
-                val stubActions: ArrayList<Parallel<Stub<Data>.()->Unit>>
-        ) : Configuration()
+                val stubActions: ArrayList<Parallel<Stub<Data>.()->Unit>>,
+                /**
+                 * log
+                 */
+                override val log: ArrayList<String> = arrayListOf()
+        ) : Configuration(log = log)
+
+        /**
+         * Add FxChildren and FxStubs as stubs to its parent
+         */
         data class AddFxChildren<N,Data>(
                 /**
                  * After this time the phase will terminate
@@ -192,8 +216,16 @@ sealed class FxComponentPhase(open val errors: ArrayList<Exception> = arrayListO
                 /**
                  * Actions to be performed on the stub
                  */
-                val stubActions: ArrayList<Parallel<Stub<Data>.()->Unit>>
-        ) : Configuration()
+                val stubActions: ArrayList<Parallel<Stub<Data>.()->Unit>>,
+                /**
+                 * log
+                 */
+                override val log: ArrayList<String> = arrayListOf()
+        ) : Configuration(log = log)
+
+        /**
+         * Apply the stubActions
+         */
         data class ExtendStub<N,Data>(
                 /**
                  * After this time the phase will terminate
@@ -231,8 +263,16 @@ sealed class FxComponentPhase(open val errors: ArrayList<Exception> = arrayListO
                 /**
                  * Actions to be performed on the stub
                  */
-                val stubActions: ArrayList<Parallel<Stub<Data>.()->Unit>>
-        ): Configuration()
+                val stubActions: ArrayList<Parallel<Stub<Data>.()->Unit>>,
+                /**
+                 * log
+                 */
+                override val log: ArrayList<String> = arrayListOf()
+        ): Configuration(log = log)
+
+        /**
+         * Set id, stub and view of the underlying configuration and call the configure-method within this phase
+         */
         data class Configure<N,Data>(
                 /**
                  * After this time the phase will terminate
@@ -266,8 +306,12 @@ sealed class FxComponentPhase(open val errors: ArrayList<Exception> = arrayListO
                 /**
                  * fxRunTime-actions
                  */
-                val fxRunTime: ArrayList<Parallel<N.()->Unit>>
-        ): Configuration()
+                val fxRunTime: ArrayList<Parallel<N.()->Unit>>,
+                /**
+                 * log
+                 */
+                override val log: ArrayList<String> = arrayListOf()
+        ): Configuration(log = log)
     }
 
     /**
@@ -279,20 +323,30 @@ sealed class FxComponentPhase(open val errors: ArrayList<Exception> = arrayListO
              * Children defined via child-function in sub-views
              */
             val fxChildren: ArrayList<FxComponent<*, *>>,
-            /* TODO think about managing parent-child-relations between fx-run-times within this phase. This would require the components to know their FxRunTime */
-            val configuration: FxComponentConfiguration<N, D>
-    ) : FxComponentPhase(), ConfigurationPhase
+            /* TODO think about managing parent-child-relations between fx-handleRequests-times within this phase. This would require the components to know their FxRunTime */
+            val configuration: FxComponentConfiguration<N, D>,
+            /**
+             * fxRunTime-actions
+             */
+            val fxRunTime: ArrayList<Parallel<N.()->Unit>>,
+            /**
+             * log
+             */
+            override val log: ArrayList<String> = arrayListOf()
+    ) : FxComponentPhase(log = log), ConfigurationPhase
 
-    sealed class RunTimePhase<N, D> : FxComponentPhase() {
+    sealed class RunTimePhase<N, D>(override val log: ArrayList<String>) : FxComponentPhase(log = log) {
+
+
         /**
          * Execute blocks declared using the fxRunTime-function
          */
-        data class RunTime<N, D>(val fxRunTime: FxRunTime<N, D>) : RunTimePhase<N, D>()
-        class ShutDown<N, D> : RunTimePhase<N, D>()
+        data class RunTime<N, D>(val fxRunTime: FxRunTime<N, D>, override val log: ArrayList<String>) : RunTimePhase<N, D>(log = log)
+        class ShutDown<N, D>(override val log: ArrayList<String>) : RunTimePhase<N, D>(log = log)
     }
 
-    sealed class TerminationPhase : FxComponentPhase() {
-        class TerminateWithErrors(override val errors: ArrayList<Exception>) : FxComponentPhase(errors)
-        class Terminate : FxComponentPhase()
+    sealed class TerminationPhase(override val log: ArrayList<String>) : FxComponentPhase(log = log) {
+        class TerminateWithErrors(override val errors: ArrayList<Exception>, override val log: ArrayList<String>) : FxComponentPhase(errors = errors, log = log)
+        class Terminate(override val log: ArrayList<String>) : FxComponentPhase(log = log)
     }
 }

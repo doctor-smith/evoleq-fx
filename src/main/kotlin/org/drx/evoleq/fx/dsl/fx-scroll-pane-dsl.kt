@@ -23,7 +23,12 @@ import org.drx.evoleq.fx.component.FxComponent
 /**
  * ScrollPane
  */
-fun <D> Any?.fxScrollPane(configuration: FxComponentConfiguration<ScrollPane, D>.()->Unit): FxComponent<ScrollPane, D> {
+@Suppress("unused")
+fun <D> FxComponentConfiguration<out Any, *>.fxScrollPane(configuration: FxComponentConfiguration<ScrollPane, D>.()->Unit): FxComponent<ScrollPane, D> {
+    return fxComponent(configuration)
+}
+
+fun <D> fxScrollPane(configuration: FxComponentConfiguration<ScrollPane, D>.()->Unit): FxComponent<ScrollPane, D> {
     return fxComponent(configuration)
 }
 fun <C : Node, D> FxComponentConfiguration<ScrollPane, D>.content(component: FxComponent<C, D>)  {

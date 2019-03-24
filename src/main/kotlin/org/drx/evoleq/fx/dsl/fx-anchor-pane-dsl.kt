@@ -16,13 +16,20 @@
 package org.drx.evoleq.fx.dsl
 
 import javafx.scene.Node
+import javafx.scene.Parent
+import javafx.scene.Scene
 import javafx.scene.layout.AnchorPane
 import org.drx.evoleq.fx.component.FxComponent
 
 /**
  * AnchorPane
  */
-fun <D> Any?.fxAnchorPane(configuration: FxComponentConfiguration<AnchorPane, D>.()->Unit): FxComponent<AnchorPane, D> {
+@Suppress("unused")
+fun <D> FxComponentConfiguration<out Any, *>.fxAnchorPane(configuration: FxComponentConfiguration<AnchorPane, D>.()->Unit): FxComponent<AnchorPane, D> {
+    return fxComponent(configuration)
+}
+
+fun <D> fxAnchorPane(configuration: FxComponentConfiguration<AnchorPane, D>.()->Unit): FxComponent<AnchorPane, D> {
     return fxComponent(configuration)
 }
 fun Node.leftAnchor(anchor: Number) {
