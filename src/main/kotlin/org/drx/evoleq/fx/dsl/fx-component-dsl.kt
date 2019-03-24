@@ -139,6 +139,21 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
     }
 
     /**
+     * Take next  Id
+     */
+    @Suppress("unused")
+    fun  FxComponentConfiguration<N, D>.nextId() {
+        val id = SimpleObjectProperty<ID>(PreId::class)
+        idProvider.add(id)
+        Parallel<Unit> {
+            while(id.value == PreId::class) {
+                delay(1)
+            }
+            launcher.id = id.get()
+        }
+    }
+
+    /**
      * Configure stub
      */
     @Suppress("unused")
