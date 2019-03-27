@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.evoleq.fx.component
+package org.drx.evoleq.fx.dsl
 
 import javafx.scene.Scene
 import javafx.scene.control.Button
@@ -22,11 +22,8 @@ import javafx.stage.Stage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.drx.evoleq.fx.application.BgAppManager
-import org.drx.evoleq.fx.dsl.*
-import org.drx.evoleq.fx.dsl.deprecated.SceneStubKey
 import org.drx.evoleq.fx.dsl.deprecated.StageStubKey
 import org.drx.evoleq.fx.test.showTestStage
-import org.drx.evoleq.stub.Key1
 import org.drx.evoleq.stub.Key2
 import org.junit.Before
 import org.junit.Test

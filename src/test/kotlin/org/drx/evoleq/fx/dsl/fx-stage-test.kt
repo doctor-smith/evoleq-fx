@@ -13,17 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.evoleq.fx.component
+package org.drx.evoleq.fx.dsl
 
 import javafx.scene.Scene
 import javafx.stage.Stage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.fx.application.BgAppManager
-import org.drx.evoleq.fx.dsl.*
+import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.test.launchTestStage
-import org.drx.evoleq.fx.test.showTestStage
 import org.junit.Before
 import org.junit.Test
 import org.testfx.api.FxToolkit
