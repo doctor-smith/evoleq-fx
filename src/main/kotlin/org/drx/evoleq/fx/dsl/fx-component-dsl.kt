@@ -22,6 +22,7 @@ import javafx.scene.Parent
 import javafx.scene.layout.*
 import kotlinx.coroutines.delay
 import org.drx.evoleq.dsl.Configuration
+import org.drx.evoleq.dsl.HashMapConfiguration
 import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.application.IdProvider
@@ -61,7 +62,9 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
 
     var fxRunTimeView: N? = null
 
-    val idProvider = IdProvider()
+    private val idProvider = IdProvider()
+
+    private val properties: HashMap<String, Any?> by lazy { HashMap<String, Any?>() }
 
     init{
         idProvider.run()
@@ -213,7 +216,7 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
     }
 
     /**
-     * Add an fx-specia component
+     * Add an fx-special component
      */
     @Suppress("unused")
     fun <M,E> FxComponentConfiguration<N, D>.fxSpecial(child: FxComponent<M, E>) {
@@ -255,14 +258,36 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
         }
         fxRunTime!!.shutdown()
     }
+
+    /**
+     * Add a property
+     */
+    @Suppress("unused")
+    fun <E> FxComponentConfiguration<N, D>.property(name: String,prop: FxComponentConfiguration<N,D>.()->E) {
+        properties[name] = prop()
+    }
+
+    /**
+     * Add properties
+     */
+    @Suppress("unused")
+    fun FxComponentConfiguration<N, D>.properties(properties: HashMapConfiguration<String, Any?>.()->Unit) {
+        this@FxComponentConfiguration.properties.putAll(org.drx.evoleq.dsl.configure(properties))
+    }
+
+    /**
+     * Get property
+     */
+    @Suppress("unused")
+    fun <E> FxComponentConfiguration<N, D>.property(name: String): E = properties[name] as E
+
+
 }
 
 /**
  * Configure an FxComponent
  */
 @Suppress("unused")
-//fun<N,D> FxComponentConfiguration<out Any, *>.fxComponent(configuration: FxComponentConfiguration<N,D>.()->Unit): FxComponent<N, D> = fxComponent(configuration)
-
 fun <N,D> fxComponent(configuration: FxComponentConfiguration<N,D>.()->Unit): FxComponent<N, D> {
     val conf = (object : FxComponentConfiguration<N, D>(){})
 
