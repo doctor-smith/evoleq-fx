@@ -102,6 +102,6 @@ class ComponentOneTest {
 
         val stub = showTestStage(stageComponent).get()
 
-        delay(10_000)
+        delay(1_000)
     }
 }

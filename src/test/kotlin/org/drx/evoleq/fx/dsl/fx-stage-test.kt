@@ -37,7 +37,7 @@ class FxStageTest{
     @Test fun fxStage() = runBlocking {
         val stub = launchTestStage(testStageConfig()).get()
 
-        delay (10_000)
+        delay (1_000)
     }
 
     fun testStageConfig(): FxComponent<Stage, Nothing> = fxStage{

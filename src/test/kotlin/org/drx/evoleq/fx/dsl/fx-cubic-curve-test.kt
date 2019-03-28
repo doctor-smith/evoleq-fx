@@ -55,6 +55,6 @@ class FxCubicCurveTest {
             child(curve)
         }
         val stub = showInTestStage(pane).get()
-        delay(10_000)
+        delay(1_000)
     }
 }

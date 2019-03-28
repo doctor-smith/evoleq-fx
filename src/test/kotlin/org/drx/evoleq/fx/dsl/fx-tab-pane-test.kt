@@ -84,6 +84,6 @@ class TabPaneTest {
 
         val stub = showTestStage(stageComponent).get()
 
-        delay(5_000)
+        delay(1_000)
     }
 }
