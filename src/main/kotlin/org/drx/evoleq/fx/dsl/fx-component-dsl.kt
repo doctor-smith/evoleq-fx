@@ -21,6 +21,7 @@ import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.layout.*
 import kotlinx.coroutines.delay
+import org.drx.evoleq.dsl.ArrayListConfiguration
 import org.drx.evoleq.dsl.Configuration
 import org.drx.evoleq.dsl.HashMapConfiguration
 import org.drx.evoleq.evolving.Evolving
@@ -214,6 +215,16 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
     fun <M,E> FxComponentConfiguration<N, D>.child(child: FxComponent<M, E>) {
         launcher.fxChildren.add( Parallel { child } )
     }
+
+    /**
+     * Add children
+     */
+    @Suppress("unused")
+    fun  FxComponentConfiguration<N, D>.children(children: ArrayListConfiguration<FxComponent<*, *>>.()->Unit) {
+        val list = org.drx.evoleq.dsl.configure(children)
+        launcher.fxChildren.addAll( list.map{ Parallel<FxComponent<*,*>> { it }} )
+    }
+
 
     /**
      * Add an fx-special component
