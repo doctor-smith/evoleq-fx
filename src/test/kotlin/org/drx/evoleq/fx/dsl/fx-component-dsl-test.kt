@@ -23,6 +23,10 @@ class FxComponentDslTest {
                     noStub()
                     view { configure {  } }
                 })
+                child(fxStackPane<Int> {
+                    noStub()
+                    view { configure {  } }
+                })
             }
         }
     }

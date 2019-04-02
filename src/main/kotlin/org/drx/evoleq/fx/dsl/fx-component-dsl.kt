@@ -224,7 +224,8 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
         val list = org.drx.evoleq.dsl.configure(children)
         launcher.fxChildren.addAll( list.map{ Parallel<FxComponent<*,*>> { it }} )
     }
-
+    @Suppress("unused")
+    fun <M,E> ArrayListConfiguration<FxComponent<*, *>>.child(child: FxComponent<M, E>) = item(child)
 
     /**
      * Add an fx-special component
