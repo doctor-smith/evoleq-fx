@@ -356,6 +356,46 @@ inline fun <reified N : Any, D> FxComponentConfiguration<N, D>.configure(noinlin
     n.configure()
     return n
 }
+/**
+ * Configure the view
+ */
+@Suppress("unused")
+inline fun <reified N : Any, reified C, D> FxComponentConfiguration<N, D>.configure(constructorData: C, noinline configure: N.()->Unit): N {
+    var n: N? = null
+    N::class.constructors.forEach {
+        try {
+            n = it.call(constructorData)
+        }
+        catch (exception: Exception){/* unimportant */}
+    }
+    if(n == null) {
+        throw Exception("Constructor does not take arguments of type ${C::class}")
+    }
+    n!!.configure()
+    return n!!
+}
+/**
+ * Configure the view
+ */
+@Suppress("unused")
+inline fun <reified N : Any, D> FxComponentConfiguration<N, D>.configure(constructorData: Array<out Any>, noinline configure: N.()->Unit): N {
+    var n: N? = null
+    N::class.constructors.forEach {
+        try {
+            n = it.call(*constructorData)
+        }
+        catch (exception: Exception){/* unimportant */}
+    }
+    if(n == null) {
+        throw Exception("Constructor does not take arguments of these types")
+    }
+    n!!.configure()
+    return n!!
+}
+
+fun constructor(vararg args : Any): Array<out Any> = args
+
+
 fun <N> N.style(css: String): N {
     when(this) {
         is Node -> this.style = css
