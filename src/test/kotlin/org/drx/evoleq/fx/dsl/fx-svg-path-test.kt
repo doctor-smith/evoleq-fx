@@ -77,7 +77,7 @@ class FxSvgPathTest{
             }}
         }
         val stub = showNodeInTestStage(path).get()
-        delay(10_000)
+       // delay(10_000)
     }
 
     @Test fun heart() = runBlocking {
@@ -139,6 +139,6 @@ class FxSvgPathTest{
         }
         val stub = showInTestStage(pane).get()
 
-        delay(30_000)
+       // delay(30_000)
     }
 }
