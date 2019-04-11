@@ -25,6 +25,8 @@ import org.drx.evoleq.fx.component.FxComponent
 fun <D> FxComponentConfiguration<out Any, *>.fxFlowPane(configuration: FxComponentConfiguration<FlowPane, D>.()->Unit): FxComponent<FlowPane, D> {
     return fxComponent(configuration)
 }
+
+@Suppress("unused")
 fun <D> fxFlowPane(configuration: FxComponentConfiguration<FlowPane, D>.()->Unit): FxComponent<FlowPane, D> {
     return fxComponent(configuration)
 }

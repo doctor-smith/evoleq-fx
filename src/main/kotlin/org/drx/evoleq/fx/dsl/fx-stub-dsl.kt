@@ -19,8 +19,10 @@ import org.drx.evoleq.dsl.StubConfiguration
 import org.drx.evoleq.dsl.configure
 import org.drx.evoleq.fx.stub.FxStub
 import org.drx.evoleq.stub.Stub
-import kotlin.reflect.KClass
 
+/**
+ * @deprecated
+ */
 open class FxStubConfiguration<D> : StubConfiguration<D>() {
 
     lateinit var stubConf: StubConfiguration<D>
@@ -44,4 +46,8 @@ open class FxStubConfiguration<D> : StubConfiguration<D>() {
     }
 
 }
+
+/**
+ * @deprecated
+ */
 fun <D> fxStub(configuration: FxStubConfiguration<D>.()->Unit): FxStub<D> = configure(configuration) as FxStub<D>

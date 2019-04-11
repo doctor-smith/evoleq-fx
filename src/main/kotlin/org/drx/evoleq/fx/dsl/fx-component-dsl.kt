@@ -20,12 +20,16 @@ import javafx.scene.Group
 import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.layout.*
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
+import org.drx.evoleq.dsl.ArrayListConfiguration
 import org.drx.evoleq.dsl.Configuration
+import org.drx.evoleq.dsl.HashMapConfiguration
 import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.application.IdProvider
 import org.drx.evoleq.fx.application.PreId
+import org.drx.evoleq.fx.application.idActor
 import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.component.FxNoStubComponent
 import org.drx.evoleq.fx.component.FxTunnelComponent
@@ -61,14 +65,20 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
 
     var fxRunTimeView: N? = null
 
-    val idProvider = IdProvider()
+    val idProvider = GlobalScope.idActor()//IdProvider()
+    private var keepIdProvider = false
 
-    init{
-        idProvider.run()
-    }
+    private val properties: HashMap<String, Any?> by lazy { HashMap<String, Any?>() }
+
 
     override fun configure(): FxComponent<N, D> = when(stubConfiguration) {
         is Tunnel<D> ->  object : FxTunnelComponent<N, D> {
+
+            init{
+                if(!keepIdProvider) {
+                    idProvider.close()
+                }
+            }
 
             override val id: ID
                 get() = idConfiguration
@@ -84,7 +94,11 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
             override suspend fun evolve(d: D): Evolving<D> = stubConfiguration.evolve(d)
         }
         is NoStub<D> ->  object : FxNoStubComponent<N, D> {
-
+            init{
+                if(!keepIdProvider) {
+                    idProvider.close()
+                }
+            }
             override val id: ID
                 get() = idConfiguration
 
@@ -99,7 +113,11 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
             override suspend fun evolve(d: D): Evolving<D> = stubConfiguration.evolve(d)
         }
         else ->  object : FxComponent<N, D> {
-
+            init{
+                if(!keepIdProvider) {
+                    idProvider.close()
+                }
+            }
             override val id: ID
                 get() = idConfiguration
 
@@ -144,8 +162,10 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
     @Suppress("unused")
     fun  FxComponentConfiguration<N, D>.nextId() {
         val id = SimpleObjectProperty<ID>(PreId::class)
-        idProvider.add(id)
+        //idProvider.add(id)
+
         Parallel<Unit> {
+            idProvider.send(id)
             while(id.value == PreId::class) {
                 delay(1)
             }
@@ -153,6 +173,13 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
         }
     }
 
+    /**
+     *
+     */
+    @Suppress("unused")
+    fun FxComponentConfiguration<N, D>.keepIdProvider() {
+        keepIdProvider = true
+    }
     /**
      * Configure stub
      */
@@ -169,8 +196,9 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
         val stub = NoStub<D>()
         launcher.stub = stub
         val id = SimpleObjectProperty<ID>(PreId::class)
-        idProvider.add(id)
+        //idProvider.add(id)
         Parallel<Unit> {
+            idProvider.send(id)
             while(id.value == PreId::class) {
                 delay(1)
             }
@@ -186,8 +214,9 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
         val stub = Tunnel<D>()
         launcher.stub = stub
         val id = SimpleObjectProperty<ID>(PreId::class)
-        idProvider.add(id)
+        //idProvider.add(id)
         Parallel<Unit> {
+            idProvider.send(id)
             while(id.value == PreId::class) {
                 delay(1)
             }
@@ -213,7 +242,18 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
     }
 
     /**
-     * Add an fx-specia component
+     * Add children
+     */
+    @Suppress("unused")
+    fun  FxComponentConfiguration<N, D>.children(children: ArrayListConfiguration<FxComponent<*, *>>.()->Unit) {
+        val list = org.drx.evoleq.dsl.configure(children)
+        launcher.fxChildren.addAll( list.map{ Parallel<FxComponent<*,*>> { it }} )
+    }
+    @Suppress("unused")
+    fun <M,E> ArrayListConfiguration<FxComponent<*, *>>.child(child: FxComponent<M, E>) = item(child)
+
+    /**
+     * Add an fx-special component
      */
     @Suppress("unused")
     fun <M,E> FxComponentConfiguration<N, D>.fxSpecial(child: FxComponent<M, E>) {
@@ -255,14 +295,36 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
         }
         fxRunTime!!.shutdown()
     }
+
+    /**
+     * Add a property
+     */
+    @Suppress("unused")
+    fun <E> FxComponentConfiguration<N, D>.property(name: String,prop: FxComponentConfiguration<N,D>.()->E) {
+        properties[name] = prop()
+    }
+
+    /**
+     * Add properties
+     */
+    @Suppress("unused")
+    fun FxComponentConfiguration<N, D>.properties(properties: HashMapConfiguration<String, Any?>.()->Unit) {
+        this@FxComponentConfiguration.properties.putAll(org.drx.evoleq.dsl.configure(properties))
+    }
+
+    /**
+     * Get property
+     */
+    @Suppress("unused", "unchecked_cast")
+    fun <E> FxComponentConfiguration<N, D>.property(name: String): E = properties[name] as E
+
+
 }
 
 /**
  * Configure an FxComponent
  */
 @Suppress("unused")
-//fun<N,D> FxComponentConfiguration<out Any, *>.fxComponent(configuration: FxComponentConfiguration<N,D>.()->Unit): FxComponent<N, D> = fxComponent(configuration)
-
 fun <N,D> fxComponent(configuration: FxComponentConfiguration<N,D>.()->Unit): FxComponent<N, D> {
     val conf = (object : FxComponentConfiguration<N, D>(){})
 
@@ -271,6 +333,7 @@ fun <N,D> fxComponent(configuration: FxComponentConfiguration<N,D>.()->Unit): Fx
     Parallel<Unit> {
         val l = conf.launcher.launch(conf)
         val terminate = fxComponentFlow<N, D>().evolve(l).get()
+        conf.idProvider.close()
         // print log
         terminate.log.forEach {
             println(it)
@@ -304,6 +367,7 @@ fun <N,D> fxComponent(configuration: FxComponentConfiguration<N,D>.()->Unit): Fx
         //delay(1)
     }
     if(conf.cancel) {
+        //conf.
         sleep(100)
         throw FxConfigurationException.ConfigurationCancelled()
     }
@@ -319,6 +383,46 @@ inline fun <reified N : Any, D> FxComponentConfiguration<N, D>.configure(noinlin
     n.configure()
     return n
 }
+/**
+ * Configure the view
+ */
+@Suppress("unused")
+inline fun <reified N : Any, reified C, D> FxComponentConfiguration<N, D>.configure(constructorData: C, noinline configure: N.()->Unit): N {
+    var n: N? = null
+    N::class.constructors.forEach {
+        try {
+            n = it.call(constructorData)
+        }
+        catch (exception: Exception){/* unimportant */}
+    }
+    if(n == null) {
+        throw Exception("Constructor does not take arguments of type ${C::class}")
+    }
+    n!!.configure()
+    return n!!
+}
+/**
+ * Configure the view
+ */
+@Suppress("unused")
+inline fun <reified N : Any, D> FxComponentConfiguration<N, D>.configure(constructorData: Array<out Any>, noinline configure: N.()->Unit): N {
+    var n: N? = null
+    N::class.constructors.forEach {
+        try {
+            n = it.call(*constructorData)
+        }
+        catch (exception: Exception){/* unimportant */}
+    }
+    if(n == null) {
+        throw Exception("Constructor does not take arguments of these types")
+    }
+    n!!.configure()
+    return n!!
+}
+
+fun constructor(vararg args : Any): Array<out Any> = args
+
+
 fun <N> N.style(css: String): N {
     when(this) {
         is Node -> this.style = css

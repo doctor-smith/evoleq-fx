@@ -21,4 +21,5 @@ import org.drx.evoleq.fx.component.FxComponent
 @Suppress("unused")
 fun <D> FxComponentConfiguration<out Any, *>.fxImageView(configuration: FxComponentConfiguration<ImageView, D>.()->Unit): FxComponent<ImageView, D> = fxComponent(configuration)
 
+@Suppress("unused")
 fun <D> fxImageView(configuration: FxComponentConfiguration<ImageView, D>.()->Unit): FxComponent<ImageView, D> = fxComponent(configuration)

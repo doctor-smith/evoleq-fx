@@ -9,12 +9,12 @@ Combine evoleq with JavaFX.
 2. Provide Dsl to setup composable FxComponents (Application, Stages, Scenes, Nodes, ...) and
 their functional components (Stubs, Flows, Gaps) in order to run them in some evoleq process. 
 To make things clear, here is the base interface for all FxComponents 
-```kotlin
-interface FxComponent<N, D> : Stub<D> {
-    fun show(): N
-}
+    ```kotlin
+        interface FxComponent<N, D> : Stub<D> {
+           fun show(): N
+        }
 
-```
+    ```
 
 
 ## Examples 
@@ -41,7 +41,7 @@ Use TestFX to launch an app-manager-instance before running the tests
 
 Using evoleq we are dealing with async code all the time - Run your tests in a runBlocking-block
 ```kotlin
-@Test fun testFunction() = RunBlocking{
-    /* test implementation */
-}
+    @Test fun testFunction() = runBlocking{
+        /* test implementation */
+    }
 ``` 

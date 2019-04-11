@@ -26,6 +26,8 @@ import org.drx.evoleq.fx.component.FxComponent
 fun <D> FxComponentConfiguration<out Any, *>.fxGroup(configuration: FxComponentConfiguration<Group, D>.()->Unit): FxComponent<Group, D> {
     return fxComponent(configuration)
 }
+
+@Suppress("unused")
 fun <D> fxGroup(configuration: FxComponentConfiguration<Group, D>.()->Unit): FxComponent<Group, D> {
     return fxComponent(configuration)
 }

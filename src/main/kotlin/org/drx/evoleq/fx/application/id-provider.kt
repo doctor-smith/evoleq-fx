@@ -17,6 +17,8 @@ package org.drx.evoleq.fx.application
 
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.drx.evoleq.dsl.conditions
@@ -88,4 +90,19 @@ class IdProvider  {
      fun terminate() = Parallel<Unit> {
          cancel = true
      }
+}
+
+val numberOfKeys: Int by lazy{Keys.size}
+fun CoroutineScope.idActor() = actor<SimpleObjectProperty<ID>>(){
+    val currentId = SimpleIntegerProperty(0)
+    for(property in channel) {
+        val id = currentId.value
+        if (id == numberOfKeys - 1) {
+            currentId.value = 0
+        } else {
+            currentId.value = id + 1
+        }
+
+        property.value = Keys[id]
+    }
 }

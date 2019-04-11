@@ -15,6 +15,7 @@
  */
 package org.drx.evoleq.fx.flow
 
+import javafx.application.Application
 import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.Node
@@ -33,14 +34,21 @@ import org.drx.evoleq.fx.dsl.*
 import org.drx.evoleq.fx.flow.Config.style1
 import org.drx.evoleq.fx.test.showTestStage
 import org.drx.evoleq.stub.*
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.testfx.api.FxToolkit
 
 class FxComponentFlowTest {
-    @Before fun launchBgAppManager() = runBlocking {
+    var m : Application? = null
+    @Before
+    fun launchBgAppManager() = runBlocking {
         FxToolkit.registerPrimaryStage()
-        val m = FxToolkit.setupApplication { BgAppManager() }
+        m = FxToolkit.setupApplication { BgAppManager() }
+    }
+    @After
+    fun cleanUp() {
+        FxToolkit.cleanupApplication(m!!)
     }
 
 
@@ -63,6 +71,7 @@ class FxComponentFlowTest {
             scene(fxScene {
                 //id<SceneId>()
                 //stylesheet(style1)
+                tunnel()
                 root(fxAnchorPane{
                     //id<RootId>()
                     view{ configure{} }
@@ -85,6 +94,7 @@ class FxComponentFlowTest {
                         })
                     })
                     child(fxBorderPane<Nothing> {
+                        tunnel()
                         view{
                             configure{
                                 leftAnchor( 10)
@@ -98,6 +108,7 @@ class FxComponentFlowTest {
                             view{configure{}}
                             child<Button,Nothing>(fxButton {
                                 //id<Key5>()
+                                tunnel()
                                 view{ configure{
                                     text = "TOP"
                                     action{
@@ -106,27 +117,29 @@ class FxComponentFlowTest {
                                     }
                                 }}
                                 tooltip(fxTooltip{
+                                    noStub()
                                     view{configure{
                                         text = "Da werden Sie geholfen!"
                                     }}
-                                    noStub()
+
                                 })
-                                tunnel()
+
                             })
-                            tunnel()
+                            stub(stub{})
+                            //tunnel()
                         })
                         bottom( fxButton {
                             id<BottomId>()
                             view{configure{ text = "BOTTOM" }}
-
-                            noStub()
+                            stub(stub{})
+                            //noStub()
                         })
-                        tunnel()
+
                     })
                 }){
                     root -> Scene(root, 300.0, 200.0)
                 }
-                tunnel()
+
             })
 
             fxRunTime {
@@ -206,6 +219,8 @@ class FxComponentFlowTest {
                 stubs[Label::class]!!
             }
         }
+
+        val stub = showTestStage(stageComponent).get()
 
         assert(stageComponent.stubs.size ==2)
 

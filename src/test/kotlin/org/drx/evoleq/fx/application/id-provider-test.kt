@@ -28,14 +28,16 @@ import java.lang.Exception
 
 class IdProviderTest {
     @Test fun test() = runBlocking {
+        val N = 10000
         val ids = arrayListOf<Parallel<ID>>()
-        val provider = IdProvider()
+        val provider = idActor()//IdProvider()
         val process = Parallel<Unit> {
-            IntRange(1, 1000).forEach {
+            IntRange(1, N).forEach {
                 //Parallel<Unit> {
                     ids.add(Parallel {
                         val property = SimpleObjectProperty<ID>(PreId::class)
-                        provider.add(property)
+                        //provider.add(property)
+                        provider.send(property)
                         while(property.value == PreId::class) {
                             kotlinx.coroutines.delay(1)
                         }
@@ -44,17 +46,21 @@ class IdProviderTest {
                 //}
             }
         }
+        /*
         Parallel<Unit> {
             provider.run()
         }
+
+         */
         delay(1_000)
         //process.get()
 
-        provider.terminate()
-
+        //provider.terminate()
+        provider.close()
         //withTimeout(1_000) {
-            assert(ids.size == 1000)
-        println(ids.first().get())
+        assert(ids.size == N)
+
+        println("first id: "+ids.first().get())
         //ids.map{println(it.get())}
         //}
         var count = 0
@@ -62,8 +68,10 @@ class IdProviderTest {
             val id = it.get()
 
             count++
-            println(id)
-        }}catch(exception : Exception){}
+            //println(id)
+        }}catch(exception : Exception){
+            println("@id: $count: error ok: $exception")
+        }
         }
         println(count)
         delay(1_000)

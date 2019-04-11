@@ -15,6 +15,7 @@
  */
 package org.drx.evoleq.fx.test
 
+import javafx.application.Application
 import javafx.scene.layout.StackPane
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -23,15 +24,21 @@ import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.fx.application.BgAppManager
 import org.drx.evoleq.fx.dsl.*
 import org.drx.evoleq.fx.test.deprecated.showTestStage
+import org.junit.After
 import org.junit.Before
 import org.testfx.api.FxToolkit
 import org.junit.Test
 
 class TestAppTest{
+    var m : Application? = null
     @Before
     fun launchBgAppManager() = runBlocking {
         FxToolkit.registerPrimaryStage()
-        val m = FxToolkit.setupApplication { BgAppManager() }
+        m = FxToolkit.setupApplication { BgAppManager() }
+    }
+    @After
+    fun cleanUp() {
+        FxToolkit.cleanupApplication(m!!)
     }
 
     @Test fun testApp() = runBlocking{

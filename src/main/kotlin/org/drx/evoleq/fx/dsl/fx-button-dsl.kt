@@ -19,7 +19,6 @@ import javafx.event.ActionEvent
 import javafx.scene.control.Button
 import javafx.scene.control.ButtonBase
 import org.drx.evoleq.fx.component.FxComponent
-import java.lang.Exception
 
 /**
  * Button
@@ -29,11 +28,12 @@ fun <D> FxComponentConfiguration<out Any, D>.fxButton(configuration: FxComponent
     return  fxComponent(configuration)
 }
 
-
+@Suppress("unused")
 fun <D> fxButton(configuration: FxComponentConfiguration<Button, D>.()->Unit): FxComponent<Button, D> {
     return fxComponent(configuration)
 }
 
+@Suppress("unused")
 fun <B : ButtonBase> B.action(action: ActionEvent.()->Unit): B {
     this.setOnAction{
         it.action()

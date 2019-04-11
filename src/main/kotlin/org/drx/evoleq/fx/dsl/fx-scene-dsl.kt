@@ -25,6 +25,7 @@ fun <D> FxComponentConfiguration<Stage, D>.fxScene(configuration: FxComponentCon
     return fxComponent(configuration)
 }
 
+@Suppress("unused")
 fun <D> fxScene(configuration: FxComponentConfiguration<Scene, D>.()->Unit): FxComponent<Scene, D> {
     return fxComponent(configuration)
 }
@@ -32,6 +33,7 @@ fun <D> fxScene(configuration: FxComponentConfiguration<Scene, D>.()->Unit): FxC
 /**
  * Scene
  */
+@Suppress("unused")
 fun <P: Parent, D> FxComponentConfiguration<Scene, D>.root(component: FxComponent<P, D>, inject:(P)->Scene = { p -> Scene(p)}) : FxComponentConfiguration<Scene, D> {
     child(component)
     val root = component.show()
@@ -39,11 +41,15 @@ fun <P: Parent, D> FxComponentConfiguration<Scene, D>.root(component: FxComponen
     view{scene}
     return this
 }
+
+@Suppress("unused")
 fun < D> FxComponentConfiguration<Scene, D>.stylesheet(stylesheet: String) {
     fxRunTime {
         stylesheets.add(stylesheet)
     }
 }
+
+@Suppress("unused")
 fun < D> FxComponentConfiguration<Scene, D>.stylesheets(stylesheets: ArrayList<String>) {
     fxRunTime {
         stylesheets.addAll(stylesheets)

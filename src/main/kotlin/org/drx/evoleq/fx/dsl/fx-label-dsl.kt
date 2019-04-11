@@ -21,4 +21,5 @@ import org.drx.evoleq.fx.component.FxComponent
 @Suppress("unused")
 fun <D> FxComponentConfiguration<out Any, *>.fxLabel(configuration: FxComponentConfiguration<Label, D>.()->Unit): FxComponent<Label, D> = fxComponent(configuration)
 
+@Suppress("unused")
 fun <D> fxLabel(configuration: FxComponentConfiguration<Label, D>.()->Unit): FxComponent<Label, D> = fxComponent(configuration)

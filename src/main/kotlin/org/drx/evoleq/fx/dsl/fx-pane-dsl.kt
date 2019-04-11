@@ -26,6 +26,7 @@ fun <D> FxComponentConfiguration<out Any, *>.fxPane(configuration: FxComponentCo
     return fxComponent(configuration)
 }
 
+@Suppress("unused")
 fun <D> fxPane(configuration: FxComponentConfiguration<Pane, D>.()->Unit): FxComponent<Pane, D> {
     return fxComponent(configuration)
 }

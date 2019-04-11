@@ -21,35 +21,43 @@ import javafx.scene.input.*
 /**
  * Node - MouseEvents
  */
+@Suppress("unused")
 fun <N : Node> N.onMouseReleased(action: MouseEvent.()->Unit) : N {
     this.setOnMouseReleased { it.action() }
     return this
 }
+@Suppress("unused")
 fun <N : Node> N.onMousePressed(action: MouseEvent.()->Unit) : N {
     this.setOnMousePressed { it.action() }
     return this
 }
+@Suppress("unused")
 fun <N : Node> N.onMouseClicked(action: MouseEvent.()->Unit) : N {
     this.setOnMouseClicked { it.action() }
     return this
 }
+@Suppress("unused")
 fun <N : Node> N.onMouseDragged(action: MouseEvent.()->Unit) : N {
     this.setOnMouseDragged { it.action() }
     return this
 }
+@Suppress("unused")
 fun <N : Node> N.onMouseDragDetected(action: MouseEvent.()->Unit) : N {
     this.setOnDragDetected { it.action() }
     return this
 }
 
+@Suppress("unused")
 fun <N : Node> N.onMouseMoved(action: MouseEvent.()->Unit) : N {
     this.setOnMouseMoved { it.action() }
     return this
 }
+@Suppress("unused")
 fun <N : Node> N.onMouseEntered(action: MouseEvent.()->Unit) : N {
     this.setOnMouseEntered { it.action() }
     return this
 }
+@Suppress("unused")
 fun <N : Node> N.onMouseExited(action: MouseEvent.()->Unit) : N {
     this.setOnMouseExited{ it.action() }
     return this
@@ -58,11 +66,13 @@ fun <N : Node> N.onMouseExited(action: MouseEvent.()->Unit) : N {
 /**
  * Mouse Drag Events
  */
+@Suppress("unused")
 fun <N : Node> N.onMouseDragEntered(action: MouseDragEvent.()->Unit) : N {
     this.setOnMouseDragEntered { it.action() }
     return this
 }
 
+@Suppress("unused")
 fun <N : Node> N.onMouseDragExited(action: MouseDragEvent.()->Unit) : N {
     this.setOnMouseDragExited{ it.action() }
     return this
@@ -70,26 +80,32 @@ fun <N : Node> N.onMouseDragExited(action: MouseDragEvent.()->Unit) : N {
 /**
  * Drag Events
  */
+
+@Suppress("unused")
 fun <N : Node> N.onDragEntered(action: DragEvent.()->Unit) : N {
     this.setOnDragEntered { it.action() }
     return this
 }
 
+@Suppress("unused")
 fun <N : Node> N.onDragExited(action: DragEvent.()->Unit) : N {
     this.setOnDragExited{ it.action() }
     return this
 }
 
+@Suppress("unused")
 fun <N : Node> N.onDragOver(action: DragEvent.()->Unit) : N {
     this.setOnDragOver{ it.action() }
     return this
 }
 
+@Suppress("unused")
 fun <N : Node> N.onDragDone(action: DragEvent.()->Unit) : N {
     this.setOnDragDone{ it.action() }
     return this
 }
 
+@Suppress("unused")
 fun <N : Node> N.onDragDropped(action: DragEvent.()->Unit) : N {
     this.setOnDragDropped{ it.action() }
     return this
@@ -98,14 +114,20 @@ fun <N : Node> N.onDragDropped(action: DragEvent.()->Unit) : N {
 /**
  * Rotate
  */
+
+@Suppress("unused")
 fun <N : Node> N.onRotate(action: RotateEvent.()->Unit) : N {
     this.setOnRotate(action)
     return this
 }
+
+@Suppress("unused")
 fun <N : Node> N.onKRotationStarted(action: RotateEvent.()->Unit) : N {
     this.setOnRotationStarted(action)
     return this
 }
+
+@Suppress("unused")
 fun <N : Node> N.onRotationFinished(action: RotateEvent.()->Unit) : N {
     this.setOnRotationFinished(action)
     return this
@@ -114,14 +136,20 @@ fun <N : Node> N.onRotationFinished(action: RotateEvent.()->Unit) : N {
 /**
  * Scroll
  */
+
+@Suppress("unused")
 fun <N : Node> N.onScroll(action: ScrollEvent.()->Unit) : N {
     this.setOnScroll(action)
     return this
 }
+
+@Suppress("unused")
 fun <N : Node> N.onScrollStarted(action: ScrollEvent.()->Unit) : N {
     this.setOnScrollStarted(action)
     return this
 }
+
+@Suppress("unused")
 fun <N : Node> N.onScrollFinished(action: ScrollEvent.()->Unit) : N {
     this.setOnScrollFinished(action)
     return this
@@ -130,21 +158,26 @@ fun <N : Node> N.onScrollFinished(action: ScrollEvent.()->Unit) : N {
 /**
  * Swipe
  */
+
+@Suppress("unused")
 fun <N : Node> N.onSwipeUp(action: SwipeEvent.()->Unit) : N {
     this.setOnSwipeUp(action)
     return this
 }
 
+@Suppress("unused")
 fun <N : Node> N.onSwipeDown(action: SwipeEvent.()->Unit) : N {
     this.setOnSwipeDown(action)
     return this
 }
 
+@Suppress("unused")
 fun <N : Node> N.onSwipeLeft(action: SwipeEvent.()->Unit) : N {
     this.setOnSwipeLeft(action)
     return this
 }
 
+@Suppress("unused")
 fun <N : Node> N.onSwipeRight(action: SwipeEvent.()->Unit) : N {
     this.setOnSwipeRight(action)
     return this
@@ -153,21 +186,26 @@ fun <N : Node> N.onSwipeRight(action: SwipeEvent.()->Unit) : N {
 /**
  * Touch
  */
+
+@Suppress("unused")
 fun <N : Node> N.onTouchMoved(action: TouchEvent.()->Unit) : N {
     this.setOnTouchMoved(action)
     return this
 }
 
+@Suppress("unused")
 fun <N : Node> N.onTouchPressed(action: TouchEvent.()->Unit) : N {
     this.setOnTouchPressed(action)
     return this
 }
 
+@Suppress("unused")
 fun <N : Node> N.onTouchReleased(action: TouchEvent.()->Unit) : N {
     this.setOnTouchReleased(action)
     return this
 }
 
+@Suppress("unused")
 fun <N : Node> N.onTouchStationary(action: TouchEvent.()->Unit) : N {
     this.setOnTouchStationary(action)
     return this
@@ -176,16 +214,19 @@ fun <N : Node> N.onTouchStationary(action: TouchEvent.()->Unit) : N {
 /**
  * Zoom
  */
+@Suppress("unused")
 fun <N : Node> N.onZoom(action: ZoomEvent.()->Unit) : N {
     this.setOnZoom(action)
     return this
 }
 
+@Suppress("unused")
 fun <N : Node> N.onZoomStarted(action: ZoomEvent.()->Unit) : N {
     this.setOnZoomStarted(action)
     return this
 }
 
+@Suppress("unused")
 fun <N : Node> N.onZoomFinished(action: ZoomEvent.()->Unit) : N {
     this.setOnZoomFinished(action)
     return this
@@ -195,16 +236,19 @@ fun <N : Node> N.onZoomFinished(action: ZoomEvent.()->Unit) : N {
 /**
  * Key Events
  */
+@Suppress("unused")
 fun <N : Node> N.onKeyPressed(action: KeyEvent.()->Unit) : N {
     this.setOnKeyPressed(action)
     return this
 }
 
+@Suppress("unused")
 fun <N : Node> N.onKeyTyped(action: KeyEvent.()->Unit) : N {
     this.setOnKeyTyped(action)
     return this
 }
 
+@Suppress("unused")
 fun <N : Node> N.onKeyReleased(action: KeyEvent.()->Unit) : N {
     this.setOnKeyReleased(action)
     return this

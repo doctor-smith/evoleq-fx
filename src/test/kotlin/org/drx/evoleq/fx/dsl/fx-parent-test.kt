@@ -13,26 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.evoleq.fx.component
+package org.drx.evoleq.fx.dsl
 
-import javafx.collections.ObservableList
+import javafx.application.Application
 import javafx.scene.Group
-import javafx.scene.Node
-import javafx.scene.Parent
 import javafx.scene.control.Button
 import kotlinx.coroutines.runBlocking
 import org.drx.evoleq.fx.application.BgAppManager
-import org.drx.evoleq.fx.dsl.hasModifiableChildren
-import org.drx.evoleq.fx.dsl.isFxParent
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.testfx.api.FxToolkit
 
 class FxParentTest {
-    @Before fun launchBgAppManager() = runBlocking {
+    var m : Application? = null
+    @Before
+    fun launchBgAppManager() = runBlocking {
         FxToolkit.registerPrimaryStage()
-        val m = FxToolkit.setupApplication { BgAppManager() }
+        m = FxToolkit.setupApplication { BgAppManager() }
     }
+    @After
+    fun cleanUp() {
+        FxToolkit.cleanupApplication(m!!)
+    }
+
     @Test fun isFxParent() {
         val g = Group()
         assert(g.hasModifiableChildren())

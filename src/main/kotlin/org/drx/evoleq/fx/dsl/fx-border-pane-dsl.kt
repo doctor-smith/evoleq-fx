@@ -16,7 +16,6 @@
 package org.drx.evoleq.fx.dsl
 
 import javafx.scene.Node
-import javafx.scene.Scene
 import javafx.scene.layout.BorderPane
 import org.drx.evoleq.fx.component.FxComponent
 
@@ -27,33 +26,39 @@ import org.drx.evoleq.fx.component.FxComponent
 fun <D> FxComponentConfiguration<out Any, *>.fxBorderPane(configuration: FxComponentConfiguration<BorderPane,D>.()->Unit): FxComponent<BorderPane, D> {
     return fxComponent(configuration)
 }
+@Suppress("unused")
 fun <D> fxBorderPane(configuration: FxComponentConfiguration<BorderPane,D>.()->Unit): FxComponent<BorderPane, D> {
     return fxComponent(configuration)
 }
+@Suppress("unused")
 fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.top(component: FxComponent<C, D>)  {
     fxSpecial( component )
     fxRunTime {
         top =  component.show()
     }
 }
+@Suppress("unused")
 fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.bottom(component: FxComponent<C, D>)  {
     fxSpecial( component )
     fxRunTime {
         bottom =  component.show()
     }
 }
+@Suppress("unused")
 fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.left(component: FxComponent<C, D>)  {
     fxSpecial( component )
     fxRunTime {
         left =  component.show()
     }
 }
+@Suppress("unused")
 fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.right(component: FxComponent<C, D>)  {
     fxSpecial( component )
     fxRunTime {
         right =  component.show()
     }
 }
+@Suppress("unused")
 fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.center(component: FxComponent<C, D>)  {
     fxSpecial( component )
     fxRunTime {

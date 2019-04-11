@@ -21,4 +21,5 @@ import org.drx.evoleq.fx.component.FxComponent
 @Suppress("unused")
 fun <D> FxComponentConfiguration<out Any, *>.fxText(configuration: FxComponentConfiguration<Text, D>.()->Unit): FxComponent<Text, D> = fxComponent(configuration)
 
+@Suppress("unused")
 fun <D> fxText(configuration: FxComponentConfiguration<Text, D>.()->Unit): FxComponent<Text, D> = fxComponent(configuration)

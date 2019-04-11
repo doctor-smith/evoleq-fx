@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.evoleq.fx.component
+package org.drx.evoleq.fx.dsl
 
+import javafx.application.Application
 import javafx.scene.Scene
 import javafx.scene.control.Button
 import javafx.scene.layout.VBox
@@ -22,20 +23,24 @@ import javafx.stage.Stage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.drx.evoleq.fx.application.BgAppManager
-import org.drx.evoleq.fx.dsl.*
-import org.drx.evoleq.fx.dsl.deprecated.SceneStubKey
 import org.drx.evoleq.fx.dsl.deprecated.StageStubKey
 import org.drx.evoleq.fx.test.showTestStage
-import org.drx.evoleq.stub.Key1
 import org.drx.evoleq.stub.Key2
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.testfx.api.FxToolkit
 
 class ScrollPaneTest {
-    @Before fun launchBgAppManager() = runBlocking {
+    var m : Application? = null
+    @Before
+    fun launchBgAppManager() = runBlocking {
         FxToolkit.registerPrimaryStage()
-        val m = FxToolkit.setupApplication { BgAppManager() }
+        m = FxToolkit.setupApplication { BgAppManager() }
+    }
+    @After
+    fun cleanUp() {
+        FxToolkit.cleanupApplication(m!!)
     }
 
     @Test fun basics() = runBlocking {
@@ -72,6 +77,6 @@ class ScrollPaneTest {
         }
         showTestStage(stageComponent)
 
-        delay(15_000)
+        delay(1_000)
     }
 }
