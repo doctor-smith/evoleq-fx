@@ -20,6 +20,7 @@ import javafx.scene.Group
 import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.layout.*
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import org.drx.evoleq.dsl.ArrayListConfiguration
 import org.drx.evoleq.dsl.Configuration
@@ -28,6 +29,7 @@ import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.application.IdProvider
 import org.drx.evoleq.fx.application.PreId
+import org.drx.evoleq.fx.application.idActor
 import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.component.FxNoStubComponent
 import org.drx.evoleq.fx.component.FxTunnelComponent
@@ -63,12 +65,13 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
 
     var fxRunTimeView: N? = null
 
-    private val idProvider = IdProvider()
+    private val idProvider = GlobalScope.idActor()//IdProvider()
 
     private val properties: HashMap<String, Any?> by lazy { HashMap<String, Any?>() }
 
     init{
-        idProvider.run()
+        //GlobalScope{ idProvider = idActor()}
+        //idProvider.run()
     }
 
     override fun configure(): FxComponent<N, D> = when(stubConfiguration) {
@@ -148,8 +151,10 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
     @Suppress("unused")
     fun  FxComponentConfiguration<N, D>.nextId() {
         val id = SimpleObjectProperty<ID>(PreId::class)
-        idProvider.add(id)
+        //idProvider.add(id)
+
         Parallel<Unit> {
+            idProvider.send(id)
             while(id.value == PreId::class) {
                 delay(1)
             }
@@ -173,8 +178,9 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
         val stub = NoStub<D>()
         launcher.stub = stub
         val id = SimpleObjectProperty<ID>(PreId::class)
-        idProvider.add(id)
+        //idProvider.add(id)
         Parallel<Unit> {
+            idProvider.send(id)
             while(id.value == PreId::class) {
                 delay(1)
             }
@@ -190,8 +196,9 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
         val stub = Tunnel<D>()
         launcher.stub = stub
         val id = SimpleObjectProperty<ID>(PreId::class)
-        idProvider.add(id)
+        //idProvider.add(id)
         Parallel<Unit> {
+            idProvider.send(id)
             while(id.value == PreId::class) {
                 delay(1)
             }
