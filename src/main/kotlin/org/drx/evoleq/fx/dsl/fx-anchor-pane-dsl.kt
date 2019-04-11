@@ -16,8 +16,6 @@
 package org.drx.evoleq.fx.dsl
 
 import javafx.scene.Node
-import javafx.scene.Parent
-import javafx.scene.Scene
 import javafx.scene.layout.AnchorPane
 import org.drx.evoleq.fx.component.FxComponent
 

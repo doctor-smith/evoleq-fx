@@ -65,17 +65,20 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
 
     var fxRunTimeView: N? = null
 
-    private val idProvider = GlobalScope.idActor()//IdProvider()
+    val idProvider = GlobalScope.idActor()//IdProvider()
+    private var keepIdProvider = false
 
     private val properties: HashMap<String, Any?> by lazy { HashMap<String, Any?>() }
 
-    init{
-        //GlobalScope{ idProvider = idActor()}
-        //idProvider.run()
-    }
 
     override fun configure(): FxComponent<N, D> = when(stubConfiguration) {
         is Tunnel<D> ->  object : FxTunnelComponent<N, D> {
+
+            init{
+                if(!keepIdProvider) {
+                    idProvider.close()
+                }
+            }
 
             override val id: ID
                 get() = idConfiguration
@@ -91,7 +94,11 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
             override suspend fun evolve(d: D): Evolving<D> = stubConfiguration.evolve(d)
         }
         is NoStub<D> ->  object : FxNoStubComponent<N, D> {
-
+            init{
+                if(!keepIdProvider) {
+                    idProvider.close()
+                }
+            }
             override val id: ID
                 get() = idConfiguration
 
@@ -106,7 +113,11 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
             override suspend fun evolve(d: D): Evolving<D> = stubConfiguration.evolve(d)
         }
         else ->  object : FxComponent<N, D> {
-
+            init{
+                if(!keepIdProvider) {
+                    idProvider.close()
+                }
+            }
             override val id: ID
                 get() = idConfiguration
 
@@ -162,6 +173,13 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
         }
     }
 
+    /**
+     *
+     */
+    @Suppress("unused")
+    fun FxComponentConfiguration<N, D>.keepIdProvider() {
+        keepIdProvider = true
+    }
     /**
      * Configure stub
      */
@@ -297,7 +315,7 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
     /**
      * Get property
      */
-    @Suppress("unused")
+    @Suppress("unused", "unchecked_cast")
     fun <E> FxComponentConfiguration<N, D>.property(name: String): E = properties[name] as E
 
 
@@ -315,6 +333,7 @@ fun <N,D> fxComponent(configuration: FxComponentConfiguration<N,D>.()->Unit): Fx
     Parallel<Unit> {
         val l = conf.launcher.launch(conf)
         val terminate = fxComponentFlow<N, D>().evolve(l).get()
+        conf.idProvider.close()
         // print log
         terminate.log.forEach {
             println(it)
@@ -348,6 +367,7 @@ fun <N,D> fxComponent(configuration: FxComponentConfiguration<N,D>.()->Unit): Fx
         //delay(1)
     }
     if(conf.cancel) {
+        //conf.
         sleep(100)
         throw FxConfigurationException.ConfigurationCancelled()
     }

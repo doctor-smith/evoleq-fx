@@ -15,11 +15,12 @@
  */
 package org.drx.evoleq.fx.dsl
 
-import javafx.geometry.Point2D
 import javafx.scene.shape.CubicCurve
-import org.drx.evoleq.dsl.Configuration
 import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.geometry.Derivation
+
+/* TODO Think about which configuration function shall be used in the future */
+
 
 /**
  * CubicCurve
@@ -32,6 +33,7 @@ fun <D> FxComponentConfiguration<out Any, *>.fxCubicCurve(configuration: FxCompo
 /**
  *
  */
+@Suppress("unused")
 fun <D> fxCubicCurve(configuration: FxComponentConfiguration<CubicCurve, D>.()->Unit): FxComponent<CubicCurve,D> {
     return fxComponent(configuration)
 }

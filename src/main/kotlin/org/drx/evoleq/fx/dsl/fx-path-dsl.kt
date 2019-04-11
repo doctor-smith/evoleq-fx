@@ -26,44 +26,52 @@ fun <D> FxComponentConfiguration<out Any, *>.fxPath(configuration: FxComponentCo
     return fxComponent(configuration)
 }
 
+@Suppress("unused")
 fun <D> fxPath(configuration: FxComponentConfiguration<Path, D>.()->Unit): FxComponent<Path, D> {
     return fxComponent(configuration)
 }
 
+@Suppress("unused")
 fun <D> FxComponentConfiguration<Path, D>.elements(configure: ObservableList<PathElement>.()->Unit) {
     fxRunTime{ elements.configure() }
 }
 
+@Suppress("unused")
 fun ObservableList<PathElement>.moveTo(configuration: MoveTo.()->Unit){
     val moveTo = MoveTo()
     moveTo.configuration()
     add(moveTo)
 }
 
+@Suppress("unused")
 fun ObservableList<PathElement>.lineTo(configuration: LineTo.()->Unit){
     val lineTo = LineTo()
     lineTo.configuration()
     add(lineTo)
 }
 
+@Suppress("unused")
 fun ObservableList<PathElement>.hLineTo(configuration: HLineTo.()->Unit){
     val hLineTo = HLineTo()
     hLineTo.configuration()
     add(hLineTo)
 }
 
+@Suppress("unused")
 fun ObservableList<PathElement>.vLineTo(configuration: VLineTo.()->Unit){
     val vLineTo = VLineTo()
     vLineTo.configuration()
     add(vLineTo)
 }
 
+@Suppress("unused")
 fun ObservableList<PathElement>.arcTo(configuration: ArcTo.()->Unit){
     val arcTo = ArcTo()
     arcTo.configuration()
     add(arcTo)
 }
 
+@Suppress("unused")
 fun ObservableList<PathElement>.quadCurveTo(configuration: QuadCurveTo.()->Unit){
     val quadCurveTo = QuadCurveTo()
     quadCurveTo.configuration()
@@ -73,12 +81,14 @@ fun ObservableList<PathElement>.quadCurveTo(configuration: QuadCurveTo.()->Unit)
 /**
  * Velocity at the end-point
  */
+@Suppress("unused")
 fun QuadCurveTo.endVelocity(setup: Point2DConfiguration.()->Unit){
     val point = point(setup)
     controlX = -point.x / 2 + x
     controlY = -point.y / 2 + y
 }
 
+@Suppress("unused")
 fun QuadCurveTo.startVelocity(startPoint: Point2D,setup: Point2DConfiguration.()->Unit){
     val point = point(setup)
     controlX = startPoint.x + point.x / 2
@@ -86,7 +96,7 @@ fun QuadCurveTo.startVelocity(startPoint: Point2D,setup: Point2DConfiguration.()
 }
 
 
-
+@Suppress("unused")
 fun ObservableList<PathElement>.cubicCurveTo(
         startVelocity: Point2D? = null,
         endVelocity: Point2D? = null,
@@ -110,6 +120,7 @@ fun ObservableList<PathElement>.cubicCurveTo(
     add(cubicCurveTo)
 }
 
+@Suppress("unused")
 fun ObservableList<PathElement>.startPoint(): Point2D? = when(this.size) {
     0 -> null
     else -> when (val p = first()) {
@@ -118,6 +129,7 @@ fun ObservableList<PathElement>.startPoint(): Point2D? = when(this.size) {
     }
 }
 
+@Suppress("unused")
 fun ObservableList<PathElement>.endPoint(): Point2D? = when(this.size) {
     0 -> null
     1 -> when(val p = last()) {
@@ -137,6 +149,8 @@ fun ObservableList<PathElement>.endPoint(): Point2D? = when(this.size) {
         else -> null
     }
 }
+
+@Suppress("unused")
 fun ObservableList<PathElement>.endX() : Double? = when(this.size) {
     0 -> null
     1 -> when(val p = last()) {
@@ -158,6 +172,7 @@ fun ObservableList<PathElement>.endX() : Double? = when(this.size) {
     }
 }
 
+@Suppress("unused")
 fun ObservableList<PathElement>.endY() : Double? = when(this.size) {
     0 -> null
     1 -> when(val p = last()) {
@@ -179,6 +194,7 @@ fun ObservableList<PathElement>.endY() : Double? = when(this.size) {
     }
 }
 
+@Suppress("unused")
 fun CubicCurveTo.startVelocity(startPoint: Point2D,setup: Point2DConfiguration.()->Unit){
     val point = point(setup)
     controlX1 = startPoint.x + point.x / 3
@@ -186,6 +202,7 @@ fun CubicCurveTo.startVelocity(startPoint: Point2D,setup: Point2DConfiguration.(
 
 }
 
+@Suppress("unused")
 fun CubicCurveTo.endVelocity(setup: Point2DConfiguration.()->Unit){
     val point = point(setup)
 
@@ -193,20 +210,25 @@ fun CubicCurveTo.endVelocity(setup: Point2DConfiguration.()->Unit){
     controlY2 = - point.y / 3 + y
 }
 
+@Suppress("unused")
 fun ObservableList<PathElement>.closePath(configuration: ClosePath.()->Unit){
     val closePath = ClosePath()
     closePath.configuration()
     add(closePath)
 }
+
+@Suppress("unused")
 fun ObservableList<PathElement>.closePath(){
     val closePath = ClosePath()
     add(closePath)
 }
 
+@Suppress("unused")
 fun Path.add(element: PathElement) {
     elements.add(element)
 }
 
+@Suppress("unused")
 fun Path.remove(element: PathElement) {
     elements.remove(element)
 }

@@ -55,5 +55,5 @@ class LaunchApplicationStubFromClassConfiguration<D, A: KClass<out AppManager<D>
 
 
 }
-
+@Suppress("unused")
 fun <D, A: KClass<out AppManager<D>>> launchApplicationStubFromClass(configuration: LaunchApplicationStubFromClassConfiguration<D, A>.()->Unit): Stub<Stub<D>?> = configure(configuration)

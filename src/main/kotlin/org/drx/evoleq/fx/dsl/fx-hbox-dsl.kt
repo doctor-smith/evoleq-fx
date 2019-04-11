@@ -21,4 +21,5 @@ import org.drx.evoleq.fx.component.FxComponent
 @Suppress("unused")
 fun <D> FxComponentConfiguration<out Any, *>.fxHBox(configuration: FxComponentConfiguration<HBox, D>.()->Unit): FxComponent<HBox, D> = fxComponent(configuration)
 
+@Suppress("unused")
 fun <D> fxHBox(configuration: FxComponentConfiguration<HBox, D>.()->Unit): FxComponent<HBox, D> = fxComponent(configuration)

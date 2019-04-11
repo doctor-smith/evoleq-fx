@@ -22,8 +22,10 @@ import org.drx.evoleq.fx.component.FxComponent
 @Suppress("unused")
 fun <D> Any?.fxTooltip(configuration: FxComponentConfiguration<Tooltip, D>.()->Unit): FxComponent<Tooltip, D> = fxComponent(configuration)
 
+@Suppress("unused")
 fun <D> fxTooltip(configuration: FxComponentConfiguration<Tooltip, D>.()->Unit): FxComponent<Tooltip, D> = fxComponent(configuration)
 
+@Suppress("unused")
 fun <C : Control, D> FxComponentConfiguration<C, D>.tooltip(component: FxComponent<Tooltip, D>) {
     fxSpecial(component)
     fxRunTime{

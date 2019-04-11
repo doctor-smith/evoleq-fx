@@ -28,9 +28,11 @@ fun <D> FxComponentConfiguration<out Any, *>.fxScrollPane(configuration: FxCompo
     return fxComponent(configuration)
 }
 
+@Suppress("unused")
 fun <D> fxScrollPane(configuration: FxComponentConfiguration<ScrollPane, D>.()->Unit): FxComponent<ScrollPane, D> {
     return fxComponent(configuration)
 }
+@Suppress("unused")
 fun <C : Node, D> FxComponentConfiguration<ScrollPane, D>.content(component: FxComponent<C, D>)  {
     fxSpecial( component )
     fxRunTime {

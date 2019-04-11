@@ -25,6 +25,7 @@ fun <D> FxComponentConfiguration<out Any, *>.fxSvgPath(configuration: FxComponen
     return fxComponent(configuration)
 }
 
+@Suppress("unused")
 fun <D> fxSvgPath(configuration: FxComponentConfiguration<SVGPath, D>.()->Unit): FxComponent<SVGPath, D> {
     return fxComponent(configuration)
 }
