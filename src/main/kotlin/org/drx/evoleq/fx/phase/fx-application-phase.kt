@@ -13,5 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.evoleq.fx.dsl
+package org.drx.evoleq.fx.phase
 
+import org.drx.evoleq.flow.Phase
+
+const val  FX_APPLICATION_PHASE_TIMEOUT: Long = 1_000
+
+sealed class FxApplicationPhase(open val errors: ArrayList<Exception> = arrayListOf()) : Phase {
+    val defaultTimeout: Long = FX_COMPONENT_PHASE_TIMEOUT
+
+    class Launch()
+
+    class Configure()
+
+    class RunTime()
+
+    class Terminate()
+}
