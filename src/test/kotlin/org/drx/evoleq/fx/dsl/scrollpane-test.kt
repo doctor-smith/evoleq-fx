@@ -15,6 +15,7 @@
  */
 package org.drx.evoleq.fx.dsl
 
+import javafx.application.Application
 import javafx.scene.Scene
 import javafx.scene.control.Button
 import javafx.scene.layout.VBox
@@ -25,14 +26,21 @@ import org.drx.evoleq.fx.application.BgAppManager
 import org.drx.evoleq.fx.dsl.deprecated.StageStubKey
 import org.drx.evoleq.fx.test.showTestStage
 import org.drx.evoleq.stub.Key2
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.testfx.api.FxToolkit
 
 class ScrollPaneTest {
-    @Before fun launchBgAppManager() = runBlocking {
+    var m : Application? = null
+    @Before
+    fun launchBgAppManager() = runBlocking {
         FxToolkit.registerPrimaryStage()
-        val m = FxToolkit.setupApplication { BgAppManager() }
+        m = FxToolkit.setupApplication { BgAppManager() }
+    }
+    @After
+    fun cleanUp() {
+        FxToolkit.cleanupApplication(m!!)
     }
 
     @Test fun basics() = runBlocking {

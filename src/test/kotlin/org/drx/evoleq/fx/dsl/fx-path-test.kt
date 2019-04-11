@@ -15,6 +15,7 @@
  */
 package org.drx.evoleq.fx.dsl
 
+import javafx.application.Application
 import javafx.geometry.Point2D
 import javafx.scene.Scene
 import javafx.scene.paint.Color
@@ -25,6 +26,7 @@ import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.fx.application.BgAppManager
 import org.drx.evoleq.fx.geometry.Derivation
 import org.drx.evoleq.fx.test.showTestStage
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.testfx.api.FxToolkit
@@ -32,12 +34,18 @@ import java.nio.file.Path
 
 class FxPathTest {
 
-    @Before fun launchBgAppManager() = runBlocking {
+    var m : Application? = null
+    @Before
+    fun launchBgAppManager() = runBlocking {
         FxToolkit.registerPrimaryStage()
-        val m = FxToolkit.setupApplication { BgAppManager() }
+        m = FxToolkit.setupApplication { BgAppManager() }
     }
-
-    @Test fun fxPath() = runBlocking {
+    @After
+    fun cleanUp() {
+        FxToolkit.cleanupApplication(m!!)
+    }
+    //@Test
+    fun fxPath() = runBlocking {
         val stageComponent = fxStage<Unit> {
             id<StageId>()
             view{configure{}}

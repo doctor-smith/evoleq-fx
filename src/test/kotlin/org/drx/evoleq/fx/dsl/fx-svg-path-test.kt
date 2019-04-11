@@ -15,6 +15,7 @@
  */
 package org.drx.evoleq.fx.dsl
 
+import javafx.application.Application
 import javafx.scene.paint.Color
 import javafx.scene.shape.SVGPath
 import javafx.scene.shape.StrokeLineCap
@@ -25,18 +26,25 @@ import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.fx.application.BgAppManager
 import org.drx.evoleq.fx.test.showInTestStage
 import org.drx.evoleq.fx.test.showNodeInTestStage
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.testfx.api.FxToolkit
 
 class FxSvgPathTest{
-
-    @Before fun launchBgAppManager() = runBlocking {
+    var m : Application? = null
+    @Before
+    fun launchBgAppManager() = runBlocking {
         FxToolkit.registerPrimaryStage()
-        val m = FxToolkit.setupApplication { BgAppManager() }
+        m = FxToolkit.setupApplication { BgAppManager() }
+    }
+    @After
+    fun cleanUp() {
+        FxToolkit.cleanupApplication(m!!)
     }
 
-    @Test fun fxSvgPath() = runBlocking{
+    //@Test
+    fun fxSvgPath() = runBlocking{
         val path = fxSvgPath<Nothing>{
             id<SVGPath>()
             stub(stub{})
@@ -77,10 +85,11 @@ class FxSvgPathTest{
             }}
         }
         val stub = showNodeInTestStage(path).get()
-       // delay(10_000)
+        delay(1_000)
     }
 
-    @Test fun heart() = runBlocking {
+    //@Test
+    fun heart() = runBlocking {
         val heart = org.drx.evoleq.fx.dsl.fxSvgPath<Nothing> {
             noStub()
             view{configure {
@@ -139,6 +148,6 @@ class FxSvgPathTest{
         }
         val stub = showInTestStage(pane).get()
 
-       // delay(30_000)
+       delay(1_000)
     }
 }

@@ -15,6 +15,7 @@
  */
 package org.drx.evoleq.fx.dsl
 
+import javafx.application.Application
 import javafx.scene.Parent
 import javafx.scene.paint.Color
 import javafx.scene.shape.CubicCurve
@@ -25,14 +26,21 @@ import org.drx.evoleq.fx.application.BgAppManager
 import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.geometry.Derivation
 import org.drx.evoleq.fx.test.showInTestStage
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.testfx.api.FxToolkit
 
 class FxCubicCurveTest {
-    @Before fun launchBgAppManager() = runBlocking {
+    var m : Application? = null
+    @Before
+    fun launchBgAppManager() = runBlocking {
         FxToolkit.registerPrimaryStage()
-        val m = FxToolkit.setupApplication { BgAppManager() }
+        m = FxToolkit.setupApplication { BgAppManager() }
+    }
+    @After
+    fun cleanUp() {
+        FxToolkit.cleanupApplication(m!!)
     }
 
     @Test fun basics() = runBlocking{
