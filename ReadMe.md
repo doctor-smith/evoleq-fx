@@ -2,11 +2,11 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 
-#EvoleqFX
+# EvoleqFX
 Combine Evoleq with JavaFX. 
 
 
-##Goals
+## Goals
 1. Provide JavaFX - specific  implementations of the Evolving interface
     * ParallelFx
     * AsyncFx
