@@ -117,7 +117,7 @@ publishing {
                 val root = asNode()
                 root.appendNode("description", "A declarative approach to application design based on the theory of dynamical systems")
                 root.appendNode("name", Config.Project.artifactId)
-                root.appendNode("url", "https://bitbucket.org/dr-smith/evoleq-fx.git")
+                root.appendNode("url", "https://github.com/doctor-smith/evoleq.git")
                 root.children().addAll(maven.pom().dependencies)
             }
 
