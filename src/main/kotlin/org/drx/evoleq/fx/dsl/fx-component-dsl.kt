@@ -65,7 +65,7 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
 
     var fxRunTimeView: N? = null
 
-    val idProvider = GlobalScope.idActor()//IdProvider()
+    val idProvider = GlobalScope.idActor()
     private var keepIdProvider = false
 
     private val properties: HashMap<String, Any?> by lazy { HashMap<String, Any?>() }
