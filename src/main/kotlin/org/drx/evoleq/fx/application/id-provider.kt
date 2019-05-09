@@ -92,7 +92,7 @@ class IdProvider  {
      }
 }
 
-val numberOfKeys: Int by lazy{Keys.size}
+val numberOfKeys: Int by lazy{ Keys.size }
 fun CoroutineScope.idActor() = actor<SimpleObjectProperty<ID>>(){
     val currentId = SimpleIntegerProperty(0)
     for(property in channel) {
