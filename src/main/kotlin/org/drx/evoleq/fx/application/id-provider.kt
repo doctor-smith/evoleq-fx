@@ -31,7 +31,9 @@ import org.drx.evoleq.stub.toFlow
 import kotlin.reflect.KClass
 
 class PreId
-
+/**
+ * @deprecated
+ */
 class IdProvider  {
     private val requests: ArrayList<SimpleObjectProperty<ID>> by lazy{ ArrayList<SimpleObjectProperty<ID>>() }
     private val currentId = SimpleIntegerProperty(0)
