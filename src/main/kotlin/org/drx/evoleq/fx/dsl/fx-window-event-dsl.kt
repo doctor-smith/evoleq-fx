@@ -15,6 +15,7 @@
  */
 package org.drx.evoleq.fx.dsl
 
+import javafx.stage.Stage
 import javafx.stage.Window
 import javafx.stage.WindowEvent
 
@@ -44,6 +45,36 @@ fun <W:  Window> W.onHiding(action: WindowEvent.()->Unit): W {
 
 @Suppress("unused")
 fun <W:  Window> W.onHidden(action: WindowEvent.()->Unit): W {
+    this.setOnHidden(action)
+    return this
+}
+
+@Suppress("unused")
+fun <S: Stage> S.onCloseRequest(action: WindowEvent.()->Unit): S {
+    this.setOnCloseRequest(action)
+    return this
+}
+
+@Suppress("unused")
+fun <S:  Stage> S.onShown(action: WindowEvent.()->Unit): S {
+    this.setOnShown(action)
+    return this
+}
+
+@Suppress("unused")
+fun <S:  Stage> S.onShowing(action: WindowEvent.()->Unit): S {
+    this.setOnShowing(action)
+    return this
+}
+
+@Suppress("unused")
+fun <S:  Stage> S.onHiding(action: WindowEvent.()->Unit): S {
+    this.setOnHiding(action)
+    return this
+}
+
+@Suppress("unused")
+fun <S:  Stage> S.onHidden(action: WindowEvent.()->Unit): S {
     this.setOnHidden(action)
     return this
 }
