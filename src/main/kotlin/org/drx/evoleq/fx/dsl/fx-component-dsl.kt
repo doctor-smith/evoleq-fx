@@ -29,7 +29,7 @@ import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.application.IdProvider
 import org.drx.evoleq.fx.application.PreId
-import org.drx.evoleq.fx.application.idActor
+import org.drx.evoleq.fx.application.idProvider
 import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.component.FxNoStubComponent
 import org.drx.evoleq.fx.component.FxTunnelComponent
@@ -65,7 +65,7 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
 
     var fxRunTimeView: N? = null
 
-    val idProvider = GlobalScope.idActor()
+    val idProvider = GlobalScope.idProvider()
     private var keepIdProvider = false
 
     private val properties: HashMap<String, Any?> by lazy { HashMap<String, Any?>() }

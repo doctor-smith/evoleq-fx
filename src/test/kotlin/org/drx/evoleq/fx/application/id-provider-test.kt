@@ -21,8 +21,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.dsl.ID
-import org.drx.evoleq.stub.DefaultIdentificationKey
-import org.drx.evoleq.time.WaitForProperty
 import org.junit.Test
 import java.lang.Exception
 
@@ -30,7 +28,7 @@ class IdProviderTest {
     @Test fun test() = runBlocking {
         val N = 10000
         val ids = arrayListOf<Parallel<ID>>()
-        val provider = idActor()//IdProvider()
+        val provider = idProvider()//IdProvider()
         val process = Parallel<Unit> {
             IntRange(1, N).forEach {
                 //Parallel<Unit> {
