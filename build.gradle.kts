@@ -15,7 +15,7 @@ group = Config.Project.group
 version = Config.Project.version//"1.0.0-beta"//-SNAPSHOT"
 
 repositories {
-    mavenLocal()
+    //mavenLocal()
     mavenCentral()
     jcenter()
 }

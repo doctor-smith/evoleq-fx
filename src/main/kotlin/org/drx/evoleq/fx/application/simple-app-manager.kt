@@ -15,19 +15,42 @@
  */
 package org.drx.evoleq.fx.application
 
-import javafx.application.Platform
 import javafx.scene.Node
 import javafx.scene.Scene
 import javafx.stage.Stage
-import kotlinx.coroutines.delay
+import org.drx.evoleq.coroutines.BaseReceiver
+import org.drx.evoleq.dsl.*
 import org.drx.evoleq.evolving.Evolving
+import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.component.FxComponent
+import org.drx.evoleq.fx.dsl.FxComponents
 import org.drx.evoleq.fx.dsl.ID
 import org.drx.evoleq.fx.evolving.ParallelFx
-import java.lang.Thread.sleep
+import org.drx.evoleq.fx.phase.AppFlowMessage
+import org.drx.evoleq.stub.Stub
 
 abstract class SimpleAppManager<D> : AppManager<D>() {
+
+    lateinit var applicationManagerPort: BaseReceiver<AppFlowMessage.Runtime<D>>
+    lateinit var port: BaseReceiver<AppFlowMessage<D>>
+    protected lateinit var receiverStub: Stub<AppFlowMessage<D>>
+    init{
+        Parallel<Unit>{
+            port = scope.receiver{}
+            receiverStub = receivingStub<AppFlowMessage<D>,AppFlowMessage<D>>{
+                id(AppManager::class)
+                evolve{
+                    Immediate{it}
+                }
+                gap{
+                    from{ message -> Immediate{ message }}
+                    to{ _, message -> Immediate{ message }}
+                }
+                receiver(port)
+            }
+        }
+    }
 
     protected val stages: HashMap<ID, Stage> by lazy {
         HashMap<ID, Stage>()
@@ -42,7 +65,13 @@ abstract class SimpleAppManager<D> : AppManager<D>() {
         HashMap<ID, ()->FxComponent<Node, *>>()
     }
 
-    protected open fun showStage(id : ID): Evolving<FxComponent<Stage, *>> = ParallelFx<FxComponent<Stage, *>> {
+    fun registerComponents(components: FxComponents) {
+        stageComponents.putAll(components.stages)
+        sceneComponents.putAll(components.scenes)
+        nodeComponents.putAll(components.nodes)
+    }
+
+    open fun showStage(id : ID): Evolving<FxComponent<Stage, *>> = ParallelFx<FxComponent<Stage, *>> {
             val component = stageComponents[id]!!()
             val stage = component.show()
             stages[id] = stage
@@ -50,7 +79,7 @@ abstract class SimpleAppManager<D> : AppManager<D>() {
             component
         }
 
-    protected open fun hideStage(id: ID) =
+    open fun hideStage(id: ID) =
         ParallelFx<Unit> {
             val stage = stages[id]
             if (stage != null) {
@@ -58,5 +87,9 @@ abstract class SimpleAppManager<D> : AppManager<D>() {
                 hideStage(stage)
             }
         }
+
+
+
+
 
 }

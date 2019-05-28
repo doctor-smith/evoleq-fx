@@ -24,11 +24,14 @@ import org.drx.evoleq.dsl.Configuration
 import org.drx.evoleq.dsl.StubConfiguration
 import org.drx.evoleq.dsl.configure
 import org.drx.evoleq.dsl.stub
+import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.dsl.ID
 import org.drx.evoleq.stub.Stub
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
+
+class ApplicationManager
 
 /**
  * You will have to override the configure method.
@@ -55,7 +58,7 @@ abstract class AppManager<D> : Application(), Configuration<Stub<D>> {
         /**
          * Launch an application ( and register it ).
          * Calling this function a second time with a second app will not launch the entire
-         * application (which is impossibly) - it will only change the implementation of the app-manager
+         * application (which is impossibly) - it will only change the implementation of the app-applicationManager
          */
         @Suppress("UNCHECKED_CAST")
         fun <D, A : AppManager<D>> launch(app: A): Parallel<Stub<D>> {
@@ -79,13 +82,17 @@ abstract class AppManager<D> : Application(), Configuration<Stub<D>> {
             // configure app and
             // set stubConfiguration to return and
             scope.launch { coroutineScope{
-                AppManager.STUB = app.configure()
+                STUB = app.configure()
+                STUB.stubs[ApplicationManager::class] = stub<AppManager<D>?>{
+                    id(ApplicationManager::class)
+                    evolve{ Immediate{app} }
+                }
                 STUB_INITIALIZED = true
             } }
             while(!STUB_INITIALIZED){
                 kotlinx.coroutines.delay(1)
             }
-            val stub = AppManager.STUB as Stub<D>
+            val stub = STUB as Stub<D>
             REGISTRY[stub.id] = stub
             stub
         }}
@@ -118,7 +125,6 @@ abstract class AppManager<D> : Application(), Configuration<Stub<D>> {
     open fun hideStage(stage: Stage) {
         stage.hide()
     }
-
 
 }
 
