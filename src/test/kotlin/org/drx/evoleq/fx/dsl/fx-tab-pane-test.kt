@@ -26,6 +26,7 @@ import org.drx.evoleq.fx.application.BgAppManager
 import org.drx.evoleq.fx.dsl.*
 import org.drx.evoleq.fx.dsl.deprecated.SceneStubKey
 import org.drx.evoleq.fx.dsl.deprecated.StageStubKey
+import org.drx.evoleq.fx.test.fxRunTest
 import org.drx.evoleq.fx.test.showTestStage
 import org.drx.evoleq.stub.*
 import org.junit.After
@@ -36,15 +37,17 @@ import org.testfx.api.FxToolkit
 class TabPaneTest {
     var m : Application? = null
     @Before
-    fun launchBgAppManager() = runBlocking {
+    fun launchBgAppManager() = fxRunTest{//runBlocking {
         FxToolkit.registerPrimaryStage()
         m = FxToolkit.setupApplication { BgAppManager() }
     }
-    @After fun cleanUp() {
+    @After
+    fun cleanUp() = fxRunTest{// {
         FxToolkit.cleanupApplication(m!!)
+        FxToolkit.cleanupStages()
     }
 
-    @Test fun basics() = runBlocking {
+    @Test fun basics() = fxRunTest{//runBlocking {
         var done = false
 
         val stageComponent = fxStage<Nothing>{

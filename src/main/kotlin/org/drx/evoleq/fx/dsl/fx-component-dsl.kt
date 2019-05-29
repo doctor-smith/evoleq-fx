@@ -15,21 +15,18 @@
  */
 package org.drx.evoleq.fx.dsl
 
-import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.Group
 import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.layout.*
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import org.drx.evoleq.dsl.ArrayListConfiguration
 import org.drx.evoleq.dsl.Configuration
 import org.drx.evoleq.dsl.HashMapConfiguration
 import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.evolving.Parallel
-import org.drx.evoleq.fx.application.IdProvider
 import org.drx.evoleq.fx.application.PreId
-import org.drx.evoleq.fx.application.idProvider
+import org.drx.evoleq.fx.application.idProvider_Change
 import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.component.FxNoStubComponent
 import org.drx.evoleq.fx.component.FxTunnelComponent
@@ -41,6 +38,8 @@ import org.drx.evoleq.fx.runtime.FxRunTime
 import org.drx.evoleq.fx.stub.NoStub
 import org.drx.evoleq.fx.stub.Tunnel
 import org.drx.evoleq.stub.Stub
+import org.drx.evoleq.time.Change
+import org.drx.evoleq.time.happen
 import java.lang.Thread.sleep
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
@@ -65,7 +64,7 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
 
     var fxRunTimeView: N? = null
 
-    val idProvider = GlobalScope.idProvider()
+    val idProvider = GlobalScope.idProvider_Change()
     private var keepIdProvider = false
 
     private val properties: HashMap<String, Any?> by lazy { HashMap<String, Any?>() }
@@ -160,7 +159,15 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
      * Take next  Id
      */
     @Suppress("unused")
-    fun  FxComponentConfiguration<N, D>.nextId() {
+    fun  FxComponentConfiguration<N, D>.nextId() = Parallel<Unit> {
+        val change = Change<ID>(PreId::class)
+        val changing = change.happen()
+        Parallel<Unit>{
+            idProvider.send(change)
+            //launcher.id = changing.get()
+        }
+        launcher.id = changing.get()
+        /*
         val id = SimpleObjectProperty<ID>(PreId::class)
         //idProvider.add(id)
 
@@ -171,6 +178,8 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
             }
             launcher.id = id.get()
         }
+        */
+
     }
 
     /**
@@ -192,9 +201,17 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
      * No stub configuration
      */
     @Suppress("unused")
-    fun FxComponentConfiguration<N, D>.noStub() {
+    fun FxComponentConfiguration<N, D>.noStub() = Parallel<Unit>{
         val stub = NoStub<D>()
         launcher.stub = stub
+        val change = Change<ID>(PreId::class)
+        val changing = change.happen()
+        Parallel<Unit>{
+            idProvider.send(change)
+
+        }
+        launcher.id = changing.get()
+        /*
         val id = SimpleObjectProperty<ID>(PreId::class)
         //idProvider.add(id)
         Parallel<Unit> {
@@ -203,16 +220,26 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
                 delay(1)
             }
             launcher.id = id.get()
-        }
+        }.get()
+        */
+
     }
 
     /**
      * Underlying stub is a tunnel
      */
     @Suppress("unused")
-    fun FxComponentConfiguration<N, D>.tunnel(){
+    fun FxComponentConfiguration<N, D>.tunnel() = Parallel<Unit>{
         val stub = Tunnel<D>()
         launcher.stub = stub
+        val change = Change<ID>(PreId::class)
+        val changing = change.happen()
+        Parallel<Unit>{
+            idProvider.send(change)
+
+        }
+        launcher.id = changing.get()
+        /*
         val id = SimpleObjectProperty<ID>(PreId::class)
         //idProvider.add(id)
         Parallel<Unit> {
@@ -221,7 +248,8 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
                 delay(1)
             }
             launcher.id = id.get()
-        }
+        }.get()
+        */
     }
 
 

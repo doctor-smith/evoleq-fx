@@ -19,7 +19,11 @@ import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.Scene
 import javafx.stage.Stage
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.channels.actor
 import org.drx.evoleq.dsl.stub
+import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.application.AppManager
 import org.drx.evoleq.fx.application.deprecated.SimpleAppManager
@@ -27,6 +31,8 @@ import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.dsl.*
 import org.drx.evoleq.fx.evolving.ParallelFx
 import org.drx.evoleq.stub.Stub
+import org.drx.evoleq.time.Change
+import org.drx.evoleq.time.happen
 
 
 /**
@@ -83,4 +89,51 @@ fun <N : Node, D> showNodeInTestStage(nodeComponent: FxComponent<N, D>): Paralle
         child(nodeComponent)
     }
     showInTestStage(group).get()
+}
+
+
+val testRunner: SendChannel<Change<suspend CoroutineScope.() -> Unit>> =
+        GlobalScope.actor {
+            var blocked = false
+            for (f in channel) {
+                while(blocked){
+                    delay(1)
+                }
+                var error : Exception? = null
+                Parallel<Unit> {
+                    blocked = true
+                    var job: Job? = null
+                    try {
+                        withTimeout(10_000) {
+                            job = launch { f.value(scope) }
+                            job!!.join()
+
+                        }
+                    }
+                    catch(exception: Exception) {
+                        job!!.cancel()
+                        error = exception
+                    }
+
+                    blocked = false
+                }.get()
+                if(error == null) {
+                    f.value = {}
+                }
+                else{
+                    f.value = {throw error!!}
+                }
+            }
+
+        }
+
+suspend fun runTest(test: suspend CoroutineScope.()->Unit): Evolving<suspend CoroutineScope.()->Unit> {
+    val change = Change(test)
+    val changing = change.happen()
+    testRunner.send(change)
+    return changing
+}
+
+fun fxRunTest(test: suspend CoroutineScope.()->Unit) = runBlocking {
+    runTest(test).get()()
 }

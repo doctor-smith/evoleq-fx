@@ -15,17 +15,35 @@
  */
 package org.drx.evoleq.fx.application
 
+import javafx.application.Application
 import javafx.beans.property.SimpleObjectProperty
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.dsl.ID
+import org.drx.evoleq.fx.test.fxRunTest
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
+import org.testfx.api.FxToolkit
 import java.lang.Exception
 
 class IdProviderTest {
-    @Test fun test() = runBlocking {
+    var m : Application? = null
+    @Before
+    fun launchBgAppManager() = fxRunTest{//runBlocking {
+        FxToolkit.registerPrimaryStage()
+        m = FxToolkit.setupApplication { BgAppManager() }
+    }
+    @After
+    fun cleanUp() = fxRunTest{// {
+        FxToolkit.cleanupApplication(m!!)
+        FxToolkit.cleanupStages()
+    }
+
+    //@Test
+    fun test() = fxRunTest{//runBlocking {
         val N = 10000
         val ids = arrayListOf<Parallel<ID>>()
         val provider = idProvider()//IdProvider()
@@ -37,7 +55,7 @@ class IdProviderTest {
                         //provider.add(property)
                         provider.send(property)
                         while(property.value == PreId::class) {
-                            kotlinx.coroutines.delay(1)
+                            delay(1)
                         }
                         property.value
                     })

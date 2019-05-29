@@ -28,6 +28,7 @@ import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.fx.application.BgAppManager
 import org.drx.evoleq.fx.dsl.*
 import org.drx.evoleq.fx.stub.NoStub
+import org.drx.evoleq.fx.test.fxRunTest
 import org.drx.evoleq.fx.test.showTestStage
 import org.drx.evoleq.stub.Key50
 import org.drx.evoleq.stub.Key9
@@ -39,16 +40,17 @@ import org.testfx.api.FxToolkit
 class ComponentOneTest {
     var m : Application? = null
     @Before
-    fun launchBgAppManager() = runBlocking {
+    fun launchBgAppManager() = fxRunTest{//runBlocking {
         FxToolkit.registerPrimaryStage()
         m = FxToolkit.setupApplication { BgAppManager() }
     }
     @After
-    fun cleanUp() {
+    fun cleanUp() = fxRunTest{// {
         FxToolkit.cleanupApplication(m!!)
+        FxToolkit.cleanupStages()
     }
 
-    @Test fun go() = runBlocking {
+    @Test fun go() = fxRunTest{//runBlocking {
         val stageComponent = fxStage<Nothing> {
             id<StageId>()
             view { configure {

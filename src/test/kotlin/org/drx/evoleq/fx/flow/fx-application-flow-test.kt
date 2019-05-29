@@ -1,38 +1,71 @@
+/**
+ * Copyright (c) 2019 Dr. Florian Schmidt
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.drx.evoleq.fx.flow
 
-import javafx.beans.property.SimpleBooleanProperty
+import javafx.application.Application
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.Scene
 import javafx.scene.control.Button
 import javafx.stage.Stage
+import javafx.stage.WindowEvent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import org.drx.evoleq.conditions.once
 import org.drx.evoleq.coroutines.BaseReceiver
 import org.drx.evoleq.dsl.*
 import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.flow.intercept
-import org.drx.evoleq.fx.application.AppManager
+import org.drx.evoleq.fx.application.BgAppManager
 import org.drx.evoleq.fx.application.SimpleAppManager
 import org.drx.evoleq.fx.dsl.*
 import org.drx.evoleq.fx.dsl.deprecated.action
+import org.drx.evoleq.fx.evolving.ParallelFx
 import org.drx.evoleq.fx.phase.AppFlowMessage
 import org.drx.evoleq.fx.phase.FxApplicationPhase
-import org.drx.evoleq.message.Message
+import org.drx.evoleq.fx.test.fxRunTest
 import org.drx.evoleq.stub.Stub
 import org.drx.evoleq.stub.toFlow
 import org.drx.evoleq.time.WaitForProperty
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
+import org.testfx.api.FxRobot
+import org.testfx.api.FxToolkit
 import kotlin.reflect.KClass
 
 class FxApplicationFlowTest {
-    @Test fun basics() = runBlocking {
+    var m : Application? = null
+    @Before
+    fun launchBgAppManager() = fxRunTest{//runBlocking {
+        FxToolkit.registerPrimaryStage()
+        m = FxToolkit.setupApplication { BgAppManager() }
+    }
+    @After
+    fun cleanUp() = fxRunTest{// {
+        FxToolkit.cleanupApplication(m!!)
+        FxToolkit.cleanupStages()
+    }
+    @Test fun basics() = fxRunTest{//runBlocking{ fxRunTest {
 
         class CloseDialog
 
         class Data(val initialized: Boolean = false ,val message: AppFlowMessage<Data> = AppFlowMessage.Runtime.Wait<Data>())
-
+        var stage : Stage? = null
+        var okButton : Button? = null
+        var cancelButton : Button? = null
         class App : SimpleAppManager<Data>() {
             override fun configure(): Stub<Data> = stub appStub@{
                 // configure flow of this specific application
@@ -136,6 +169,9 @@ class FxApplicationFlowTest {
                     consume()
                     (property("close") as SimpleObjectProperty<Boolean>).value = true
                 }
+                x = 200.0
+                y = 200.0
+                stage = this
             }}
             scene(fxScene{
                 id<Scene>()
@@ -156,13 +192,17 @@ class FxApplicationFlowTest {
                     Data(it.initialized, AppFlowMessage.Runtime.HideStage(Stage::class))}
                 }
             })
+
         }
 
         fun closeDialog() = fxStage<AppFlowMessage.Runtime.Confirm<Data>>{
             id<CloseDialog>()
             val clicked = SimpleObjectProperty<AppFlowMessage.Runtime.Confirm<Data>>()
             //properties{"confirm" to SimpleObjectProperty<AppFlowMessage.Runtime.Confirm<Data>>() }
-            view{configure{}}
+            view{configure{
+                x = 200.0
+                y = 200.0
+            }}
 
             scene(fxScene{
                 id<Scene>()
@@ -175,6 +215,8 @@ class FxApplicationFlowTest {
                         noStub()
                         view{configure{
                             text = "Cancel"
+                            id = "calncel"
+                            cancelButton = this
                             action{
                                 clicked.value = AppFlowMessage.Runtime.Confirm.Cancel()
                                 //(property("confirm") as SimpleObjectProperty<AppFlowMessage.Runtime.Confirm<Data>>).value = AppFlowMessage.Runtime.Confirm.Ok()
@@ -185,6 +227,8 @@ class FxApplicationFlowTest {
                         noStub()
                         view{configure{
                             text = "Ok"
+                            id="ok"
+                            okButton = this
                             action{
                                 clicked.value = AppFlowMessage.Runtime.Confirm.Ok()
                                 //(property("confirm") as SimpleObjectProperty<AppFlowMessage.Runtime.Confirm<Data>>).value = AppFlowMessage.Runtime.Confirm.Ok()
@@ -275,11 +319,33 @@ class FxApplicationFlowTest {
                 updateCondition { data -> !data.initialized  }
             }
         )
+        val res = Parallel<Data>{mainFlow.evolve(Data()).get()}
 
-        val res = mainFlow.evolve(Data()).get()
+        val click = Parallel<Unit>{
+            while(stage == null){
+                kotlinx.coroutines.delay(1)
+            }
+            delay(1000)
+            ParallelFx<Unit> {
+                stage!!.fireEvent(WindowEvent(
+                        stage,
+                        WindowEvent.WINDOW_CLOSE_REQUEST
+                ))
+            }
+            while(okButton == null) {
+                kotlinx.coroutines.delay(1)
+            }
+            Parallel<Unit>{
+                FxRobot().clickOn(okButton!!)
+            }.get()
+        }
+        res.get()
+        click.get()
+
         port.actor.close()
         delay(1_000)
         Unit
+    //}.get()()
     }
 
 

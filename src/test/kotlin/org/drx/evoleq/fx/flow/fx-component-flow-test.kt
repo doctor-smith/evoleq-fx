@@ -32,6 +32,7 @@ import org.drx.evoleq.fx.application.BgAppManager
 import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.dsl.*
 import org.drx.evoleq.fx.flow.Config.style1
+import org.drx.evoleq.fx.test.fxRunTest
 import org.drx.evoleq.fx.test.showTestStage
 import org.drx.evoleq.stub.*
 import org.junit.After
@@ -42,17 +43,18 @@ import org.testfx.api.FxToolkit
 class FxComponentFlowTest {
     var m : Application? = null
     @Before
-    fun launchBgAppManager() = runBlocking {
+    fun launchBgAppManager() = fxRunTest{//runBlocking {
         FxToolkit.registerPrimaryStage()
         m = FxToolkit.setupApplication { BgAppManager() }
     }
     @After
-    fun cleanUp() {
+    fun cleanUp() = fxRunTest{// {
         FxToolkit.cleanupApplication(m!!)
+        FxToolkit.cleanupStages()
     }
 
 
-    @Test fun example() = runBlocking {
+    @Test fun example() = fxRunTest{//runBlocking {
         val stageConfiguration = fxStage<Nothing> stage@{
             val closeButtonClicked = SimpleBooleanProperty(false)
             id<StageId>()
@@ -88,7 +90,7 @@ class FxComponentFlowTest {
                                     """-fx-color: green;"""
                             )
                         }
-                        stub(org.drx.evoleq.dsl.stub {
+                        stub(stub {
                             evolve{ x -> Immediate{x+1}
                             }
                         })
@@ -171,7 +173,7 @@ class FxComponentFlowTest {
     }
 
 
-    @Test fun tunnelsAndNoStubs() = runBlocking{
+    @Test fun tunnelsAndNoStubs() = fxRunTest{//runBlocking{
         val stageComponent = fxStage<Unit> {
             id<StageId>()
             view{configure{}}
@@ -221,8 +223,10 @@ class FxComponentFlowTest {
         }
 
         val stub = showTestStage(stageComponent).get()
-
-        assert(stageComponent.stubs.size ==2)
+        delay(1_000)
+        //println(stageComponent.stubs.size)
+        //stageComponent.stubs.forEach{println(it)}
+        assert(stageComponent.stubs.size ==3) // 3 because the ApplicationManager is also a sub-stub
 
     }
 }

@@ -15,9 +15,11 @@
  */
 package org.drx.evoleq.fx.application
 
+import com.sun.org.apache.xml.internal.security.Init.isInitialized
 import javafx.scene.Node
 import javafx.scene.Scene
 import javafx.stage.Stage
+import kotlinx.coroutines.runBlocking
 import org.drx.evoleq.coroutines.BaseReceiver
 import org.drx.evoleq.dsl.*
 import org.drx.evoleq.evolving.Evolving
@@ -36,19 +38,21 @@ abstract class SimpleAppManager<D> : AppManager<D>() {
     lateinit var port: BaseReceiver<AppFlowMessage<D>>
     protected lateinit var receiverStub: Stub<AppFlowMessage<D>>
     init{
-        Parallel<Unit>{
-            port = scope.receiver{}
-            receiverStub = receivingStub<AppFlowMessage<D>,AppFlowMessage<D>>{
-                id(AppManager::class)
-                evolve{
-                    Immediate{it}
+        runBlocking {
+            Parallel<Unit> {
+                port = scope.receiver {}
+                receiverStub = receivingStub<AppFlowMessage<D>, AppFlowMessage<D>> {
+                    id(AppManager::class)
+                    evolve {
+                        Immediate { it }
+                    }
+                    gap {
+                        from { message -> Immediate { message } }
+                        to { _, message -> Immediate { message } }
+                    }
+                    receiver(port)
                 }
-                gap{
-                    from{ message -> Immediate{ message }}
-                    to{ _, message -> Immediate{ message }}
-                }
-                receiver(port)
-            }
+            }.get()
         }
     }
 

@@ -15,6 +15,7 @@
  */
 package org.drx.evoleq.fx.application
 
+import javafx.application.Application
 import javafx.application.Platform
 import javafx.stage.Stage
 import kotlinx.coroutines.delay
@@ -22,6 +23,7 @@ import kotlinx.coroutines.runBlocking
 import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.fx.dsl.launchApplicationStub
 import org.drx.evoleq.fx.evolving.ParallelFx
+import org.drx.evoleq.fx.test.fxRunTest
 import org.drx.evoleq.stub.Stub
 import org.junit.*
 import org.testfx.api.FxToolkit
@@ -29,19 +31,22 @@ import java.lang.Thread.sleep
 
 class AppManagerTest {
 
+    var m : Application? = null
     @Before
-    fun launchBgAppManager() = runBlocking {
+    fun launchBgAppManager() = fxRunTest{//runBlocking {
         FxToolkit.registerPrimaryStage()
-        val m = FxToolkit.setupApplication { BgAppManager() }
+        m = FxToolkit.setupApplication { BgAppManager() }
+    }
+    @After
+    fun cleanUp() = fxRunTest{// {
+        FxToolkit.cleanupApplication(m!!)
+        FxToolkit.cleanupStages()
     }
 
-    @Test fun launchApp() = runBlocking {
+    @Test fun launchApp() = fxRunTest{//runBlocking {
         class App: AppManager<Unit>() {
 
-            override fun showStage(stage: Stage) {
-                println("show stage")
-                super.showStage(stage)
-            }
+
 
             override fun configure(): Stub<Unit> = stub {
                 id(App::class)
@@ -60,13 +65,9 @@ class AppManagerTest {
 
         //delay(1_000)
     }
-    @Test fun launchFromClass() = runBlocking{
+    @Test fun launchFromClass() = fxRunTest{//runBlocking{
         class App: AppManager<Unit>() {
 
-            override fun showStage(stage: Stage) {
-                println("show stage")
-                super.showStage(stage)
-            }
 
             override fun configure(): Stub<Unit> = stub {
                 id(App::class)
@@ -84,7 +85,7 @@ class AppManagerTest {
         val u = stub.evolve(Unit).get()
     }
 
-    @Test fun launchViaDsl() = runBlocking{
+    @Test fun launchViaDsl() = fxRunTest{//runBlocking{
 
         class App: AppManager<Boolean>() {
             override fun configure(): Stub<Boolean> = stub{
@@ -111,7 +112,7 @@ class AppManagerTest {
 
     }
 
-    @Test fun launchTwoAppsAndCheckRegistry() = runBlocking {
+    @Test fun launchTwoAppsAndCheckRegistry() = fxRunTest{//runBlocking {
         class App1: AppManager<Boolean>() {
             override fun configure(): Stub<Boolean> = stub{
                 id(App1::class)

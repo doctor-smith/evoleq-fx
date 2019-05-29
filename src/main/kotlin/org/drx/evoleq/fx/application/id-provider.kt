@@ -28,6 +28,7 @@ import org.drx.evoleq.fx.dsl.ID
 import org.drx.evoleq.stub.Keys
 import org.drx.evoleq.stub.Stub
 import org.drx.evoleq.stub.toFlow
+import org.drx.evoleq.time.Change
 import kotlin.reflect.KClass
 
 class PreId
@@ -44,5 +45,20 @@ fun CoroutineScope.idProvider() = actor<SimpleObjectProperty<ID>>(){
         }
 
         property.value = Keys[id]
+    }
+}
+
+fun CoroutineScope.idProvider_Change() = actor<Change<ID>>(capacity = 100_000){
+    var currentId = 0
+    val number = numberOfKeys
+    for(change in channel){
+        val id = currentId
+        currentId = if (id == number - 1) {
+            0
+        } else {
+            id + 1
+        }
+
+        change.value = Keys[id]!!
     }
 }

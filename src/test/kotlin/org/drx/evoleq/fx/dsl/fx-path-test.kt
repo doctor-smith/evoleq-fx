@@ -25,6 +25,7 @@ import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.fx.application.BgAppManager
 import org.drx.evoleq.fx.geometry.Derivation
+import org.drx.evoleq.fx.test.fxRunTest
 import org.drx.evoleq.fx.test.showTestStage
 import org.junit.After
 import org.junit.Before
@@ -36,16 +37,17 @@ class FxPathTest {
 
     var m : Application? = null
     @Before
-    fun launchBgAppManager() = runBlocking {
+    fun launchBgAppManager() = fxRunTest{//runBlocking {
         FxToolkit.registerPrimaryStage()
         m = FxToolkit.setupApplication { BgAppManager() }
     }
     @After
-    fun cleanUp() {
+    fun cleanUp() = fxRunTest{// {
         FxToolkit.cleanupApplication(m!!)
+        FxToolkit.cleanupStages()
     }
-    //@Test
-    fun fxPath() = runBlocking {
+    @Test
+    fun fxPath() = fxRunTest{//runBlocking {
         val stageComponent = fxStage<Unit> {
             id<StageId>()
             view{configure{}}

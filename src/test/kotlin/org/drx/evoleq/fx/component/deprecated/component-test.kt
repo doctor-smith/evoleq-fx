@@ -15,6 +15,7 @@
  */
 package org.drx.evoleq.fx.component.deprecated
 
+import javafx.application.Application
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.Insets
 import javafx.scene.Scene
@@ -38,8 +39,10 @@ import org.drx.evoleq.fx.dsl.launchApplicationStub
 import org.drx.evoleq.fx.evolving.AsyncFx
 import org.drx.evoleq.fx.evolving.ParallelFx
 import org.drx.evoleq.fx.test.deprecated.showTestStage
+import org.drx.evoleq.fx.test.fxRunTest
 import org.drx.evoleq.stub.Stub
 import org.drx.evoleq.stub.toFlow
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.testfx.api.FxRobot
@@ -48,15 +51,21 @@ import java.lang.Thread.sleep
 
 class ComponentTest {
 
+    var m : Application? = null
     @Before
-    fun launchBgAppManager() = runBlocking {
+    fun launchBgAppManager() = fxRunTest{//runBlocking {
         FxToolkit.registerPrimaryStage()
-        val m = FxToolkit.setupApplication { BgAppManager() }
+        m = FxToolkit.setupApplication { BgAppManager() }
+    }
+    @After
+    fun cleanUp() = fxRunTest{// {
+        FxToolkit.cleanupApplication(m!!)
+        FxToolkit.cleanupStages()
     }
 
 
     //@Test
-    fun component() = runBlocking  {
+    fun component() = fxRunTest{//runBlocking  {
         class Data(val message: String = "", val passedStates: ArrayList<String> = arrayListOf<String>())
 
         //val passedStates = arrayListOf<String>()
@@ -164,7 +173,7 @@ class ComponentTest {
 
 
     //@Test
-    fun parentComponent() = runBlocking {
+    fun parentComponent() = fxRunTest{//runBlocking {
         val x = fxPane<VBox, Unit> {
 
             view {
@@ -225,7 +234,7 @@ class ComponentTest {
 
 
     //@Test
-    fun sceneComponent() = runBlocking {
+    fun sceneComponent() = fxRunTest{//runBlocking {
         val sceneComponent = fxScene<VBox, Unit> {
             configure { }
             sceneConstructorData(width = 300.0, height = 200.0)
@@ -269,7 +278,7 @@ class ComponentTest {
     }
 
     //@Test
-    fun stageComponent() = runBlocking {
+    fun stageComponent() = fxRunTest{//runBlocking {
 
         val stageComponent = fxStage<Unit> {
             configure {
@@ -315,7 +324,7 @@ class ComponentTest {
     }
 
     //@Test
-    fun showStageTwice() = runBlocking {
+    fun showStageTwice() = fxRunTest{//runBlocking {
         val stage = fxStage<Nothing> {
             configure { initStyle(StageStyle.UNDECORATED) }
             scene(fxScene<Pane, Nothing> {
@@ -366,7 +375,7 @@ class ComponentTest {
     }
 
     //@Test
-    fun fxBorderPane() = runBlocking {
+    fun fxBorderPane() = fxRunTest{//runBlocking {
 
         val stageComponent = fxStage<Unit> {
             configure {
@@ -414,7 +423,7 @@ class ComponentTest {
 
 
     //@Test
-    fun parentChildRelations() = runBlocking {
+    fun parentChildRelations() = fxRunTest{//runBlocking {
         // button to be clicked by FxRobot
         var button: Button? = null
         // hopefully carries value after button click - initially set to false
@@ -598,7 +607,7 @@ class ComponentTest {
     }
 
     //@Test
-    fun anchorPaneComponent() = runBlocking {
+    fun anchorPaneComponent() = fxRunTest{//runBlocking {
         val stageComponent = fxStage<Nothing> {
             scene(fxScene<AnchorPane, Nothing> {
                 sceneConstructorData(width = 500.0, height = 600.0)
@@ -639,7 +648,7 @@ class ComponentTest {
     }
 
     //@Test
-    fun runTime() = runBlocking {
+    fun runTime() = fxRunTest{//runBlocking {
         class Data
         val stageComponent = fxStage<Data> {
             scene(fxScene<VBox, Data> {

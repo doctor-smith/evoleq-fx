@@ -24,7 +24,7 @@ import org.drx.evoleq.fx.dsl.ID
 import org.drx.evoleq.fx.runtime.FxRunTime
 import org.drx.evoleq.stub.Stub
 
-const val  FX_COMPONENT_PHASE_TIMEOUT: Long = 5_000
+const val  FX_COMPONENT_PHASE_TIMEOUT: Long = 15_000
 sealed class FxComponentPhase(open val log: ArrayList<String> = arrayListOf(),open val errors: ArrayList<Exception> = arrayListOf()) : Phase {
     val defaultTimeout: Long = FX_COMPONENT_PHASE_TIMEOUT
     /**

@@ -15,20 +15,35 @@
  */
 package org.drx.evoleq.fx.evolving
 
+import javafx.application.Application
 import javafx.stage.Stage
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import org.drx.evoleq.fx.application.BgAppManager
+import org.drx.evoleq.fx.test.fxRunTest
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 import org.testfx.api.FxToolkit
 import java.lang.Thread.sleep
 
 class AsyncFxTest {
 
-    val primaryStage: Stage = FxToolkit.registerPrimaryStage()
+    var m : Application? = null
+    @Before
+    fun launchBgAppManager() = fxRunTest{//runBlocking {
+        FxToolkit.registerPrimaryStage()
+        m = FxToolkit.setupApplication { BgAppManager() }
+    }
+    @After
+    fun cleanUp() = fxRunTest{// {
+        FxToolkit.cleanupApplication(m!!)
+        FxToolkit.cleanupStages()
+    }
     @Test
-    fun runsOnApplicationThread() = runBlocking{
+    fun runsOnApplicationThread() = fxRunTest{//runBlocking{
         val asyncFx = AsyncFx<String> {
             Thread.currentThread().name
         }
@@ -37,7 +52,7 @@ class AsyncFxTest {
         assert(threadName == "JavaFX Application Thread")
     }
 
-    @Test fun isLaunchedOnInitialization() = runBlocking{
+    @Test fun isLaunchedOnInitialization() = fxRunTest{//runBlocking{
         val async = AsyncFx<Unit>{
             sleep(1_000)
         }
@@ -49,7 +64,7 @@ class AsyncFxTest {
         assert(measure <= 50 )
     }
 
-    @Test fun cancelImmediately() = runBlocking {
+    @Test fun cancelImmediately() = fxRunTest{//runBlocking {
         var time = System.currentTimeMillis()
         val asyncFx = AsyncFx<Int> {
             sleep(1_000)
@@ -66,7 +81,7 @@ class AsyncFxTest {
         //println(time)
     }
 
-    @Test fun cancelLate() = runBlocking {
+    @Test fun cancelLate() = fxRunTest{//runBlocking {
         val asyncFx = AsyncFx<Int> {
             sleep(200)
             1

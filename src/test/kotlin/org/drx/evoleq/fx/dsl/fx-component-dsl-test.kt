@@ -20,6 +20,7 @@ import javafx.scene.Group
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.drx.evoleq.fx.application.BgAppManager
+import org.drx.evoleq.fx.test.fxRunTest
 import org.drx.evoleq.fx.test.showInTestStage
 import org.junit.After
 import org.junit.Before
@@ -30,16 +31,17 @@ class FxComponentDslTest {
 
     var m : Application? = null
     @Before
-    fun launchBgAppManager() = runBlocking {
+    fun launchBgAppManager() = fxRunTest{//runBlocking {
         FxToolkit.registerPrimaryStage()
         m = FxToolkit.setupApplication { BgAppManager() }
     }
     @After
-    fun cleanUp() {
+    fun cleanUp() = fxRunTest{// {
         FxToolkit.cleanupApplication(m!!)
+        FxToolkit.cleanupStages()
     }
 
-    @Test fun children() {
+    @Test fun children()=fxRunTest{// {
         val c = fxComponent<Group,Nothing> {
             noStub()
             view { configure {  } }
@@ -56,7 +58,7 @@ class FxComponentDslTest {
         }
     }
 
-    @Test fun configureWithConstructorData() = runBlocking {
+    @Test fun configureWithConstructorData() = fxRunTest{//runBlocking {
         var done1: Boolean = false
         var done2: Boolean = false
         val c = fxGroup<Nothing>{
@@ -76,6 +78,7 @@ class FxComponentDslTest {
             })
         }
         val stub = showInTestStage(c).get()
+        delay(1_000)
         assert(done1 && done2)
         //delay(10_000)
     }

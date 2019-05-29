@@ -24,6 +24,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.fx.application.BgAppManager
+import org.drx.evoleq.fx.test.fxRunTest
 import org.drx.evoleq.fx.test.showInTestStage
 import org.drx.evoleq.fx.test.showNodeInTestStage
 import org.junit.After
@@ -34,17 +35,18 @@ import org.testfx.api.FxToolkit
 class FxSvgPathTest{
     var m : Application? = null
     @Before
-    fun launchBgAppManager() = runBlocking {
+    fun launchBgAppManager() = fxRunTest{//runBlocking {
         FxToolkit.registerPrimaryStage()
         m = FxToolkit.setupApplication { BgAppManager() }
     }
     @After
-    fun cleanUp() {
+    fun cleanUp() = fxRunTest{// {
         FxToolkit.cleanupApplication(m!!)
+        FxToolkit.cleanupStages()
     }
 
-    //@Test
-    fun fxSvgPath() = runBlocking{
+    @Test
+    fun fxSvgPath() = fxRunTest{//runBlocking{
         val path = fxSvgPath<Nothing>{
             id<SVGPath>()
             stub(stub{})
@@ -88,8 +90,8 @@ class FxSvgPathTest{
         delay(1_000)
     }
 
-    //@Test
-    fun heart() = runBlocking {
+    @Test
+    fun heart() = fxRunTest{//runBlocking {
         val heart = org.drx.evoleq.fx.dsl.fxSvgPath<Nothing> {
             noStub()
             view{configure {

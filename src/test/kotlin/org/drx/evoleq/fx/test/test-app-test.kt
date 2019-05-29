@@ -32,16 +32,17 @@ import org.junit.Test
 class TestAppTest{
     var m : Application? = null
     @Before
-    fun launchBgAppManager() = runBlocking {
+    fun launchBgAppManager() = fxRunTest{//runBlocking {
         FxToolkit.registerPrimaryStage()
         m = FxToolkit.setupApplication { BgAppManager() }
     }
     @After
-    fun cleanUp() {
+    fun cleanUp() = fxRunTest{// {
         FxToolkit.cleanupApplication(m!!)
+        FxToolkit.cleanupStages()
     }
 
-    @Test fun testApp() = runBlocking{
+    @Test fun testApp() = fxRunTest{//runBlocking{
 
         val stageComponent = fxStage<Boolean> {
             id<StageId>()
@@ -67,7 +68,7 @@ class TestAppTest{
         delay(1_000)
     }
 
-    @Test fun testApp2() = runBlocking{
+    @Test fun testApp2() = fxRunTest{//runBlocking{
 
         val stageComponent = fxStage<Boolean> {
             id<StageId>()

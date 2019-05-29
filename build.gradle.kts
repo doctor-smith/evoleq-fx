@@ -15,7 +15,7 @@ group = Config.Project.group
 version = Config.Project.version//"1.0.0-beta"//-SNAPSHOT"
 
 repositories {
-    //mavenLocal()
+    mavenLocal()
     mavenCentral()
     jcenter()
 }
@@ -28,10 +28,14 @@ dependencies {
     //implementation(Config.Dependencies.tornadofx)
 
     implementation ("org.drx:evoleq:1.0.3")
-
+    //compile("junit", "junit", "4.12")
     testCompile("junit", "junit", "4.12")
     testCompile ("org.testfx:testfx-core:4.0.15-alpha")
     testCompile ("org.testfx:testfx-junit:4.0.15-alpha")
+
+    //testImplementation("io.kotlintest:kotlintest-runner-junit5:3.3.2")
+    //testImplementation("org.junit.jupiter:junit-jupiter-api:5.3.1")
+    //testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.3.1")
 }
 
 configure<JavaPluginConvention> {
@@ -73,6 +77,8 @@ tasks {
 
 
 }
+
+
 
 task("writeNewPom") {
     doLast {

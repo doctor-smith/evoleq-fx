@@ -22,6 +22,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.drx.evoleq.fx.application.BgAppManager
 import org.drx.evoleq.fx.component.FxComponent
+import org.drx.evoleq.fx.test.fxRunTest
 import org.drx.evoleq.fx.test.launchTestStage
 import org.junit.After
 import org.junit.Before
@@ -32,16 +33,17 @@ class FxStageTest{
 
     var m : Application? = null
     @Before
-    fun launchBgAppManager() = runBlocking {
+    fun launchBgAppManager() = fxRunTest{//runBlocking {
         FxToolkit.registerPrimaryStage()
         m = FxToolkit.setupApplication { BgAppManager() }
     }
     @After
-    fun cleanUp() {
+    fun cleanUp() = fxRunTest{// {
         FxToolkit.cleanupApplication(m!!)
+        FxToolkit.cleanupStages()
     }
 
-    @Test fun fxStage() = runBlocking {
+    @Test fun fxStage() = fxRunTest{//runBlocking {
         val stub = launchTestStage(testStageConfig()).get()
 
         delay (1_000)

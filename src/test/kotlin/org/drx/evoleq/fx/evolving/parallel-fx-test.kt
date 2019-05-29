@@ -15,16 +15,31 @@
  */
 package org.drx.evoleq.fx.evolving
 
+import javafx.application.Application
 import javafx.stage.Stage
 import kotlinx.coroutines.runBlocking
+import org.drx.evoleq.fx.application.BgAppManager
+import org.drx.evoleq.fx.test.fxRunTest
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 import org.testfx.api.FxToolkit
 import java.lang.Thread.sleep
 
 class ParallelFxTest {
-    val primaryStage: Stage = FxToolkit.registerPrimaryStage()
+    var m : Application? = null
+    @Before
+    fun launchBgAppManager() = fxRunTest{//runBlocking {
+        FxToolkit.registerPrimaryStage()
+        m = FxToolkit.setupApplication { BgAppManager() }
+    }
+    @After
+    fun cleanUp() = fxRunTest{// {
+        FxToolkit.cleanupApplication(m!!)
+        FxToolkit.cleanupStages()
+    }
     @Test
-    fun runsOnApplicationThread() = runBlocking{
+    fun runsOnApplicationThread() = fxRunTest{//runBlocking{
         val parallelFx = ParallelFx<String> {
             assert(FxToolkit.isFXApplicationThreadRunning())
             Thread.currentThread().name

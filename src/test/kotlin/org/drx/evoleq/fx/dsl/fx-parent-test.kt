@@ -20,6 +20,7 @@ import javafx.scene.Group
 import javafx.scene.control.Button
 import kotlinx.coroutines.runBlocking
 import org.drx.evoleq.fx.application.BgAppManager
+import org.drx.evoleq.fx.test.fxRunTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -28,16 +29,17 @@ import org.testfx.api.FxToolkit
 class FxParentTest {
     var m : Application? = null
     @Before
-    fun launchBgAppManager() = runBlocking {
+    fun launchBgAppManager() = fxRunTest{//runBlocking {
         FxToolkit.registerPrimaryStage()
         m = FxToolkit.setupApplication { BgAppManager() }
     }
     @After
-    fun cleanUp() {
+    fun cleanUp() = fxRunTest{// {
         FxToolkit.cleanupApplication(m!!)
+        FxToolkit.cleanupStages()
     }
 
-    @Test fun isFxParent() {
+    @Test fun isFxParent() =fxRunTest{// {
         val g = Group()
         assert(g.hasModifiableChildren())
         assert(g.isFxParent())
@@ -50,16 +52,4 @@ class FxParentTest {
 
     }
 
-    @Test fun overrideProtectedToPublic() {
-        open class C{
-            protected open fun f(): Int = 1
-        }
-        class D : C() {
-            public override fun f(): Int {
-                return super.f()
-            }
-        }
-        val d = D()
-        println(d.f())
-    }
 }
