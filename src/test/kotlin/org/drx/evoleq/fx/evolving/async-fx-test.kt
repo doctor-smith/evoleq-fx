@@ -22,7 +22,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.drx.evoleq.fx.application.BgAppManager
-import org.drx.evoleq.fx.test.fxRunTest
+import org.drx.evoleq.fx.test.dsl.fxRunTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -31,17 +31,7 @@ import java.lang.Thread.sleep
 
 class AsyncFxTest {
 
-    var m : Application? = null
-    @Before
-    fun launchBgAppManager() = fxRunTest{//runBlocking {
-        FxToolkit.registerPrimaryStage()
-        m = FxToolkit.setupApplication { BgAppManager() }
-    }
-    @After
-    fun cleanUp() = fxRunTest{// {
-        FxToolkit.cleanupApplication(m!!)
-        FxToolkit.cleanupStages()
-    }
+
     @Test
     fun runsOnApplicationThread() = fxRunTest{//runBlocking{
         val asyncFx = AsyncFx<String> {

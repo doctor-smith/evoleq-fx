@@ -39,7 +39,7 @@ import org.drx.evoleq.fx.dsl.launchApplicationStub
 import org.drx.evoleq.fx.evolving.AsyncFx
 import org.drx.evoleq.fx.evolving.ParallelFx
 import org.drx.evoleq.fx.test.deprecated.showTestStage
-import org.drx.evoleq.fx.test.fxRunTest
+import org.drx.evoleq.fx.test.dsl.fxRunTest
 import org.drx.evoleq.stub.Stub
 import org.drx.evoleq.stub.toFlow
 import org.junit.After
@@ -51,17 +51,7 @@ import java.lang.Thread.sleep
 
 class ComponentTest {
 
-    var m : Application? = null
-    @Before
-    fun launchBgAppManager() = fxRunTest{//runBlocking {
-        FxToolkit.registerPrimaryStage()
-        m = FxToolkit.setupApplication { BgAppManager() }
-    }
-    @After
-    fun cleanUp() = fxRunTest{// {
-        FxToolkit.cleanupApplication(m!!)
-        FxToolkit.cleanupStages()
-    }
+
 
 
     //@Test

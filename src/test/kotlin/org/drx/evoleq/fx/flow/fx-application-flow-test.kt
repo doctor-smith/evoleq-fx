@@ -35,7 +35,7 @@ import org.drx.evoleq.fx.dsl.deprecated.action
 import org.drx.evoleq.fx.evolving.ParallelFx
 import org.drx.evoleq.fx.phase.AppFlowMessage
 import org.drx.evoleq.fx.phase.FxApplicationPhase
-import org.drx.evoleq.fx.test.fxRunTest
+import org.drx.evoleq.fx.test.dsl.fxRunTest
 import org.drx.evoleq.stub.Stub
 import org.drx.evoleq.stub.toFlow
 import org.drx.evoleq.time.WaitForProperty
@@ -47,17 +47,7 @@ import org.testfx.api.FxToolkit
 import kotlin.reflect.KClass
 
 class FxApplicationFlowTest {
-    var m : Application? = null
-    @Before
-    fun launchBgAppManager() = fxRunTest{//runBlocking {
-        FxToolkit.registerPrimaryStage()
-        m = FxToolkit.setupApplication { BgAppManager() }
-    }
-    @After
-    fun cleanUp() = fxRunTest{// {
-        FxToolkit.cleanupApplication(m!!)
-        FxToolkit.cleanupStages()
-    }
+
     @Test fun basics() = fxRunTest{//runBlocking{ fxRunTest {
 
         class CloseDialog

@@ -22,7 +22,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.drx.evoleq.fx.application.BgAppManager
 import org.drx.evoleq.fx.component.FxComponent
-import org.drx.evoleq.fx.test.fxRunTest
+import org.drx.evoleq.fx.test.dsl.fxRunTest
 import org.drx.evoleq.fx.test.launchTestStage
 import org.junit.After
 import org.junit.Before
@@ -31,17 +31,6 @@ import org.testfx.api.FxToolkit
 
 class FxStageTest{
 
-    var m : Application? = null
-    @Before
-    fun launchBgAppManager() = fxRunTest{//runBlocking {
-        FxToolkit.registerPrimaryStage()
-        m = FxToolkit.setupApplication { BgAppManager() }
-    }
-    @After
-    fun cleanUp() = fxRunTest{// {
-        FxToolkit.cleanupApplication(m!!)
-        FxToolkit.cleanupStages()
-    }
 
     @Test fun fxStage() = fxRunTest{//runBlocking {
         val stub = launchTestStage(testStageConfig()).get()
@@ -51,6 +40,7 @@ class FxStageTest{
 
     fun testStageConfig(): FxComponent<Stage, Nothing> = fxStage{
         //id<StageId>()
+        noStub()
         view{configure{}}
         scene(fxScene{
             root(fxBorderPane{
@@ -83,7 +73,7 @@ class FxStageTest{
             }
             noStub()
         })
-        noStub()
+
         //stub(stub{})
     }
 }

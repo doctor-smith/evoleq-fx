@@ -26,7 +26,7 @@ import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.fx.application.BgAppManager
 import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.geometry.Derivation
-import org.drx.evoleq.fx.test.fxRunTest
+import org.drx.evoleq.fx.test.dsl.fxRunTest
 import org.drx.evoleq.fx.test.showInTestStage
 import org.junit.After
 import org.junit.Before
@@ -34,17 +34,7 @@ import org.junit.Test
 import org.testfx.api.FxToolkit
 
 class FxCubicCurveTest {
-    var m : Application? = null
-    @Before
-    fun launchBgAppManager() = fxRunTest{//runBlocking {
-        FxToolkit.registerPrimaryStage()
-        m = FxToolkit.setupApplication { BgAppManager() }
-    }
-    @After
-    fun cleanUp() = fxRunTest{// {
-        FxToolkit.cleanupApplication(m!!)
-        FxToolkit.cleanupStages()
-    }
+
     @Test fun basics() = fxRunTest{//runBlocking{
         val curve = {fxCubicCurve<Nothing> {
             id<CubicCurve>()

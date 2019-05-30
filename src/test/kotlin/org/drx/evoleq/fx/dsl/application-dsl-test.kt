@@ -19,24 +19,14 @@ import javafx.application.Application
 import junit.framework.Assert.fail
 import kotlinx.coroutines.runBlocking
 import org.drx.evoleq.fx.application.BgAppManager
-import org.drx.evoleq.fx.test.fxRunTest
+import org.drx.evoleq.fx.test.dsl.fxRunTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.testfx.api.FxToolkit
 
 class ApplicationDslTest {
-    var m : Application? = null
-    @Before
-    fun launchBgAppManager() = fxRunTest{//runBlocking {
-        FxToolkit.registerPrimaryStage()
-        m = FxToolkit.setupApplication { BgAppManager() }
-    }
-    @After
-    fun cleanUp() = fxRunTest{// {
-        FxToolkit.cleanupApplication(m!!)
-        FxToolkit.cleanupStages()
-    }
+
 
     @Test fun application() = fxRunTest{//runBlocking {
 

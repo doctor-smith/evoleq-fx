@@ -22,7 +22,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.dsl.ID
-import org.drx.evoleq.fx.test.fxRunTest
+import org.drx.evoleq.fx.test.dsl.fxRunTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -30,17 +30,7 @@ import org.testfx.api.FxToolkit
 import java.lang.Exception
 
 class IdProviderTest {
-    var m : Application? = null
-    @Before
-    fun launchBgAppManager() = fxRunTest{//runBlocking {
-        FxToolkit.registerPrimaryStage()
-        m = FxToolkit.setupApplication { BgAppManager() }
-    }
-    @After
-    fun cleanUp() = fxRunTest{// {
-        FxToolkit.cleanupApplication(m!!)
-        FxToolkit.cleanupStages()
-    }
+
 
     //@Test
     fun test() = fxRunTest{//runBlocking {

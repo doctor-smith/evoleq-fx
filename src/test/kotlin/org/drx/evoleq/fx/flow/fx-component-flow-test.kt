@@ -32,7 +32,7 @@ import org.drx.evoleq.fx.application.BgAppManager
 import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.dsl.*
 import org.drx.evoleq.fx.flow.Config.style1
-import org.drx.evoleq.fx.test.fxRunTest
+import org.drx.evoleq.fx.test.dsl.fxRunTest
 import org.drx.evoleq.fx.test.showTestStage
 import org.drx.evoleq.stub.*
 import org.junit.After
@@ -41,17 +41,6 @@ import org.junit.Test
 import org.testfx.api.FxToolkit
 
 class FxComponentFlowTest {
-    var m : Application? = null
-    @Before
-    fun launchBgAppManager() = fxRunTest{//runBlocking {
-        FxToolkit.registerPrimaryStage()
-        m = FxToolkit.setupApplication { BgAppManager() }
-    }
-    @After
-    fun cleanUp() = fxRunTest{// {
-        FxToolkit.cleanupApplication(m!!)
-        FxToolkit.cleanupStages()
-    }
 
 
     @Test fun example() = fxRunTest{//runBlocking {

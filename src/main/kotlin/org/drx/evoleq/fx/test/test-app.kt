@@ -91,7 +91,7 @@ fun <N : Node, D> showNodeInTestStage(nodeComponent: FxComponent<N, D>): Paralle
     showInTestStage(group).get()
 }
 
-
+/*
 val testRunner: SendChannel<Change<suspend CoroutineScope.() -> Unit>> =
         GlobalScope.actor {
             var blocked = false
@@ -137,3 +137,4 @@ suspend fun runTest(test: suspend CoroutineScope.()->Unit): Evolving<suspend Cor
 fun fxRunTest(test: suspend CoroutineScope.()->Unit) = runBlocking {
     runTest(test).get()()
 }
+*/

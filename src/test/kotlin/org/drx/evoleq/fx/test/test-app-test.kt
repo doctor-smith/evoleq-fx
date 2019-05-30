@@ -24,12 +24,14 @@ import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.fx.application.BgAppManager
 import org.drx.evoleq.fx.dsl.*
 import org.drx.evoleq.fx.test.deprecated.showTestStage
+import org.drx.evoleq.fx.test.dsl.fxRunTest
 import org.junit.After
 import org.junit.Before
 import org.testfx.api.FxToolkit
 import org.junit.Test
 
 class TestAppTest{
+    /*
     var m : Application? = null
     @Before
     fun launchBgAppManager() = fxRunTest{//runBlocking {
@@ -41,7 +43,7 @@ class TestAppTest{
         FxToolkit.cleanupApplication(m!!)
         FxToolkit.cleanupStages()
     }
-
+*/
     @Test fun testApp() = fxRunTest{//runBlocking{
 
         val stageComponent = fxStage<Boolean> {

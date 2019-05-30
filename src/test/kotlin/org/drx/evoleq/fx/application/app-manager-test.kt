@@ -23,7 +23,7 @@ import kotlinx.coroutines.runBlocking
 import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.fx.dsl.launchApplicationStub
 import org.drx.evoleq.fx.evolving.ParallelFx
-import org.drx.evoleq.fx.test.fxRunTest
+import org.drx.evoleq.fx.test.dsl.fxRunTest
 import org.drx.evoleq.stub.Stub
 import org.junit.*
 import org.testfx.api.FxToolkit
@@ -31,17 +31,7 @@ import java.lang.Thread.sleep
 
 class AppManagerTest {
 
-    var m : Application? = null
-    @Before
-    fun launchBgAppManager() = fxRunTest{//runBlocking {
-        FxToolkit.registerPrimaryStage()
-        m = FxToolkit.setupApplication { BgAppManager() }
-    }
-    @After
-    fun cleanUp() = fxRunTest{// {
-        FxToolkit.cleanupApplication(m!!)
-        FxToolkit.cleanupStages()
-    }
+
 
     @Test fun launchApp() = fxRunTest{//runBlocking {
         class App: AppManager<Unit>() {
