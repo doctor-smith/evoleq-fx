@@ -43,12 +43,11 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.testfx.api.FxRobot
-import org.testfx.api.FxToolkit
 import kotlin.reflect.KClass
 
 class FxApplicationFlowTest {
 
-    @Test fun basics() = fxRunTest{//runBlocking{ fxRunTest {
+    @Test fun basics() = fxRunTest{
 
         class CloseDialog
 

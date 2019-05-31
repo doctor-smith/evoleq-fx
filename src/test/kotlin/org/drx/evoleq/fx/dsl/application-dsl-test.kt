@@ -15,23 +15,15 @@
  */
 package org.drx.evoleq.fx.dsl
 
-import javafx.application.Application
-import junit.framework.Assert.fail
-import kotlinx.coroutines.runBlocking
-import org.drx.evoleq.fx.application.BgAppManager
 import org.drx.evoleq.fx.test.dsl.fxRunTest
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
-import org.testfx.api.FxToolkit
 
 class ApplicationDslTest {
 
 
-    @Test fun application() = fxRunTest{//runBlocking {
-
-        //assert(false)
-        //fail("Prototype")
+    @Test
+    fun application() = fxRunTest{//runBlocking {
+        //assert(false, {"test case is a prototype"})
     }
 
 }

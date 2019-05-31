@@ -15,23 +15,15 @@
  */
 package org.drx.evoleq.fx.dsl
 
-import javafx.application.Application
-import javafx.scene.Parent
 import javafx.scene.layout.Pane
 import javafx.scene.paint.Color
 import javafx.scene.shape.CubicCurve
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import org.drx.evoleq.dsl.stub
-import org.drx.evoleq.fx.application.BgAppManager
-import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.geometry.Derivation
 import org.drx.evoleq.fx.test.dsl.fxRunTest
-import org.drx.evoleq.fx.test.showInTestStage
-import org.junit.After
-import org.junit.Before
+import org.drx.evoleq.fx.util.showOnStage
 import org.junit.Test
-import org.testfx.api.FxToolkit
 
 class FxCubicCurveTest {
 
@@ -55,7 +47,7 @@ class FxCubicCurveTest {
             child(curve())
             stub(stub{})
         }
-        val stub = showInTestStage(pane).get()
+        val stub = showOnStage(pane).get()
         delay(1_000)
     }
 }

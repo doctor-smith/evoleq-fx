@@ -15,27 +15,16 @@
  */
 package org.drx.evoleq.fx.playground
 
-import javafx.application.Application
-import javafx.geometry.Pos
 import javafx.scene.Scene
 import javafx.scene.control.Button
 import javafx.scene.effect.Reflection
 import javafx.scene.layout.AnchorPane
-import javafx.scene.text.TextAlignment
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
-import org.drx.evoleq.evolving.Immediate
-import org.drx.evoleq.fx.application.BgAppManager
+import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.fx.dsl.*
-import org.drx.evoleq.fx.stub.NoStub
 import org.drx.evoleq.fx.test.dsl.fxRunTest
-import org.drx.evoleq.fx.test.showTestStage
-import org.drx.evoleq.stub.Key50
-import org.drx.evoleq.stub.Key9
-import org.junit.After
-import org.junit.Before
+import org.drx.evoleq.fx.util.showStage
 import org.junit.Test
-import org.testfx.api.FxToolkit
 
 class ComponentOneTest {
     /*
@@ -52,7 +41,7 @@ class ComponentOneTest {
     }
 */
     @Test fun go() = fxRunTest{//runBlocking {
-        val stageComponent = fxStage<Nothing> {
+        val stageComponent = {fxStage<Nothing> {
             id<StageId>()
             view { configure {
                 //isResizable = false
@@ -62,7 +51,6 @@ class ComponentOneTest {
                 root(fxBorderPane {
                     tunnel()
                     view { configure {} }
-
 
                     center(fxText<Nothing> {
                             noStub()
@@ -79,7 +67,7 @@ class ComponentOneTest {
 
                     bottom(fxAnchorPane {
                         id<AnchorPane>()
-                        stub(NoStub())
+                        stub(stub{})
                         view{configure {  }}
 
                         child(fxButton{
@@ -98,19 +86,19 @@ class ComponentOneTest {
                             """.trimIndent()
                             )
                             }
-                            stub(NoStub())
+                            stub(stub{})
                         })
                    })
                 }){
                     root -> Scene(root, 350.0,230.0)
                 }
-                noStub()
+
 
             })
-            stub(NoStub())
-        }
+            stub(stub{})
+        }}
 
-        val stub = showTestStage(stageComponent).get()
+        val stub = showStage(stageComponent()).get()
 
         delay(1_000)
     }

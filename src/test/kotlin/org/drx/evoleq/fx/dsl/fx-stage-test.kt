@@ -15,65 +15,61 @@
  */
 package org.drx.evoleq.fx.dsl
 
-import javafx.application.Application
 import javafx.scene.Scene
 import javafx.stage.Stage
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
-import org.drx.evoleq.fx.application.BgAppManager
+import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.test.dsl.fxRunTest
-import org.drx.evoleq.fx.test.launchTestStage
-import org.junit.After
-import org.junit.Before
+import org.drx.evoleq.fx.util.launchStage
 import org.junit.Test
-import org.testfx.api.FxToolkit
 
 class FxStageTest{
 
 
     @Test fun fxStage() = fxRunTest{//runBlocking {
-        val stub = launchTestStage(testStageConfig()).get()
+        val stub = launchStage(testStageConfig()).get()
 
         delay (1_000)
     }
 
     fun testStageConfig(): FxComponent<Stage, Nothing> = fxStage{
-        //id<StageId>()
-        noStub()
+        id<StageId>()
+        //noStub()
         view{configure{}}
         scene(fxScene{
+            id<Scene>()
             root(fxBorderPane{
+                noStub()
                 view {configure{}}
                 top(fxButton {
-                    view{configure{text = "Hi"}}
                     noStub()
+                    view{configure{text = "Hi"}}
                 })
                 center(fxAnchorPane {
+                    noStub()
                     view{configure{ style = "-fx-background-color: red;"}}
                     child(fxButton {
+                        noStub()
                         view{configure{
                             text = "center"
                             leftAnchor(10.0)
                             topAnchor(20.0)
                         }}
-                        noStub()
                     })
-                    noStub()
                 })
                 bottom(fxButton {
+                    noStub()
                     view{configure{
                         text = "Bottom"
                     }}
-                    noStub()
                 })
-                noStub()
             }) {
                 root -> Scene(root, 200.0,200.0)
             }
-            noStub()
+            stub(stub{})
         })
 
-        //stub(stub{})
+        stub(stub{})
     }
 }

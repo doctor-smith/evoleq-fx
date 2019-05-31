@@ -27,6 +27,7 @@ import org.drx.evoleq.stub.Stub
 /**
  * Show the stageComponent and return it as a stub
  */
+
 fun <D> showTestStage(stageComponent: FxStageComponent<D>): Parallel<Stub<D>> = Parallel {
 
     class TestApp<D> : SimpleAppManager<D>() {
@@ -38,3 +39,5 @@ fun <D> showTestStage(stageComponent: FxStageComponent<D>): Parallel<Stub<D>> = 
     val stub = AppManager.launch(TestApp<D>()).get()
     stub
 }
+
+

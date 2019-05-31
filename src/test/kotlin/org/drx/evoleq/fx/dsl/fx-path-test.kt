@@ -15,22 +15,16 @@
  */
 package org.drx.evoleq.fx.dsl
 
-import javafx.application.Application
 import javafx.geometry.Point2D
 import javafx.scene.Scene
 import javafx.scene.paint.Color
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.evolving.Immediate
-import org.drx.evoleq.fx.application.BgAppManager
 import org.drx.evoleq.fx.geometry.Derivation
 import org.drx.evoleq.fx.test.dsl.fxRunTest
-import org.drx.evoleq.fx.test.showTestStage
-import org.junit.After
-import org.junit.Before
+import org.drx.evoleq.fx.util.showStage
 import org.junit.Test
-import org.testfx.api.FxToolkit
 import java.nio.file.Path
 
 class FxPathTest {
@@ -66,7 +60,6 @@ class FxPathTest {
                             //closePath()
                         }
                         stub(stub{
-
                         })
                     })
 
@@ -140,7 +133,7 @@ class FxPathTest {
             })
         }
 
-        val stub = showTestStage(stageComponent).get()
+        val stub = showStage(stageComponent).get()
         delay(1_000)
     }
 }

@@ -15,7 +15,6 @@
  */
 package org.drx.evoleq.fx.flow
 
-import javafx.application.Application
 import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.Node
@@ -28,17 +27,12 @@ import kotlinx.coroutines.runBlocking
 import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.evolving.Parallel
-import org.drx.evoleq.fx.application.BgAppManager
 import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.dsl.*
-import org.drx.evoleq.fx.flow.Config.style1
 import org.drx.evoleq.fx.test.dsl.fxRunTest
-import org.drx.evoleq.fx.test.showTestStage
+import org.drx.evoleq.fx.util.showStage
 import org.drx.evoleq.stub.*
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
-import org.testfx.api.FxToolkit
 
 class FxComponentFlowTest {
 
@@ -149,7 +143,7 @@ class FxComponentFlowTest {
 
         }
 
-        val stub = showTestStage(stageConfiguration).get()
+        val stub = showStage(stageConfiguration).get()
         //FxRobot().clickOn()
         delay(1_000)
     }
@@ -211,7 +205,7 @@ class FxComponentFlowTest {
             }
         }
 
-        val stub = showTestStage(stageComponent).get()
+        val stub = showStage(stageComponent).get()
         delay(1_000)
         //println(stageComponent.stubs.size)
         //stageComponent.stubs.forEach{println(it)}

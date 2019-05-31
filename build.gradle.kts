@@ -24,15 +24,13 @@ dependencies {
     implementation (Config.Dependencies.kotlinStandardLibrary)
     implementation (Config.Dependencies.coroutines)
     implementation ( kotlin("reflect"))
-
-
     implementation ( Config.Dependencies.evoleq )
-    testCompile( Config.Dependencies.junit )
-    testCompile ( Config.Dependencies.testfxcore )
-    testCompile ( Config.Dependencies.testfxjunit )
-    testCompile ( Config.Dependencies.testEvoleq )
-    testCompile ( Config.Dependencies.testEvoleq )
-    testCompile ( Config.Dependencies.testEvoleqFX )
+
+    testImplementation ( Config.Dependencies.junit )
+    testImplementation ( Config.Dependencies.testfxcore )
+    testImplementation ( Config.Dependencies.testfxjunit )
+    testImplementation ( Config.Dependencies.testEvoleq )
+    testImplementation ( Config.Dependencies.testEvoleqFX )
 }
 
 configure<JavaPluginConvention> {

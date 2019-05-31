@@ -15,22 +15,17 @@
  */
 package org.drx.evoleq.fx.dsl
 
-import javafx.application.Application
 import javafx.scene.Scene
 import javafx.scene.control.Button
 import javafx.scene.layout.VBox
 import javafx.stage.Stage
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
-import org.drx.evoleq.fx.application.BgAppManager
+import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.fx.dsl.deprecated.StageStubKey
 import org.drx.evoleq.fx.test.dsl.fxRunTest
-import org.drx.evoleq.fx.test.showTestStage
+import org.drx.evoleq.fx.util.showStage
 import org.drx.evoleq.stub.Key2
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
-import org.testfx.api.FxToolkit
 
 class ScrollPaneTest {
 
@@ -43,11 +38,12 @@ class ScrollPaneTest {
                 id(SceneId::class)
                 root(fxScrollPane {
                     //id(Key1::class)
+                    noStub()
                     view{ configure{
 
                     } }
                     content(fxComponent<VBox, Nothing> {
-                        id(Key2::class)
+                        noStub()
                         view{
                             configure{
                                 IntRange(1,20).forEach {
@@ -57,18 +53,17 @@ class ScrollPaneTest {
                                 }
                             }
                         }
-                        noStub()
                     })
-                    noStub()
+
                 }){
                     root -> Scene(root,150.0,300.0)
                 }
-                noStub()
+                stub(stub{})
             })
-            noStub()
+            stub(stub{})
         }
-        showTestStage(stageComponent)
+        showStage(stageComponent).get()
 
-        delay(1_000)
+        //delay(1_000)
     }
 }

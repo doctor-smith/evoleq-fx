@@ -38,8 +38,8 @@ import org.drx.evoleq.fx.dsl.deprecated.*
 import org.drx.evoleq.fx.dsl.launchApplicationStub
 import org.drx.evoleq.fx.evolving.AsyncFx
 import org.drx.evoleq.fx.evolving.ParallelFx
-import org.drx.evoleq.fx.test.deprecated.showTestStage
 import org.drx.evoleq.fx.test.dsl.fxRunTest
+import org.drx.evoleq.fx.test.dsl.showTestStage
 import org.drx.evoleq.stub.Stub
 import org.drx.evoleq.stub.toFlow
 import org.junit.After
@@ -665,7 +665,7 @@ class ComponentTest {
             })
         }
 
-        val stub = showTestStage(stageComponent).get()
+        val stub = org.drx.evoleq.fx.test.deprecated.showTestStage(stageComponent).get()
 
         delay (1_000)
     }

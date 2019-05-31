@@ -18,7 +18,7 @@ package org.drx.evoleq.fx.dsl
 import javafx.scene.Group
 import kotlinx.coroutines.delay
 import org.drx.evoleq.fx.test.dsl.fxRunTest
-import org.drx.evoleq.fx.test.showInTestStage
+import org.drx.evoleq.fx.util.showOnStage
 import org.junit.Test
 
 class FxComponentDslTest {
@@ -59,7 +59,7 @@ class FxComponentDslTest {
                 }}
             })
         }
-        val stub = showInTestStage(c).get()
+        val stub = showOnStage(c).get()
         delay(1_000)
         assert(done1 && done2)
         //delay(10_000)
