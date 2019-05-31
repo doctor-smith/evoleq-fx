@@ -19,14 +19,14 @@ import javafx.scene.Group
 import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.layout.*
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.SendChannel
 import org.drx.evoleq.dsl.ArrayListConfiguration
 import org.drx.evoleq.dsl.Configuration
 import org.drx.evoleq.dsl.HashMapConfiguration
 import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.evolving.Parallel
+import org.drx.evoleq.fx.application.IdProvider
 import org.drx.evoleq.fx.application.PreId
-import org.drx.evoleq.fx.application.idProvider_Change
 import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.component.FxNoStubComponent
 import org.drx.evoleq.fx.component.FxTunnelComponent
@@ -64,10 +64,12 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
 
     var fxRunTimeView: N? = null
 
-    val idProvider = GlobalScope.idProvider_Change()
-    private var keepIdProvider = false
+    /* TODO improve id-provider-stuff */
+    val idProvider: SendChannel<Change<ID>> = IdProvider
+    private var keepIdProvider = true
 
     private val properties: HashMap<String, Any?> by lazy { HashMap<String, Any?>() }
+
 
 
     override fun configure(): FxComponent<N, D> = when(stubConfiguration) {
@@ -166,7 +168,9 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
             idProvider.send(change)
             //launcher.id = changing.get()
         }
-        launcher.id = changing.get()
+        //withTimeout(1_000) {
+            launcher.id = changing.get()
+        //}
         /*
         val id = SimpleObjectProperty<ID>(PreId::class)
         //idProvider.add(id)
@@ -203,14 +207,17 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
     @Suppress("unused")
     fun FxComponentConfiguration<N, D>.noStub() = Parallel<Unit>{
         val stub = NoStub<D>()
-        launcher.stub = stub
+
         val change = Change<ID>(PreId::class)
         val changing = change.happen()
         Parallel<Unit>{
             idProvider.send(change)
 
         }
-        launcher.id = changing.get()
+        //withTimeout(1_000) {
+            launcher.id = changing.get()
+            launcher.stub = stub
+        //}
         /*
         val id = SimpleObjectProperty<ID>(PreId::class)
         //idProvider.add(id)
@@ -231,14 +238,16 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
     @Suppress("unused")
     fun FxComponentConfiguration<N, D>.tunnel() = Parallel<Unit>{
         val stub = Tunnel<D>()
-        launcher.stub = stub
+
         val change = Change<ID>(PreId::class)
         val changing = change.happen()
         Parallel<Unit>{
             idProvider.send(change)
-
         }
-        launcher.id = changing.get()
+        //withTimeout(1_000) {
+            launcher.id = changing.get()
+            launcher.stub = stub
+        //}
         /*
         val id = SimpleObjectProperty<ID>(PreId::class)
         //idProvider.add(id)

@@ -18,18 +18,15 @@ package org.drx.evoleq.fx.application
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.actor
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
-import org.drx.evoleq.dsl.conditions
-import org.drx.evoleq.evolving.Evolving
-import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.dsl.ID
 import org.drx.evoleq.stub.Keys
-import org.drx.evoleq.stub.Stub
-import org.drx.evoleq.stub.toFlow
 import org.drx.evoleq.time.Change
-import kotlin.reflect.KClass
+
+
+/* TODO improve id-provider-stuff */
 
 class PreId
 
@@ -48,17 +45,31 @@ fun CoroutineScope.idProvider() = actor<SimpleObjectProperty<ID>>(){
     }
 }
 
-fun CoroutineScope.idProvider_Change() = actor<Change<ID>>(capacity = 100_000){
-    var currentId = 0
-    val number = numberOfKeys
-    for(change in channel){
-        val id = currentId
-        currentId = if (id == number - 1) {
-            0
-        } else {
-            id + 1
-        }
 
-        change.value = Keys[id]!!
-    }
+
+fun CoroutineScope.idProvider_Change(): SendChannel<Change<ID>> /*{
+    if(provider == null) {
+        provider*/ = actor<Change<ID>>(capacity = 1_000_000) {
+            var currentId = 0
+            val number = numberOfKeys
+            for (change in channel) {
+                val id = currentId
+                currentId = if (id == number - 1) {
+                    0
+                } else {
+                    id + 1
+                }
+                println("@idProvider: id = $id")
+                change.value = Keys[id]!!
+            }
+            //channel.invokeOnClose { Exception() }
+        }
+    /*}
+    return provider!!
+}
+*/
+var provider: SendChannel<Change<ID>>? = null
+
+val IdProvider: SendChannel<Change<ID>> by lazy {
+    GlobalScope.idProvider_Change()
 }
