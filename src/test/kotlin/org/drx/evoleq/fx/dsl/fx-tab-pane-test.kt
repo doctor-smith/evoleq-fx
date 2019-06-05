@@ -25,7 +25,8 @@ import org.junit.Test
 class TabPaneTest {
 
 
-    @Test fun basics() = fxRunTest{//runBlocking {
+    //@Test
+    fun basics() = fxRunTest{//runBlocking {
         var done = false
 
         val stageComponent = fxStage<Nothing>{

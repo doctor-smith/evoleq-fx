@@ -112,7 +112,7 @@ open class FxParentComponentConfiguration<P: Parent,D> : FxNodeComponentConfigur
 
     private val performs: ArrayList<Parallel<*>> by lazy{ arrayListOf<Parallel<*>>() }
     fun <T> whenReady(perform:()->T) = Parallel<T>{
-        performs.add(this@Parallel)
+        //performs.add(this@Parallel)
         withTimeout(readyForCrossConfigurationTimeout) {
             while (!readyForCrossConfiguration) {
                 delay(1)

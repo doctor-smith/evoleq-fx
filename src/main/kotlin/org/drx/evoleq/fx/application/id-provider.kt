@@ -31,7 +31,10 @@ import org.drx.evoleq.time.Change
 class PreId
 
 val numberOfKeys: Int by lazy{ Keys.size }
-fun CoroutineScope.idProvider() = actor<SimpleObjectProperty<ID>>(){
+/**
+ * @deprecated
+ */
+fun CoroutineScope.idProviderDeprecated() = actor<SimpleObjectProperty<ID>>(){
     val currentId = SimpleIntegerProperty(0)
     for(property in channel) {
         val id = currentId.value
@@ -47,29 +50,21 @@ fun CoroutineScope.idProvider() = actor<SimpleObjectProperty<ID>>(){
 
 
 
-fun CoroutineScope.idProvider_Change(): SendChannel<Change<ID>> /*{
-    if(provider == null) {
-        provider*/ = actor<Change<ID>>(capacity = 1_000_000) {
-            var currentId = 0
-            val number = numberOfKeys
-            for (change in channel) {
-                val id = currentId
-                currentId = if (id == number - 1) {
-                    0
-                } else {
-                    id + 1
-                }
-                println("@idProvider: id = $id")
-                change.value = Keys[id]!!
-            }
-            //channel.invokeOnClose { Exception() }
+fun CoroutineScope.idProvider(): SendChannel<Change<ID>> = actor(capacity = 1_000_000) {
+    var currentId = 0
+    val number = numberOfKeys
+    for (change in channel) {
+        val id = currentId
+        currentId = if (id == number - 1) {
+            0
+        } else {
+            id + 1
         }
-    /*}
-    return provider!!
+        //println("@id-provider: id = $id")
+        change.value = Keys[id]!!
+    }
 }
-*/
-var provider: SendChannel<Change<ID>>? = null
 
 val IdProvider: SendChannel<Change<ID>> by lazy {
-    GlobalScope.idProvider_Change()
+    GlobalScope.idProvider()
 }

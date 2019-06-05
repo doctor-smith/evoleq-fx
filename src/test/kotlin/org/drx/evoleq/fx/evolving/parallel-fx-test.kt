@@ -17,6 +17,9 @@ package org.drx.evoleq.fx.evolving
 
 import javafx.application.Application
 import javafx.stage.Stage
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.drx.evoleq.fx.application.BgAppManager
 import org.drx.evoleq.fx.test.dsl.fxRunTest
@@ -37,5 +40,51 @@ class ParallelFxTest {
         val threadName = parallelFx.get()
 
         assert(threadName == "JavaFX Application Thread")
+    }
+
+    @Test fun isLaunchedOnInitialization() = fxRunTest{//runBlocking{
+        val parallel = ParallelFx<Unit>{
+            sleep(1_000)
+        }
+        delay(1_050)
+        val time = System.currentTimeMillis()
+        val u = parallel.get()
+        val measure = System.currentTimeMillis() - time
+        println(measure)
+        assert(measure <= 50 )
+    }
+
+    @Test fun cancelImmediately() = fxRunTest{//runBlocking {
+        var time = System.currentTimeMillis()
+        val parallelFx = ParallelFx<Int> {
+            sleep(1_000)
+            1
+        }
+        launch{ coroutineScope{
+            val x = parallelFx.get()
+            assert(x == 0)
+        }
+        }
+
+        parallelFx.cancel(0).get()
+        time = System.currentTimeMillis() - time
+        assert(time < 50)
+        //println(time)
+    }
+
+    @Test fun cancelLate() = fxRunTest{//runBlocking {
+        val parallelFx = ParallelFx<Int> {
+            sleep(200)
+            1
+        }
+        var x = -1
+        launch { coroutineScope{
+            x = parallelFx.get()
+            assert(x == 0)
+        } }
+        delay(100)
+        x = parallelFx.cancel(0).get()
+        assert(x == 0)
+
     }
 }

@@ -90,7 +90,7 @@ fun <D, A: KClass<out SimpleAppManager<D>>> fxApplicationManagerStub(): Stub<FxA
                         is AppFlowMessage.Runtime.EnteredRuntimePhase -> Parallel{
                             phase.applicationManager.applicationManagerPort = phase.applicationManagerPort
                             phase.applicationManager.port.send(message)
-                            AppFlowMessage.Runtime.Wait()
+                            AppFlowMessage.Runtime.Wait<D>()
                         }
                         is AppFlowMessage.Runtime.Wait -> Parallel{
                             observingStub.evolve(message).get()
@@ -101,7 +101,7 @@ fun <D, A: KClass<out SimpleAppManager<D>>> fxApplicationManagerStub(): Stub<FxA
                                 val stage = phase.applicationManager.showStage(message.id).get()
                                 phase.applicationManager.port.send(AppFlowMessage.FxComponentShown<D>(stage))
                             }
-                            AppFlowMessage.Runtime.Wait()
+                            AppFlowMessage.Runtime.Wait<D>()
 
                         }
                         is AppFlowMessage.Runtime.HideStage<*> -> ParallelFx{

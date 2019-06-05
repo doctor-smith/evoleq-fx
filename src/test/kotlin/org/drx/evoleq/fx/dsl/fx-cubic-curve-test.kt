@@ -48,6 +48,6 @@ class FxCubicCurveTest {
             stub(stub{})
         }
         val stub = showOnStage(pane).get()
-        delay(1_000)
+        //delay(1_000)
     }
 }

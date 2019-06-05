@@ -15,18 +15,12 @@
  */
 package org.drx.evoleq.fx.application
 
-import javafx.application.Application
 import javafx.beans.property.SimpleObjectProperty
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.dsl.ID
 import org.drx.evoleq.fx.test.dsl.fxRunTest
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
-import org.testfx.api.FxToolkit
 import java.lang.Exception
 
 class IdProviderTest {
@@ -36,7 +30,7 @@ class IdProviderTest {
     fun test() = fxRunTest{//runBlocking {
         val N = 10000
         val ids = arrayListOf<Parallel<ID>>()
-        val provider = idProvider()//IdProvider()
+        val provider = idProviderDeprecated()//IdProvider()
         val process = Parallel<Unit> {
             IntRange(1, N).forEach {
                 //Parallel<Unit> {

@@ -60,7 +60,7 @@ class FxComponentDslTest {
             })
         }
         val stub = showOnStage(c).get()
-        delay(1_000)
+        //delay(1_000)
         assert(done1 && done2)
         //delay(10_000)
     }

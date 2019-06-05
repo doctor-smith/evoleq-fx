@@ -134,6 +134,6 @@ class FxPathTest {
         }
 
         val stub = showStage(stageComponent).get()
-        delay(1_000)
+        //delay(1_000)
     }
 }

@@ -156,7 +156,7 @@ open class FxSceneComponentConfiguration<R: Parent, D> : Configuration<FxSceneCo
 
     private val performs: ArrayList<Parallel<*>> by lazy{ arrayListOf<Parallel<*>>() }
     fun <T> whenReady(perform: ()->T) = Parallel<T> {
-        performs.add(this@Parallel)
+        //performs.add(this@Parallel)
         withTimeout(readyTimeout) {
             while (!ready) {
                 delay(1)
@@ -165,7 +165,7 @@ open class FxSceneComponentConfiguration<R: Parent, D> : Configuration<FxSceneCo
         }
     }
     fun <T> whenRootReady(perform: ()->T) = Parallel<T> {
-        performs.add(this@Parallel)
+        //performs.add(this@Parallel)
         withTimeout(readyTimeout) {
             while (!rootReady) {
                 delay(1)

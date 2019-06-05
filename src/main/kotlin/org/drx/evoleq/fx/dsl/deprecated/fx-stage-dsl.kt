@@ -144,7 +144,7 @@ open class FxStageComponentConfiguration<D> : Configuration<FxStageComponent<D>>
 
     private val performs: ArrayList<Parallel<*>> by lazy{ arrayListOf<Parallel<*>>() }
     fun <T> whenReady(perform: ()->T) = Parallel<T> {
-        performs.add(this@Parallel)
+        //performs.add(this@Parallel)
         withTimeout(readyTimeout) {
             while (!ready) {
                 delay(1)

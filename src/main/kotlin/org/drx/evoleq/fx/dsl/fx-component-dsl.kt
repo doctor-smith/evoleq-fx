@@ -20,6 +20,7 @@ import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.layout.*
 import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.channels.sendBlocking
 import org.drx.evoleq.dsl.ArrayListConfiguration
 import org.drx.evoleq.dsl.Configuration
 import org.drx.evoleq.dsl.HashMapConfiguration
@@ -165,25 +166,9 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
         val change = Change<ID>(PreId::class)
         val changing = change.happen()
         Parallel<Unit>{
-            idProvider.send(change)
-            //launcher.id = changing.get()
+            idProvider.sendBlocking(change)
         }
-        //withTimeout(1_000) {
-            launcher.id = changing.get()
-        //}
-        /*
-        val id = SimpleObjectProperty<ID>(PreId::class)
-        //idProvider.add(id)
-
-        Parallel<Unit> {
-            idProvider.send(id)
-            while(id.value == PreId::class) {
-                delay(1)
-            }
-            launcher.id = id.get()
-        }
-        */
-
+        launcher.id = changing.get()
     }
 
     /**
@@ -211,25 +196,10 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
         val change = Change<ID>(PreId::class)
         val changing = change.happen()
         Parallel<Unit>{
-            idProvider.send(change)
-
+            idProvider.sendBlocking(change)
         }
-        //withTimeout(1_000) {
-            launcher.id = changing.get()
-            launcher.stub = stub
-        //}
-        /*
-        val id = SimpleObjectProperty<ID>(PreId::class)
-        //idProvider.add(id)
-        Parallel<Unit> {
-            idProvider.send(id)
-            while(id.value == PreId::class) {
-                delay(1)
-            }
-            launcher.id = id.get()
-        }.get()
-        */
-
+        launcher.id = changing.get()
+        launcher.stub = stub
     }
 
     /**
@@ -242,23 +212,10 @@ abstract class FxComponentConfiguration<N, D> :  Configuration<FxComponent<N, D>
         val change = Change<ID>(PreId::class)
         val changing = change.happen()
         Parallel<Unit>{
-            idProvider.send(change)
+            idProvider.sendBlocking(change)
         }
-        //withTimeout(1_000) {
-            launcher.id = changing.get()
-            launcher.stub = stub
-        //}
-        /*
-        val id = SimpleObjectProperty<ID>(PreId::class)
-        //idProvider.add(id)
-        Parallel<Unit> {
-            idProvider.send(id)
-            while(id.value == PreId::class) {
-                delay(1)
-            }
-            launcher.id = id.get()
-        }.get()
-        */
+        launcher.id = changing.get()
+        launcher.stub = stub
     }
 
 
@@ -370,7 +327,7 @@ fun <N,D> fxComponent(configuration: FxComponentConfiguration<N,D>.()->Unit): Fx
     Parallel<Unit> {
         val l = conf.launcher.launch(conf)
         val terminate = fxComponentFlow<N, D>().evolve(l).get()
-        conf.idProvider.close()
+        //conf.idProvider.close()
         // print log
         terminate.log.forEach {
             println(it)
