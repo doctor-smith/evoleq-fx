@@ -69,7 +69,7 @@ abstract class AppManager<D> : Application(), Configuration<Stub<D>> {
 
             // eventually launch app
             if( waitingForToolkit() ) {
-                scope.launch {
+                launch {
                     coroutineScope {
                         launch(app::class.java)
                     }
@@ -81,7 +81,7 @@ abstract class AppManager<D> : Application(), Configuration<Stub<D>> {
 
             // configure app and
             // set stubConfiguration to return and
-            scope.launch { coroutineScope{
+            launch { coroutineScope{
                 STUB = app.configure()
                 STUB.stubs[ApplicationManager::class] = stub<AppManager<D>?>{
                     id(ApplicationManager::class)

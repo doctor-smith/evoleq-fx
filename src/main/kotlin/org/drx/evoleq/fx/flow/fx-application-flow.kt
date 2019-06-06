@@ -66,7 +66,7 @@ fun <D, A: KClass<out SimpleAppManager<D>>> fxApplicationManagerStub(): Stub<FxA
                     phase.receiver.send(AppFlowMessage.ComponentsRegistered())
                     FxApplicationPhase.RunTime<D>(
                             appManager,
-                            scope.receiver{},
+                            receiver{},
                             phase.receiver
                     )
                 }

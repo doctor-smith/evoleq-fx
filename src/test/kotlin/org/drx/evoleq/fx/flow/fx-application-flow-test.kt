@@ -47,7 +47,8 @@ import kotlin.reflect.KClass
 
 class FxApplicationFlowTest {
 
-    @Test fun basics() = fxRunTest{
+    //@Test
+    fun basics() = fxRunTest{
 
         class CloseDialog
 
@@ -308,7 +309,7 @@ class FxApplicationFlowTest {
                 updateCondition { data -> !data.initialized  }
             }
         )
-        val res = Parallel<Data>{mainFlow.evolve(Data()).get()}
+        val res = parallel<Data>{mainFlow.evolve(Data()).get()}
 
         val click = Parallel<Unit>{
             while(stage == null){
@@ -332,7 +333,7 @@ class FxApplicationFlowTest {
         click.get()
 
         port.actor.close()
-        delay(1_000)
+        //delay(1_000)
         Unit
     //}.get()()
     }

@@ -40,7 +40,7 @@ abstract class SimpleAppManager<D> : AppManager<D>() {
     init{
         runBlocking {
             Parallel<Unit> {
-                port = scope.receiver {}
+                port = receiver {}
                 receiverStub = receivingStub<AppFlowMessage<D>, AppFlowMessage<D>> {
                     id(AppManager::class)
                     evolve {
