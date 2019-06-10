@@ -16,6 +16,7 @@
 package org.drx.evoleq.fx.phase
 
 import kotlinx.coroutines.delay
+import org.drx.evoleq.dsl.parallel
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.dsl.FxComponentConfiguration
@@ -29,23 +30,24 @@ class ComponentPhaseLauncher<N,D> {
     val fxChildren = ArrayList<Parallel<FxComponent<*, *>>>()
     val fxSpecials = ArrayList<Parallel<FxComponent<*, *>>>()
     val stubActions = ArrayList<Parallel<Stub<D>.() -> Unit>>()
-    val fxRunTime = ArrayList<Parallel<N.() -> Unit>>()
+    val fxRunTime: ArrayList<Parallel<N.() -> Unit>>
+        get() = ArrayList<Parallel<N.() -> Unit>>()
 
     fun launch(configuration: FxComponentConfiguration<N, D>): FxComponentPhase.Launch<N,D> = FxComponentPhase.Launch(
-            configuration = Parallel{configuration},
-            stub = Parallel{
+            configuration = configuration.scope.parallel{configuration},
+            stub = configuration.scope.parallel{
                 while( stub == null ) {
                     delay(1)
                 }
                 stub!!
             },
-            view = Parallel{
+            view = configuration.scope.parallel{
                 while( view == null ) {
                     delay(1)
                 }
                 view!!
             },
-            id = Parallel{
+            id = configuration.scope.parallel{
                 while( id == null  ) {
                     delay(1)
                 }

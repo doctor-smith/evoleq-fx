@@ -21,6 +21,7 @@ import javafx.scene.control.Button
 import kotlinx.coroutines.runBlocking
 import org.drx.evoleq.fx.application.BgAppManager
 import org.drx.evoleq.fx.test.dsl.fxRunTest
+import org.drx.evoleq.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -33,7 +34,7 @@ class FxParentTest {
         val g = Group()
         assert(g.hasModifiableChildren())
         assert(g.isFxParent())
-        println(g::class.java.getMethod("getChildren").returnType)
+        //println(g::class.java.getMethod("getChildren").returnType)
 
         val b = Button()
 

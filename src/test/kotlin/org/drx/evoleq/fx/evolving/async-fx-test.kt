@@ -15,26 +15,19 @@
  */
 package org.drx.evoleq.fx.evolving
 
-import javafx.application.Application
-import javafx.stage.Stage
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import org.drx.evoleq.fx.application.BgAppManager
 import org.drx.evoleq.fx.test.dsl.fxRunTest
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
-import org.testfx.api.FxToolkit
 import java.lang.Thread.sleep
 
-class AsyncFxTest {
+class AsynqFxTest {
 
 
     @Test
     fun runsOnApplicationThread() = fxRunTest{//runBlocking{
-        val asyncFx = AsyncFx<String> {
+        val asyncFx = AsynqFx<String> {
             Thread.currentThread().name
         }
         val threadName = asyncFx.get()
@@ -43,7 +36,7 @@ class AsyncFxTest {
     }
 
     @Test fun isLaunchedOnInitialization() = fxRunTest{//runBlocking{
-        val async = AsyncFx<Unit>{
+        val async = AsynqFx<Unit>{
             sleep(1_000)
         }
         delay(1_050)
@@ -56,7 +49,7 @@ class AsyncFxTest {
 
     @Test fun cancelImmediately() = fxRunTest{//runBlocking {
         var time = System.currentTimeMillis()
-        val asyncFx = AsyncFx<Int> {
+        val asyncFx = AsynqFx<Int> {
             sleep(1_000)
             1
         }
@@ -72,7 +65,7 @@ class AsyncFxTest {
     }
 
     @Test fun cancelLate() = fxRunTest{//runBlocking {
-        val asyncFx = AsyncFx<Int> {
+        val asyncFx = AsynqFx<Int> {
             sleep(200)
             1
         }

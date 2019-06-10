@@ -15,11 +15,8 @@
  */
 package org.drx.evoleq.fx.flow
 
-import org.drx.evoleq.dsl.conditions
-import org.drx.evoleq.dsl.receiver
-import org.drx.evoleq.dsl.receivingStub
-import org.drx.evoleq.dsl.stub
-import org.drx.evoleq.evolving.Immediate
+import kotlinx.coroutines.CoroutineScope
+import org.drx.evoleq.dsl.*
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.application.AppManager
 import org.drx.evoleq.fx.application.ApplicationManager
@@ -35,11 +32,11 @@ class ApplicationRuntime
 class ApplicationManagerStub
 /* TODO error handling */
 @Suppress("unchecked_cast")
-fun <D, A: KClass<out SimpleAppManager<D>>> fxApplicationManagerStub(): Stub<FxApplicationPhase<D>> = stub{
+fun <D, A: KClass<out SimpleAppManager<D>>> CoroutineScope.fxApplicationManagerStub(): Stub<FxApplicationPhase<D>> = stub{
     id(ApplicationManagerStub::class)
     evolve{
         phase -> when(phase) {
-            is FxApplicationPhase.Launch<*> -> Parallel{
+            is FxApplicationPhase.Launch<*> -> this@fxApplicationManagerStub.parallel{
                 println("launch@fxApplicationStub")
                 // launch application and pass stub to receiver
                 val stub = AppManager.launch( phase.applicationClass as A ).get()
@@ -56,7 +53,7 @@ fun <D, A: KClass<out SimpleAppManager<D>>> fxApplicationManagerStub(): Stub<FxA
                 )
             }
             is FxApplicationPhase.Configure -> when(phase) {
-                is FxApplicationPhase.Configure.RegisterComponents<*> -> Parallel {
+                is FxApplicationPhase.Configure.RegisterComponents<*> -> this@fxApplicationManagerStub.parallel {
                     println("registerComponents@fxApplicationStub")
                     require(phase is FxApplicationPhase.Configure.RegisterComponents<D>)
                     val appManager = phase.applicationManager//(phase.stub.stubs[ApplicationManager::class]!! as Stub<SimpleAppManager<D>?>).evolve(null).get()!!
@@ -71,15 +68,15 @@ fun <D, A: KClass<out SimpleAppManager<D>>> fxApplicationManagerStub(): Stub<FxA
                     )
                 }
             }
-            is FxApplicationPhase.RunTime -> Parallel{
+            is FxApplicationPhase.RunTime -> this@fxApplicationManagerStub.parallel{
                 println("runtime@fxApplicationStub")
                 // create flow managing runtime-communication
                 // 1. create stup observing invcoming messages
                 val observingStub = receivingStub<AppFlowMessage.Runtime<D>,AppFlowMessage.Runtime<D>> {
-                    evolve{Immediate{it}}
+                    evolve{this@fxApplicationManagerStub.parallel{it}}
                     gap{
-                        from{Immediate{it}}
-                        to{_, response -> Immediate{response}}
+                        from{this@fxApplicationManagerStub.parallel{it}}
+                        to{_, response -> this@fxApplicationManagerStub.parallel{response}}
                     }
                     receiver(phase.applicationManagerPort)
                 }
@@ -87,15 +84,15 @@ fun <D, A: KClass<out SimpleAppManager<D>>> fxApplicationManagerStub(): Stub<FxA
                 val runtimeStub = stub<AppFlowMessage.Runtime<D>>{
                     //id(ApplicationRuntime::class)
                     evolve{message -> when(message){
-                        is AppFlowMessage.Runtime.EnteredRuntimePhase -> Parallel{
+                        is AppFlowMessage.Runtime.EnteredRuntimePhase -> this@fxApplicationManagerStub.parallel{
                             phase.applicationManager.applicationManagerPort = phase.applicationManagerPort
                             phase.applicationManager.port.send(message)
                             AppFlowMessage.Runtime.Wait<D>()
                         }
-                        is AppFlowMessage.Runtime.Wait -> Parallel{
+                        is AppFlowMessage.Runtime.Wait -> this@fxApplicationManagerStub.parallel{
                             observingStub.evolve(message).get()
                         }
-                        is AppFlowMessage.Runtime.ShowStage<*> -> Parallel{
+                        is AppFlowMessage.Runtime.ShowStage<*> -> this@fxApplicationManagerStub.parallel{
                             //val stage = phase.applicationManager.showStage(message.id)
                             Parallel<Unit>{
                                 val stage = phase.applicationManager.showStage(message.id).get()
@@ -106,11 +103,11 @@ fun <D, A: KClass<out SimpleAppManager<D>>> fxApplicationManagerStub(): Stub<FxA
                         }
                         is AppFlowMessage.Runtime.HideStage<*> -> ParallelFx{
                             phase.applicationManager.hideStage(message.id)
-                            AppFlowMessage.Runtime.Wait()
+                            AppFlowMessage.Runtime.Wait<D>()
                         }
                         is AppFlowMessage.Runtime.Confirm.Cancel,
-                        is AppFlowMessage.Runtime.Confirm.Ok -> Immediate{ AppFlowMessage.Runtime.Terminate<D>() }
-                        is AppFlowMessage.Runtime.Terminate -> Immediate{message}
+                        is AppFlowMessage.Runtime.Confirm.Ok -> this@fxApplicationManagerStub.parallel{ AppFlowMessage.Runtime.Terminate<D>() }
+                        is AppFlowMessage.Runtime.Terminate -> this@fxApplicationManagerStub.parallel{message}
                     }}
                 }
                 // turn runtime-stub into a flow
@@ -140,12 +137,12 @@ fun <D, A: KClass<out SimpleAppManager<D>>> fxApplicationManagerStub(): Stub<FxA
                 FxApplicationPhase.Terminate(phase.receiver)
 
             }
-            is FxApplicationPhase.Terminate -> Parallel{phase}
+            is FxApplicationPhase.Terminate -> this@fxApplicationManagerStub.parallel{phase}
         }
     }
 }
 
-fun <D, A: KClass<out SimpleAppManager<D>>> fxApplicationManagerFlow() = fxApplicationManagerStub<D,A>().toFlow<FxApplicationPhase<D>,Boolean>(
+fun <D, A: KClass<out SimpleAppManager<D>>> CoroutineScope.fxApplicationManagerFlow() = fxApplicationManagerStub<D,A>().toFlow<FxApplicationPhase<D>,Boolean>(
         conditions{
             testObject(true)
             check{b->b}

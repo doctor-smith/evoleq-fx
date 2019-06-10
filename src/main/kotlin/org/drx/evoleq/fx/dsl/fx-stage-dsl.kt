@@ -18,16 +18,18 @@ package org.drx.evoleq.fx.dsl
 import javafx.scene.Scene
 import javafx.stage.Stage
 import javafx.stage.WindowEvent
+import kotlinx.coroutines.CoroutineScope
+import org.drx.evoleq.fx.application.AppManager
 import org.drx.evoleq.fx.component.FxComponent
 
 /**
  * Stage
  */
 @Suppress("unused")
-fun <D> Any?.fxStage(configuration: FxComponentConfiguration<Stage, D>.()->Unit): FxComponent<Stage, D> = fxComponent ( configuration )
+fun <D> Any?.fxStage(scope: CoroutineScope = AppManager.SCOPE, configuration: FxComponentConfiguration<Stage, D>.()->Unit): FxComponent<Stage, D> = fxComponent (scope, configuration )
 
 @Suppress("unused")
-fun <D> fxStage(configuration: FxComponentConfiguration<Stage, D>.()->Unit): FxComponent<Stage, D> = fxComponent ( configuration )
+fun <D> fxStage(scope: CoroutineScope = AppManager.SCOPE,configuration: FxComponentConfiguration<Stage, D>.()->Unit): FxComponent<Stage, D> = fxComponent (scope, configuration )
 
 @Suppress("unused")
 fun <D> FxComponentConfiguration<Stage, D>.scene(component: FxComponent<Scene, D>): FxComponentConfiguration<Stage, D> {

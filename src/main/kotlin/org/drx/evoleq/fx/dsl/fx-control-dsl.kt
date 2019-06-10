@@ -18,12 +18,13 @@ package org.drx.evoleq.fx.dsl
 import javafx.scene.control.Control
 import javafx.scene.control.Label
 import javafx.scene.control.Tooltip
+import kotlinx.coroutines.CoroutineScope
 import org.drx.evoleq.fx.component.FxComponent
 @Suppress("unused")
-fun <D> Any?.fxTooltip(configuration: FxComponentConfiguration<Tooltip, D>.()->Unit): FxComponent<Tooltip, D> = fxComponent(configuration)
+fun <D> Any?.fxTooltip(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE,configuration: FxComponentConfiguration<Tooltip, D>.()->Unit): FxComponent<Tooltip, D> = fxComponent(scope,configuration)
 
 @Suppress("unused")
-fun <D> fxTooltip(configuration: FxComponentConfiguration<Tooltip, D>.()->Unit): FxComponent<Tooltip, D> = fxComponent(configuration)
+fun <D> fxTooltip(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE,configuration: FxComponentConfiguration<Tooltip, D>.()->Unit): FxComponent<Tooltip, D> = fxComponent(scope,configuration)
 
 @Suppress("unused")
 fun <C : Control, D> FxComponentConfiguration<C, D>.tooltip(component: FxComponent<Tooltip, D>) {

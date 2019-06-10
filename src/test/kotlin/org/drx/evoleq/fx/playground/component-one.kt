@@ -19,7 +19,11 @@ import javafx.scene.Scene
 import javafx.scene.control.Button
 import javafx.scene.effect.Reflection
 import javafx.scene.layout.AnchorPane
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import org.drx.evoleq.coroutines.onScope
 import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.fx.dsl.*
 import org.drx.evoleq.fx.test.dsl.fxRunTest
@@ -41,7 +45,7 @@ class ComponentOneTest {
     }
 */
     @Test fun go() = fxRunTest{//runBlocking {
-        val stageComponent = {fxStage<Nothing> {
+        val stageComponent = onScope{ scope: CoroutineScope ->  fxStage<Nothing>( scope ){
             id<StageId>()
             view { configure {
                 //isResizable = false
@@ -98,7 +102,7 @@ class ComponentOneTest {
             stub(stub{})
         }}
 
-        val stub = showStage(stageComponent()).get()
+        val stub = showStage(stageComponent).get()
 
         delay(1_000)
     }

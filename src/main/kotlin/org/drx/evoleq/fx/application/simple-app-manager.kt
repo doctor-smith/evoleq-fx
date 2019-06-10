@@ -19,6 +19,7 @@ import com.sun.org.apache.xml.internal.security.Init.isInitialized
 import javafx.scene.Node
 import javafx.scene.Scene
 import javafx.stage.Stage
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.runBlocking
 import org.drx.evoleq.coroutines.BaseReceiver
 import org.drx.evoleq.dsl.*
@@ -28,6 +29,7 @@ import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.dsl.FxComponents
 import org.drx.evoleq.fx.dsl.ID
+import org.drx.evoleq.fx.dsl.parallelFx
 import org.drx.evoleq.fx.evolving.ParallelFx
 import org.drx.evoleq.fx.phase.AppFlowMessage
 import org.drx.evoleq.stub.Stub
@@ -59,14 +61,14 @@ abstract class SimpleAppManager<D> : AppManager<D>() {
     protected val stages: HashMap<ID, Stage> by lazy {
         HashMap<ID, Stage>()
     }
-    protected val stageComponents: HashMap<ID, ()->FxComponent<Stage, *>> by lazy {
-        HashMap<ID, ()->FxComponent<Stage,*>>()
+    protected val stageComponents: HashMap<ID, CoroutineScope.(CoroutineScope)->FxComponent<Stage, *>> by lazy {
+        HashMap<ID, CoroutineScope.(CoroutineScope)->FxComponent<Stage, *>>()
     }
-    protected val sceneComponents: HashMap<ID, ()->FxComponent<Scene, *>> by lazy {
-        HashMap<ID, ()->FxComponent<Scene, *>>()
+    protected val sceneComponents: HashMap<ID, CoroutineScope.(CoroutineScope)->FxComponent<Scene, *>> by lazy {
+        HashMap<ID, CoroutineScope.(CoroutineScope)->FxComponent<Scene, *>>()
     }
-    protected val nodeComponents: HashMap<ID, ()->FxComponent<Node, *>> by lazy {
-        HashMap<ID, ()->FxComponent<Node, *>>()
+    protected val nodeComponents: HashMap<ID, CoroutineScope.(CoroutineScope)->FxComponent<Node, *>> by lazy {
+        HashMap<ID, CoroutineScope.(CoroutineScope)->FxComponent<Node, *>>()
     }
 
     fun registerComponents(components: FxComponents) {
@@ -75,16 +77,18 @@ abstract class SimpleAppManager<D> : AppManager<D>() {
         nodeComponents.putAll(components.nodes)
     }
 
-    open fun showStage(id : ID): Evolving<FxComponent<Stage, *>> = ParallelFx<FxComponent<Stage, *>> {
-            val component = stageComponents[id]!!()
-            val stage = component.show()
-            stages[id] = stage
-            showStage(stage)
+    open fun showStage(id : ID): Evolving<FxComponent<Stage, *>> = scope.parallel {
+            val component = stageComponents[id]!!(scope)
+            parallelFx {
+                val stage = component.show()
+                stages[id] = stage
+                showStage(stage)
+            }
             component
         }
 
     open fun hideStage(id: ID) =
-        ParallelFx<Unit> {
+        scope.parallelFx<Unit> {
             val stage = stages[id]
             if (stage != null) {
                 stages.remove(id)

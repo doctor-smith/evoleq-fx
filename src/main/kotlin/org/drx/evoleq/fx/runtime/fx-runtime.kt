@@ -15,22 +15,26 @@
  */
 package org.drx.evoleq.fx.runtime
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
+import org.drx.evoleq.dsl.parallel
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.component.FxComponent
+import org.drx.evoleq.fx.dsl.parallelFx
 import org.drx.evoleq.fx.evolving.ParallelFx
 import org.drx.evoleq.fx.exception.FxConfigurationException
 import org.drx.evoleq.fx.phase.FxComponentPhase
-
+/* TODO add dependency on a coroutine-scope*/
 abstract class  FxRunTime<N , D> {
     abstract val view: N
     abstract val component: FxComponent<N, D>
     abstract val phase: FxComponentPhase.RunTimePhase<N,D>
+    abstract val scope: CoroutineScope
     private val actions: ArrayList<N.() -> Unit> by lazy{ arrayListOf<N.()->Unit>() }
 
     var shutdown: Boolean = false
 
-    fun fxRun() : Parallel<FxComponentPhase.RunTimePhase<N, D>> = Parallel{
+    fun fxRun() : Parallel<FxComponentPhase.RunTimePhase<N, D>> = scope.parallel{
 
         var nextPhase = phase
 
@@ -38,7 +42,7 @@ abstract class  FxRunTime<N , D> {
             delay(1)
         }
 
-        try { ParallelFx<Unit> {
+        try { parallelFx<Unit> {
             while(actions.isNotEmpty() && !shutdown) {
                 val action = actions.first()
                 actions.removeAt(0)
@@ -59,7 +63,7 @@ abstract class  FxRunTime<N , D> {
     fun fxRunTime(action: N.() -> Unit) {
         actions.add(action)
     }
-    fun shutdown() = Parallel<Unit>{
+    fun shutdown() = scope.parallel<Unit>{
         val action:N.()->Unit = {shutdown = true}
         actions.add(0, action)
     }

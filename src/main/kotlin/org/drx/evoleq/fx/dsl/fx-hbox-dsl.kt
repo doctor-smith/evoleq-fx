@@ -16,10 +16,11 @@
 package org.drx.evoleq.fx.dsl
 
 import javafx.scene.layout.HBox
+import kotlinx.coroutines.CoroutineScope
 import org.drx.evoleq.fx.component.FxComponent
 
 @Suppress("unused")
-fun <D> FxComponentConfiguration<out Any, *>.fxHBox(configuration: FxComponentConfiguration<HBox, D>.()->Unit): FxComponent<HBox, D> = fxComponent(configuration)
+fun <D> FxComponentConfiguration<out Any, *>.fxHBox(scope: CoroutineScope = this.scope, configuration: FxComponentConfiguration<HBox, D>.()->Unit): FxComponent<HBox, D> = fxComponent(scope,configuration)
 
 @Suppress("unused")
-fun <D> fxHBox(configuration: FxComponentConfiguration<HBox, D>.()->Unit): FxComponent<HBox, D> = fxComponent(configuration)
+fun <D> fxHBox(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE,configuration: FxComponentConfiguration<HBox, D>.()->Unit): FxComponent<HBox, D> = fxComponent(scope,configuration)

@@ -18,7 +18,10 @@ package org.drx.evoleq.fx.dsl
 import javafx.geometry.Point2D
 import javafx.scene.Scene
 import javafx.scene.paint.Color
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
+import org.drx.evoleq.coroutines.onScope
 import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.fx.geometry.Derivation
@@ -31,7 +34,7 @@ class FxPathTest {
 
     @Test
     fun fxPath() = fxRunTest{//runBlocking {
-        val stageComponent = fxStage<Unit> {
+        val stageComponent = onScope{ scope: CoroutineScope ->fxStage<Unit>(scope) {
             id<StageId>()
             view{configure{}}
             scene(fxScene{
@@ -131,9 +134,10 @@ class FxPathTest {
                     }
                 }
             })
-        }
+        }}
 
-        val stub = showStage(stageComponent).get()
+        val stub = //GlobalScope.
+         showStage(stageComponent).get()
         //delay(1_000)
     }
 }

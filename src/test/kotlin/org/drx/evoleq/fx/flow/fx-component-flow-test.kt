@@ -22,8 +22,12 @@ import javafx.scene.Scene
 import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.text.Text
+import javafx.stage.Stage
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import org.drx.evoleq.coroutines.onScope
+import org.drx.evoleq.dsl.parallel
 import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.evolving.Parallel
@@ -37,8 +41,8 @@ import org.junit.Test
 class FxComponentFlowTest {
 
 
-    @Test fun example() = fxRunTest{//runBlocking {
-        val stageConfiguration = fxStage<Nothing> stage@{
+    @Test fun componentFlowExample() = fxRunTest{//runBlocking {
+        val stageConfiguration = onScope{ scope: CoroutineScope ->fxStage<Nothing>(scope) stage@{
             val closeButtonClicked = SimpleBooleanProperty(false)
             id<StageId>()
             view{
@@ -134,30 +138,21 @@ class FxComponentFlowTest {
             stub(stub{})
             this@stage.stubAction {
                 val s = findByKey(Button::class)!! as FxComponent<Button, Int>
-                Parallel<Unit>{
+                parallel<Unit>{
                     val x = s.evolve(0).get()
                     println(">>>result = $x")
                 }
                 this.stubs[Button::class]!!
             }
-
-        }
+        }}
 
         val stub = showStage(stageConfiguration).get()
         //FxRobot().clickOn()
-        delay(1_000)
+        //delay(1_000)
     }
-
-    //@Test
-     fun exception() = runBlocking {
-        val component = fxComponent<Node, Int> {  }
-        //delay(5_000)
-
-    }
-
 
     @Test fun tunnelsAndNoStubs() = fxRunTest{//runBlocking{
-        val stageComponent = fxStage<Unit> {
+        val stageComponent = onScope{ scope: CoroutineScope ->fxStage<Unit> {
             id<StageId>()
             view{configure{}}
             stub(stub{})
@@ -203,13 +198,13 @@ class FxComponentFlowTest {
                 stubs[Button::class]!!
                 stubs[Label::class]!!
             }
-        }
+        }}
 
         val stub = showStage(stageComponent).get()
-        delay(1_000)
+        //delay(1_000)
         //println(stageComponent.stubs.size)
         //stageComponent.stubs.forEach{println(it)}
-        assert(stageComponent.stubs.size ==3) // 3 because the ApplicationManager is also a sub-stub
+        assert(stub.stubs.size ==3) // 3 because the ApplicationManager is also a sub-stub
 
     }
 }

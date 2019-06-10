@@ -15,7 +15,6 @@
  */
 package org.drx.evoleq.fx.component.deprecated
 
-import javafx.application.Application
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.Insets
 import javafx.scene.Scene
@@ -25,28 +24,21 @@ import javafx.scene.layout.*
 import javafx.stage.Stage
 import javafx.stage.StageStyle
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import org.drx.evoleq.dsl.conditions
 import org.drx.evoleq.dsl.observingStub
 import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.application.AppManager
-import org.drx.evoleq.fx.application.BgAppManager
 //import org.drx.evoleq.fx.dsl.*
 import org.drx.evoleq.fx.dsl.deprecated.*
 import org.drx.evoleq.fx.dsl.launchApplicationStub
-import org.drx.evoleq.fx.evolving.AsyncFx
+import org.drx.evoleq.fx.evolving.AsynqFx
 import org.drx.evoleq.fx.evolving.ParallelFx
 import org.drx.evoleq.fx.test.dsl.fxRunTest
-import org.drx.evoleq.fx.test.dsl.showTestStage
 import org.drx.evoleq.stub.Stub
 import org.drx.evoleq.stub.toFlow
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
 import org.testfx.api.FxRobot
-import org.testfx.api.FxToolkit
 import java.lang.Thread.sleep
 
 class ComponentTest {
@@ -334,7 +326,7 @@ class ComponentTest {
         class App : AppManager<Int>() {
             override fun configure(): Stub<Int> = stub {
                 id(App::class)
-                evolve{ x: Int-> AsyncFx<Int>{
+                evolve{ x: Int-> AsynqFx<Int>{
                         val s = stage.show()
                         showStage(s)
                         sleep(500)
@@ -665,7 +657,7 @@ class ComponentTest {
             })
         }
 
-        val stub = org.drx.evoleq.fx.test.deprecated.showTestStage(stageComponent).get()
+        val stub = org.drx.evoleq.fx.test.deprecated.showTestStage(stageComponent= stageComponent).get()
 
         delay (1_000)
     }

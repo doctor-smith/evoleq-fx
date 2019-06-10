@@ -71,11 +71,19 @@ tasks {
         add("archives", dokkaJar)
     }
 
+    val closeRunner by creating(Task::class){
+        //classifier = "closeTestRunner"
+        println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>< close runner")
+    }
+
+    
 
 }
 
+tasks.withType<Test>{
+    (this as Task).finalizedBy(tasks.getByName("closeRunner"))
 
-
+}
 task("writeNewPom") {
     doLast {
         maven.pom {

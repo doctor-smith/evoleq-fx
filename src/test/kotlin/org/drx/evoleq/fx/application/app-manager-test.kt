@@ -15,19 +15,14 @@
  */
 package org.drx.evoleq.fx.application
 
-import javafx.application.Application
-import javafx.application.Platform
 import javafx.stage.Stage
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.GlobalScope
 import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.fx.dsl.launchApplicationStub
-import org.drx.evoleq.fx.evolving.ParallelFx
+import org.drx.evoleq.fx.dsl.parallelFx
 import org.drx.evoleq.fx.test.dsl.fxRunTest
 import org.drx.evoleq.stub.Stub
 import org.junit.*
-import org.testfx.api.FxToolkit
-import java.lang.Thread.sleep
 
 class AppManagerTest {
 
@@ -35,9 +30,9 @@ class AppManagerTest {
 
     @Test fun launchApp() = fxRunTest{//runBlocking {
         class App: AppManager<Unit>() {
-            override fun configure(): Stub<Unit> = stub {
+            override fun configure(): Stub<Unit> = scope.stub {
                 id(App::class)
-                evolve { ParallelFx {
+                evolve { parallelFx {
                     //println("fx")
                     val stage = Stage()
                     stage.title = "PIPI"
@@ -46,7 +41,7 @@ class AppManagerTest {
             }
         }
 
-        val stub = AppManager.launch(App()).get()
+        val stub = AppManager.launch(app=App()).get()
         assert(stub.id == App::class)
         val u = stub.evolve(Unit).get()
         assert(true)
@@ -54,9 +49,9 @@ class AppManagerTest {
     }
     @Test fun launchFromClass() = fxRunTest{//runBlocking{
         class App: AppManager<Unit>() {
-            override fun configure(): Stub<Unit> = stub {
+            override fun configure(): Stub<Unit> = GlobalScope.stub {
                 id(App::class)
-                evolve { ParallelFx {
+                evolve { GlobalScope.parallelFx {
                     //println("fx")
                     val stage = Stage()
                     stage.title = "PIPI"
@@ -74,9 +69,9 @@ class AppManagerTest {
     @Test fun launchViaDsl() = fxRunTest{//runBlocking{
 
         class App: AppManager<Boolean>() {
-            override fun configure(): Stub<Boolean> = stub{
+            override fun configure(): Stub<Boolean> = GlobalScope.stub{
                 id(App::class)
-                evolve{ ParallelFx{
+                evolve{ GlobalScope.parallelFx{
                     val stage = Stage()
                     stage.title = "PIPI"
                     showStage(stage)
@@ -100,9 +95,9 @@ class AppManagerTest {
 
     @Test fun launchTwoAppsAndCheckRegistry() = fxRunTest{//runBlocking {
         class App1: AppManager<Boolean>() {
-            override fun configure(): Stub<Boolean> = stub{
+            override fun configure(): Stub<Boolean> = scope.stub{
                 id(App1::class)
-                evolve{ ParallelFx{
+                evolve{ parallelFx{
                     val stage = Stage()
                     stage.title = "PIPI_1"
                     showStage(stage)
@@ -112,9 +107,9 @@ class AppManagerTest {
         }
 
         class App2: AppManager<Boolean>() {
-            override fun configure(): Stub<Boolean> = stub{
+            override fun configure(): Stub<Boolean> = scope.stub{
                 id(App2::class)
-                evolve{ ParallelFx{
+                evolve{ parallelFx{
                     val stage = Stage()
                     stage.title = "PIPI_2"
                     showStage(stage)
@@ -123,14 +118,14 @@ class AppManagerTest {
             }
         }
 
-        val stub1 = AppManager.launch(App1()).get()
+        val stub1 = AppManager.launch(app=App1()).get()
         val v1 = stub1.evolve(false).get()
         assert(v1)
         //delay(500)
         assert(stub1.id == App1::class )
         assert(AppManager.appStub<Boolean>(stub1.id) != null)
 
-        val stub2 = AppManager.launch(App2()).get()
+        val stub2 = AppManager.launch(app=App2()).get()
         val v2 = stub2.evolve(false).get()
         assert(v2)
         assert(stub2.id == App2::class )

@@ -18,16 +18,19 @@ package org.drx.evoleq.fx.dsl
 import javafx.scene.Parent
 import javafx.scene.Scene
 import javafx.stage.Stage
+import kotlinx.coroutines.CoroutineScope
+import org.drx.evoleq.dsl.parallel
 import org.drx.evoleq.fx.component.FxComponent
+import java.lang.Thread.sleep
 
 @Suppress("unused")
-fun <D> FxComponentConfiguration<Stage, D>.fxScene(configuration: FxComponentConfiguration<Scene, D>.()->Unit): FxComponent<Scene, D> {
-    return fxComponent(configuration)
+fun <D> FxComponentConfiguration<Stage, D>.fxScene(scope: CoroutineScope = this.scope, configuration: FxComponentConfiguration<Scene, D>.()->Unit): FxComponent<Scene, D> {
+    return fxComponent(scope,configuration)
 }
 
 @Suppress("unused")
-fun <D> fxScene(configuration: FxComponentConfiguration<Scene, D>.()->Unit): FxComponent<Scene, D> {
-    return fxComponent(configuration)
+fun <D> fxScene(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE,configuration: FxComponentConfiguration<Scene, D>.()->Unit): FxComponent<Scene, D> {
+    return fxComponent(scope,configuration)
 }
 
 /**
@@ -37,6 +40,22 @@ fun <D> fxScene(configuration: FxComponentConfiguration<Scene, D>.()->Unit): FxC
 fun <P: Parent, D> FxComponentConfiguration<Scene, D>.root(component: FxComponent<P, D>, inject:(P)->Scene = { p -> Scene(p)}) : FxComponentConfiguration<Scene, D> {
     child(component)
     val root = component.show()
+    val scene = inject(root)
+    view{scene}
+    return this
+}
+
+@Suppress("unused")
+fun <P: Parent, D> FxComponentConfiguration<Scene, D>.root(component: CoroutineScope.(CoroutineScope)->FxComponent<P, D>, inject:(P)->Scene = { p -> Scene(p)}) : FxComponentConfiguration<Scene, D> {
+    var comp: FxComponent<P, D>? = null
+    scope.parallel{
+        comp = component(this)
+    }
+    while(comp == null){
+        sleep(1)
+    }
+    child(comp!!)
+    val root = comp!!.show()
     val scene = inject(root)
     view{scene}
     return this

@@ -16,17 +16,18 @@
 package org.drx.evoleq.fx.dsl
 
 import javafx.scene.layout.StackPane
+import kotlinx.coroutines.CoroutineScope
 import org.drx.evoleq.fx.component.FxComponent
 
 /**
  * StackPane
  */
 @Suppress("unused")
-fun <D> FxComponentConfiguration<out Any, *>.fxStackPane(configuration: FxComponentConfiguration<StackPane, D>.()->Unit): FxComponent<StackPane, D> {
-    return fxComponent(configuration)
+fun <D> FxComponentConfiguration<out Any, *>.fxStackPane(scope: CoroutineScope = this.scope, configuration: FxComponentConfiguration<StackPane, D>.()->Unit): FxComponent<StackPane, D> {
+    return fxComponent(scope,configuration)
 }
 
 @Suppress("unused")
-fun <D> fxStackPane(configuration: FxComponentConfiguration<StackPane, D>.()->Unit): FxComponent<StackPane, D> {
-    return fxComponent(configuration)
+fun <D> fxStackPane(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE,configuration: FxComponentConfiguration<StackPane, D>.()->Unit): FxComponent<StackPane, D> {
+    return fxComponent(scope,configuration)
 }

@@ -16,10 +16,11 @@
 package org.drx.evoleq.fx.dsl
 
 import javafx.scene.text.Text
+import kotlinx.coroutines.CoroutineScope
 import org.drx.evoleq.fx.component.FxComponent
 
 @Suppress("unused")
-fun <D> FxComponentConfiguration<out Any, *>.fxText(configuration: FxComponentConfiguration<Text, D>.()->Unit): FxComponent<Text, D> = fxComponent(configuration)
+fun <D> FxComponentConfiguration<out Any, *>.fxText(scope: CoroutineScope = this.scope, configuration: FxComponentConfiguration<Text, D>.()->Unit): FxComponent<Text, D> = fxComponent(scope,configuration)
 
 @Suppress("unused")
-fun <D> fxText(configuration: FxComponentConfiguration<Text, D>.()->Unit): FxComponent<Text, D> = fxComponent(configuration)
+fun <D> fxText(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE,configuration: FxComponentConfiguration<Text, D>.()->Unit): FxComponent<Text, D> = fxComponent(scope,configuration)

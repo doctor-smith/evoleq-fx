@@ -17,12 +17,9 @@ package org.drx.evoleq.fx.application
 
 import javafx.application.Application
 import javafx.stage.Stage
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.drx.evoleq.dsl.Configuration
-import org.drx.evoleq.dsl.StubConfiguration
-import org.drx.evoleq.dsl.configure
+import org.drx.evoleq.dsl.parallel
 import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.evolving.Parallel
@@ -33,21 +30,31 @@ import kotlin.reflect.full.createInstance
 
 class ApplicationManager
 
+val DEFAULT_FX_APPLICATION_SCOPE: ()->CoroutineScope =  {GlobalScope}
+
 /**
  * You will have to override the configure method.
  * This method will be called during the launching-process
  */
-abstract class AppManager<D> : Application(), Configuration<Stub<D>> {
+abstract class AppManager<D>() : Application(), Configuration<Stub<D>> {
+
+    val scope: CoroutineScope = SCOPE
+
     /**
      * Do not override unless you set TOOLKIT_INITIALIZED = true
      */
     override fun start(primaryStage: Stage?) {
+
         TOOLKIT_INITIALIZED = true
+
         /* use this method to enter the fx-thread only */
     }
 
 
+
+
     companion object Manager{
+        val SCOPE: CoroutineScope = DEFAULT_FX_APPLICATION_SCOPE()
         private lateinit var STUB: Stub<*>
         private var TOOLKIT_INITIALIZED: Boolean = false
         //private var STUB_INITIALIZED = false
@@ -62,8 +69,9 @@ abstract class AppManager<D> : Application(), Configuration<Stub<D>> {
          */
         @Suppress("UNCHECKED_CAST")
         fun <D, A : AppManager<D>> launch(app: A): Parallel<Stub<D>> {
+            //SCOPE
             CALLED++
-            return Parallel {
+            return SCOPE.parallel {
             // reset state
             var STUB_INITIALIZED = false
 

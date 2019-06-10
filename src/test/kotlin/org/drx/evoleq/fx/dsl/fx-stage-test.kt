@@ -17,23 +17,31 @@ package org.drx.evoleq.fx.dsl
 
 import javafx.scene.Scene
 import javafx.stage.Stage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
+import org.drx.evoleq.coroutines.onScope
+import org.drx.evoleq.dsl.parallel
 import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.test.dsl.fxRunTest
 import org.drx.evoleq.fx.util.launchStage
+import org.drx.evoleq.fx.util.showStage
 import org.junit.Test
 
 class FxStageTest{
 
 
     @Test fun fxStage() = fxRunTest{//runBlocking {
-        val stub = launchStage(testStageConfig()).get()
+        val stub = parallel{
+            showStage( testStageConfig() ).get()
+            //delay(2_000)
+        }.get()
 
         //delay (1_000)
     }
 
-    fun testStageConfig(): FxComponent<Stage, Nothing> = fxStage{
+    fun testStageConfig() = onScope{scope: CoroutineScope->fxStage<Nothing>(scope){
         id<StageId>()
         //noStub()
         view{configure{}}
@@ -62,6 +70,7 @@ class FxStageTest{
                     noStub()
                     view{configure{
                         text = "Bottom"
+                        assert(true)
                     }}
                 })
             }) {
@@ -71,5 +80,5 @@ class FxStageTest{
         })
 
         stub(stub{})
-    }
+    }}
 }

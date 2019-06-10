@@ -16,10 +16,11 @@
 package org.drx.evoleq.fx.dsl
 
 import javafx.scene.control.Label
+import kotlinx.coroutines.CoroutineScope
 import org.drx.evoleq.fx.component.FxComponent
 
 @Suppress("unused")
-fun <D> FxComponentConfiguration<out Any, *>.fxLabel(configuration: FxComponentConfiguration<Label, D>.()->Unit): FxComponent<Label, D> = fxComponent(configuration)
+fun <D> FxComponentConfiguration<out Any, *>.fxLabel(scope: CoroutineScope = this.scope, configuration: FxComponentConfiguration<Label, D>.()->Unit): FxComponent<Label, D> = fxComponent(scope,configuration)
 
 @Suppress("unused")
-fun <D> fxLabel(configuration: FxComponentConfiguration<Label, D>.()->Unit): FxComponent<Label, D> = fxComponent(configuration)
+fun <D> fxLabel(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE,configuration: FxComponentConfiguration<Label, D>.()->Unit): FxComponent<Label, D> = fxComponent(scope,configuration)

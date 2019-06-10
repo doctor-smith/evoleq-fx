@@ -21,10 +21,14 @@ import javafx.scene.Scene
 import javafx.scene.control.Button
 import javafx.stage.Stage
 import javafx.stage.WindowEvent
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.drx.evoleq.coroutines.BaseReceiver
+import org.drx.evoleq.coroutines.onScope
 import org.drx.evoleq.dsl.*
+import org.drx.evoleq.dsl.gap
+import org.drx.evoleq.dsl.receiver
 import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.flow.intercept
@@ -39,9 +43,6 @@ import org.drx.evoleq.fx.test.dsl.fxRunTest
 import org.drx.evoleq.stub.Stub
 import org.drx.evoleq.stub.toFlow
 import org.drx.evoleq.time.WaitForProperty
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
 import org.testfx.api.FxRobot
 import kotlin.reflect.KClass
 
@@ -149,7 +150,7 @@ class FxApplicationFlowTest {
             }
         }
 
-        fun mainStage() = fxStage<Data> {
+        val mainStage = onScope{scope: CoroutineScope ->fxStage<Data>(scope) {
             id<Stage>()
             properties{
                 "close" to SimpleObjectProperty<Boolean>(false)
@@ -183,9 +184,9 @@ class FxApplicationFlowTest {
                 }
             })
 
-        }
+        }}
 
-        fun closeDialog() = fxStage<AppFlowMessage.Runtime.Confirm<Data>>{
+        val  closeDialog =onScope{scope: CoroutineScope -> fxStage<AppFlowMessage.Runtime.Confirm<Data>>(scope){
             id<CloseDialog>()
             val clicked = SimpleObjectProperty<AppFlowMessage.Runtime.Confirm<Data>>()
             //properties{"confirm" to SimpleObjectProperty<AppFlowMessage.Runtime.Confirm<Data>>() }
@@ -243,11 +244,11 @@ class FxApplicationFlowTest {
                     else -> Immediate{AppFlowMessage.Runtime.Confirm.Cancel<Data>()}
                 }}
             })
-        }
+        }}
 
         val components = fxComponents {
-            stage(Stage::class){mainStage()}
-            stage(CloseDialog::class){closeDialog()}
+            stage(Stage::class, mainStage)
+            stage(CloseDialog::class,closeDialog)
         }
 
         val port: BaseReceiver<AppFlowMessage<Data>> = receiver{}

@@ -16,6 +16,7 @@
 package org.drx.evoleq.fx.dsl
 
 import javafx.scene.shape.CubicCurve
+import kotlinx.coroutines.CoroutineScope
 import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.geometry.Derivation
 
@@ -26,16 +27,16 @@ import org.drx.evoleq.fx.geometry.Derivation
  * CubicCurve
  */
 @Suppress("unused")
-fun <D> FxComponentConfiguration<out Any, *>.fxCubicCurve(configuration: FxComponentConfiguration<CubicCurve, D>.()->Unit): FxComponent<CubicCurve,D> {
-    return fxComponent(configuration)
+fun <D> FxComponentConfiguration<out Any, *>.fxCubicCurve(scope: CoroutineScope = this.scope, configuration: FxComponentConfiguration<CubicCurve, D>.()->Unit): FxComponent<CubicCurve,D> {
+    return fxComponent(scope,configuration)
 }
 
 /**
  *
  */
 @Suppress("unused")
-fun <D> fxCubicCurve(configuration: FxComponentConfiguration<CubicCurve, D>.()->Unit): FxComponent<CubicCurve,D> {
-    return fxComponent(configuration)
+fun <D> fxCubicCurve(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE,configuration: FxComponentConfiguration<CubicCurve, D>.()->Unit): FxComponent<CubicCurve,D> {
+    return fxComponent(scope,configuration)
 }
 
 fun <D> FxComponentConfiguration<CubicCurve, D>.startVelocity(configuration: Point2DConfiguration.()->Unit) {

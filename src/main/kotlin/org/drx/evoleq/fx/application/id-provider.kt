@@ -19,6 +19,7 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.actor
 import org.drx.evoleq.fx.dsl.ID
@@ -49,7 +50,7 @@ fun CoroutineScope.idProviderDeprecated() = actor<SimpleObjectProperty<ID>>(){
 }
 
 
-
+@Suppress("obsolete")
 fun CoroutineScope.idProvider(): SendChannel<Change<ID>> = actor(capacity = 1_000_000) {
     var currentId = 0
     val number = numberOfKeys

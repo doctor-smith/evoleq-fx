@@ -16,6 +16,8 @@
 package org.drx.evoleq.fx.dsl
 
 import javafx.scene.Scene
+import kotlinx.coroutines.CoroutineScope
+import org.drx.evoleq.coroutines.onScope
 import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.fx.test.dsl.fxRunTest
 import org.drx.evoleq.fx.util.showStage
@@ -24,12 +26,12 @@ import org.junit.Test
 
 class TabPaneTest {
 
-
+    /* TODO tab-component*/
     //@Test
     fun basics() = fxRunTest{//runBlocking {
         var done = false
 
-        val stageComponent = fxStage<Nothing>{
+        val stageComponent = onScope{scope: CoroutineScope ->fxStage<Nothing>(scope){
             id<StageId>()
             view{configure{}}
             scene(fxScene {
@@ -71,7 +73,7 @@ class TabPaneTest {
                 stub(stub{})
             })
             stub(stub{})
-        }
+        }}
 
         val stub = showStage(stageComponent).get()
         assert(done)

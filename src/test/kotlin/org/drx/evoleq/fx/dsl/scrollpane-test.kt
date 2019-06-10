@@ -19,7 +19,10 @@ import javafx.scene.Scene
 import javafx.scene.control.Button
 import javafx.scene.layout.VBox
 import javafx.stage.Stage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
+import org.drx.evoleq.coroutines.onScope
 import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.fx.dsl.deprecated.StageStubKey
 import org.drx.evoleq.fx.test.dsl.fxRunTest
@@ -30,8 +33,8 @@ import org.junit.Test
 class ScrollPaneTest {
 
 
-    @Test fun basics() = fxRunTest{//runBlocking {
-        val stageComponent = fxComponent<Stage, Nothing> {
+    @Test fun scrollPaneBasics() = fxRunTest{//runBlocking {
+        val stageComponent = onScope{ scope: CoroutineScope->fxComponent<Stage, Nothing>(scope) {
             id(StageStubKey::class)
             view{configure{title = "ScrollPane"}}
             scene(fxScene {
@@ -42,7 +45,7 @@ class ScrollPaneTest {
                     view{ configure{
 
                     } }
-                    content(fxComponent<VBox, Nothing> {
+                    content(fxVBox< Nothing> {
                         noStub()
                         view{
                             configure{
@@ -61,9 +64,9 @@ class ScrollPaneTest {
                 stub(stub{})
             })
             stub(stub{})
-        }
+        } }
         showStage(stageComponent).get()
 
-        //delay(1_000)
+        //delay(10_000)
     }
 }

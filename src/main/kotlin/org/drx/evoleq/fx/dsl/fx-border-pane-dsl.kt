@@ -17,18 +17,19 @@ package org.drx.evoleq.fx.dsl
 
 import javafx.scene.Node
 import javafx.scene.layout.BorderPane
+import kotlinx.coroutines.CoroutineScope
 import org.drx.evoleq.fx.component.FxComponent
 
 /**
  * BorderPane
  */
 @Suppress("unused")
-fun <D> FxComponentConfiguration<out Any, *>.fxBorderPane(configuration: FxComponentConfiguration<BorderPane,D>.()->Unit): FxComponent<BorderPane, D> {
-    return fxComponent(configuration)
+fun <D> FxComponentConfiguration<out Any, *>.fxBorderPane(scope: CoroutineScope = this.scope, configuration: FxComponentConfiguration<BorderPane,D>.()->Unit): FxComponent<BorderPane, D> {
+    return fxComponent(scope,configuration)
 }
 @Suppress("unused")
-fun <D> fxBorderPane(configuration: FxComponentConfiguration<BorderPane,D>.()->Unit): FxComponent<BorderPane, D> {
-    return fxComponent(configuration)
+fun <D> fxBorderPane(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE,configuration: FxComponentConfiguration<BorderPane,D>.()->Unit): FxComponent<BorderPane, D> {
+    return fxComponent(scope,configuration)
 }
 @Suppress("unused")
 fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.top(component: FxComponent<C, D>)  {

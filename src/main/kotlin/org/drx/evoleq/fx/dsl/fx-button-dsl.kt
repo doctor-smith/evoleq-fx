@@ -18,20 +18,24 @@ package org.drx.evoleq.fx.dsl
 import javafx.event.ActionEvent
 import javafx.scene.control.Button
 import javafx.scene.control.ButtonBase
+import kotlinx.coroutines.CoroutineScope
 import org.drx.evoleq.fx.component.FxComponent
 
 /**
  * Button
  */
 @Suppress("unused")
-fun <D> FxComponentConfiguration<out Any, D>.fxButton(configuration: FxComponentConfiguration<Button, D>.()->Unit): FxComponent<Button, D> {
-    return  fxComponent(configuration)
+fun <D> FxComponentConfiguration<out Any, D>.fxButton(scope: CoroutineScope = this.scope, configuration: FxComponentConfiguration<Button, D>.()->Unit): FxComponent<Button, D> {
+    return  fxComponent(scope,configuration)
 }
 
 @Suppress("unused")
-fun <D> fxButton(configuration: FxComponentConfiguration<Button, D>.()->Unit): FxComponent<Button, D> {
-    return fxComponent(configuration)
+fun <D> fxButton(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE,configuration: FxComponentConfiguration<Button, D>.()->Unit): FxComponent<Button, D> {
+    return fxComponent(scope,configuration)
 }
+
+//fun <D> CoroutineScope.fxButton(configuration: FxComponentConfiguration<Button, D>.()->Unit): CoroutineScope.()->FxComponent<Button, D> = this.fxComponent(configuration)
+
 
 @Suppress("unused")
 fun <B : ButtonBase> B.action(action: ActionEvent.()->Unit): B {

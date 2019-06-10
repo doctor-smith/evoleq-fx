@@ -18,30 +18,31 @@ package org.drx.evoleq.fx.dsl
 import javafx.scene.Node
 import javafx.scene.Scene
 import javafx.stage.Stage
+import kotlinx.coroutines.CoroutineScope
 import org.drx.evoleq.dsl.Configuration
 import org.drx.evoleq.dsl.configure
 import org.drx.evoleq.fx.component.FxComponent
 
 data class FxComponents(
-    val stages: HashMap<ID,()-> FxComponent<Stage, *>>,
-    val scenes: HashMap<ID,()-> FxComponent<Scene, *>>,
-    val nodes: HashMap<ID,()-> FxComponent<Node, *>>
+        val stages: HashMap<ID, CoroutineScope.(CoroutineScope)->FxComponent<Stage, *>>,
+        val scenes: HashMap<ID,CoroutineScope.(CoroutineScope)->FxComponent<Scene, *>>,
+        val nodes: HashMap<ID,CoroutineScope.(CoroutineScope)->FxComponent<Node, *>>
 )
 
 open class FxComponentsConfiguration : Configuration<FxComponents> {
-    private val stages: HashMap<ID,()-> FxComponent<Stage, *>> = hashMapOf()
-    private val scenes: HashMap<ID,()-> FxComponent<Scene, *>> = hashMapOf()
-    private val nodes: HashMap<ID,()-> FxComponent<Node, *>> = hashMapOf()
+    private val stages: HashMap<ID,CoroutineScope.(CoroutineScope)->FxComponent<Stage, *>> = hashMapOf()
+    private val scenes: HashMap<ID,CoroutineScope.(CoroutineScope)->FxComponent<Scene, *>> = hashMapOf()
+    private val nodes: HashMap<ID,CoroutineScope.(CoroutineScope)->FxComponent<Node, *>> = hashMapOf()
 
-    fun stage(id: ID, stage: ()-> FxComponent<Stage, *>){
+    fun stage(id: ID, stage: CoroutineScope.(CoroutineScope)->FxComponent<Stage, *>){
         stages[id] = stage
     }
 
-    fun scene(id: ID, scene: ()-> FxComponent<Scene, *>){
+    fun scene(id: ID, scene: CoroutineScope.(CoroutineScope)->FxComponent<Scene, *>){
         scenes[id] = scene
     }
     
-    fun node(id: ID, node: ()-> FxComponent<Node, *>){
+    fun node(id: ID, node: CoroutineScope.(CoroutineScope)->FxComponent<Node, *>){
         nodes[id] = node
     }
 

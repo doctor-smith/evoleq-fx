@@ -16,18 +16,19 @@
 package org.drx.evoleq.fx.dsl
 
 import javafx.scene.shape.SVGPath
+import kotlinx.coroutines.CoroutineScope
 import org.drx.evoleq.dsl.Configuration
 import org.drx.evoleq.fx.component.FxComponent
 
 
 @Suppress("unused")
-fun <D> FxComponentConfiguration<out Any, *>.fxSvgPath(configuration: FxComponentConfiguration<SVGPath, D>.()->Unit): FxComponent<SVGPath, D> {
-    return fxComponent(configuration)
+fun <D> FxComponentConfiguration<out Any, *>.fxSvgPath(scope: CoroutineScope = this.scope, configuration: FxComponentConfiguration<SVGPath, D>.()->Unit): FxComponent<SVGPath, D> {
+    return fxComponent(scope,configuration)
 }
 
 @Suppress("unused")
-fun <D> fxSvgPath(configuration: FxComponentConfiguration<SVGPath, D>.()->Unit): FxComponent<SVGPath, D> {
-    return fxComponent(configuration)
+fun <D> fxSvgPath(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE,configuration: FxComponentConfiguration<SVGPath, D>.()->Unit): FxComponent<SVGPath, D> {
+    return fxComponent(scope,configuration)
 }
 
 sealed class SVGPathElement {

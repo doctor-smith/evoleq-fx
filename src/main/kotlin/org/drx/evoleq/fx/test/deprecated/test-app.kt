@@ -16,8 +16,10 @@
 package org.drx.evoleq.fx.test.deprecated
 
 import javafx.stage.Stage
+import kotlinx.coroutines.CoroutineScope
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.application.AppManager
+import org.drx.evoleq.fx.application.DEFAULT_FX_APPLICATION_SCOPE
 import org.drx.evoleq.fx.application.deprecated.SimpleAppManager
 import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.component.deprecated.FxStageComponent
@@ -28,7 +30,7 @@ import org.drx.evoleq.stub.Stub
  * Show the stageComponent and return it as a stub
  */
 
-fun <D> showTestStage(stageComponent: FxStageComponent<D>): Parallel<Stub<D>> = Parallel {
+fun <D> showTestStage( stageComponent: FxStageComponent<D>): Parallel<Stub<D>> = Parallel {
 
     class TestApp<D> : SimpleAppManager<D>() {
         init{

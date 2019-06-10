@@ -18,7 +18,11 @@ package org.drx.evoleq.fx.dsl
 import javafx.scene.layout.Pane
 import javafx.scene.paint.Color
 import javafx.scene.shape.CubicCurve
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
+import org.drx.evoleq.coroutines.onScope
+import org.drx.evoleq.dsl.parallel
 import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.fx.geometry.Derivation
 import org.drx.evoleq.fx.test.dsl.fxRunTest
@@ -28,7 +32,7 @@ import org.junit.Test
 class FxCubicCurveTest {
 
     @Test fun basics() = fxRunTest{//runBlocking{
-        val curve = {fxCubicCurve<Nothing> {
+        val curve = onScope{scope: CoroutineScope -> fxCubicCurve<Nothing>(scope) {
             id<CubicCurve>()
             view{configure {
                 stroke = Color.RED
@@ -38,16 +42,16 @@ class FxCubicCurveTest {
             }}
             stub(stub{})
         }}
-        val pane = fxStackPane<Nothing> {
+        val pane = onScope{scope: CoroutineScope->fxStackPane<Nothing>(scope) {
             id<Pane>()
             view{configure {
                 prefHeight = 300.0
                 prefWidth = 400.0
             }}
-            child(curve())
+            child(curve)
             stub(stub{})
-        }
-        val stub = showOnStage(pane).get()
+        }}
+        val stub = parallel{showOnStage(pane).get()}.get()
         //delay(1_000)
     }
 }

@@ -17,18 +17,19 @@ package org.drx.evoleq.fx.dsl
 
 import javafx.scene.Node
 import javafx.scene.layout.AnchorPane
+import kotlinx.coroutines.CoroutineScope
 import org.drx.evoleq.fx.component.FxComponent
 
 /**
  * AnchorPane
  */
 @Suppress("unused")
-fun <D> FxComponentConfiguration<out Any, *>.fxAnchorPane(configuration: FxComponentConfiguration<AnchorPane, D>.()->Unit): FxComponent<AnchorPane, D> {
-    return fxComponent(configuration)
+fun <D> FxComponentConfiguration<out Any, *>.fxAnchorPane(scope: CoroutineScope = this.scope, configuration: FxComponentConfiguration<AnchorPane, D>.()->Unit): FxComponent<AnchorPane, D> {
+    return fxComponent(scope,configuration)
 }
 
-fun <D> fxAnchorPane(configuration: FxComponentConfiguration<AnchorPane, D>.()->Unit): FxComponent<AnchorPane, D> {
-    return fxComponent(configuration)
+fun <D> fxAnchorPane(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE,configuration: FxComponentConfiguration<AnchorPane, D>.()->Unit): FxComponent<AnchorPane, D> {
+    return fxComponent(scope,configuration)
 }
 fun Node.leftAnchor(anchor: Number) {
     AnchorPane.setLeftAnchor(this, anchor.toDouble())

@@ -18,7 +18,9 @@ package org.drx.evoleq.fx.dsl
 import javafx.scene.paint.Color
 import javafx.scene.shape.SVGPath
 import javafx.scene.shape.StrokeLineJoin
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
+import org.drx.evoleq.coroutines.onScope
 import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.fx.test.dsl.fxRunTest
 import org.drx.evoleq.fx.util.showOnStage
@@ -27,10 +29,9 @@ import org.junit.Test
 
 class FxSvgPathTest{
 
-
     //@Test
     fun fxSvgPath() = fxRunTest{//runBlocking{
-        val path = {fxSvgPath<Nothing>{
+        val path = onScope{scope: CoroutineScope -> fxSvgPath<Nothing>{
             id<SVGPath>()
             stub(stub{})
             view{configure {
@@ -69,7 +70,7 @@ class FxSvgPathTest{
                 }
             }}
         }}
-        val stub = showNodeOnStage(path()).get()
+        val stub = showNodeOnStage(path).get()
         //delay(1_000)
     }
 

@@ -17,6 +17,7 @@ package org.drx.evoleq.fx.dsl
 
 import javafx.scene.Node
 import javafx.scene.control.ScrollPane
+import kotlinx.coroutines.CoroutineScope
 import org.drx.evoleq.fx.component.FxComponent
 
 
@@ -24,13 +25,13 @@ import org.drx.evoleq.fx.component.FxComponent
  * ScrollPane
  */
 @Suppress("unused")
-fun <D> FxComponentConfiguration<out Any, *>.fxScrollPane(configuration: FxComponentConfiguration<ScrollPane, D>.()->Unit): FxComponent<ScrollPane, D> {
-    return fxComponent(configuration)
+fun <D> FxComponentConfiguration<out Any, *>.fxScrollPane(scope: CoroutineScope = this.scope, configuration: FxComponentConfiguration<ScrollPane, D>.()->Unit): FxComponent<ScrollPane, D> {
+    return fxComponent(scope,configuration)
 }
 
 @Suppress("unused")
-fun <D> fxScrollPane(configuration: FxComponentConfiguration<ScrollPane, D>.()->Unit): FxComponent<ScrollPane, D> {
-    return fxComponent(configuration)
+fun <D> fxScrollPane(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE,configuration: FxComponentConfiguration<ScrollPane, D>.()->Unit): FxComponent<ScrollPane, D> {
+    return fxComponent(scope,configuration)
 }
 @Suppress("unused")
 fun <C : Node, D> FxComponentConfiguration<ScrollPane, D>.content(component: FxComponent<C, D>)  {
