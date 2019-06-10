@@ -18,64 +18,57 @@ package org.drx.evoleq.fx.evolving
 import javafx.application.Platform
 import kotlinx.coroutines.*
 import org.drx.evoleq.coroutines.blockRace
-import org.drx.evoleq.coroutines.suspended
 import org.drx.evoleq.evolving.Cancellable
 import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.evolving.Immediate
 
 
-class AsyncFx<D>(
+class AsynqFx<D>(
         private val delay: Long = 1,
         val scope: CoroutineScope = GlobalScope,
-        private val block:  AsyncFx<D>.() -> D
+        private val block:  CoroutineScope.() -> D
 ) : Evolving<D>, Cancellable<D> {
 
-    private lateinit var deferred: Deferred<D>//? = null
+    private lateinit var deferred: Deferred<D>
 
     private var default: D? = null
 
+    private var job: Job
+
     init {
-        scope.launch { //coroutineScope {
+        job = scope.launch {
             deferred = async {
                 var d:D? = null
                 Platform.runLater {
-                    d = this@AsyncFx.block()
+                    d = block()
                 }
                 while(d == null){
                     delay(1)
                 }
                 d!!
             }
-        }//}
+            default = deferred.await()
+        }
+        scope + job
     }
 
-    override suspend fun get(): D {
-        while (!::deferred.isInitialized) {
+    override suspend fun get(): D = coroutineScope {
+        while (default == null) {
             delay(delay)
         }
-
-        return blockRace(
-                scope,
-                { deferred.await() },
-                { while(default == null) { delay(1) }
-                default!! }
-               ).await()
+        default!!
     }
 
-    override fun cancel(d: D): Evolving<D> = Immediate {
-        default = d
-        if(::deferred.isInitialized) {
-            deferred.cancel()
-        }
-        else { coroutineScope{
-            var cnt = 0
-            while (cnt < 1000 && !::deferred.isInitialized) {
-                delay(delay)
-                cnt++
+    override fun cancel(d: D): Evolving<D> = object: Evolving<D> {
+        init {
+            default = d
+            if (::deferred.isInitialized) {
+                deferred.cancel()
             }
-            deferred.cancel()
-        } }
-        d
+            job.cancel()
+        }
+
+        override suspend fun get(): D = d
     }
 
     fun job(): Job = deferred
