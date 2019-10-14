@@ -27,7 +27,7 @@ fun <D> FxComponentConfiguration<out Any, *>.fxSvgPath(scope: CoroutineScope = t
 }
 
 @Suppress("unused")
-fun <D> fxSvgPath(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE,configuration: FxComponentConfiguration<SVGPath, D>.()->Unit): FxComponent<SVGPath, D> {
+fun <D> fxSvgPath(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: FxComponentConfiguration<SVGPath, D>.()->Unit): FxComponent<SVGPath, D> {
     return fxComponent(scope,configuration)
 }
 

@@ -38,6 +38,7 @@ class SceneStubKey
 /**
  * @deprecated
  */
+/*
 open class FxStageComponentConfiguration<D> : Configuration<FxStageComponent<D>> {
 
     private lateinit var idDef: KClass<*>
@@ -170,8 +171,10 @@ open class FxStageComponentConfiguration<D> : Configuration<FxStageComponent<D>>
     }
 }
 
+
+ */
 /**
  * Configure an FxStageComponent
  * @deprecated
  */
-fun <D> fxStage(configuration: FxStageComponentConfiguration<D>.()->Unit): FxStageComponent<D> = configure(configuration)
+//fun <D> fxStage(configuration: FxStageComponentConfiguration<D>.()->Unit): FxStageComponent<D> = configure(configuration)

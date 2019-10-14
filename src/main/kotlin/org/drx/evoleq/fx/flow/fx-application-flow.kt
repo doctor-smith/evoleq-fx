@@ -21,6 +21,7 @@ import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.application.AppManager
 import org.drx.evoleq.fx.application.ApplicationManager
 import org.drx.evoleq.fx.application.SimpleAppManager
+import org.drx.evoleq.fx.dsl.parallelFx
 import org.drx.evoleq.fx.evolving.ParallelFx
 import org.drx.evoleq.fx.phase.AppFlowMessage
 import org.drx.evoleq.fx.phase.FxApplicationPhase
@@ -59,16 +60,18 @@ fun <D, A: KClass<out SimpleAppManager<D>>> CoroutineScope.fxApplicationManagerS
                     val appManager = phase.applicationManager//(phase.stub.stubs[ApplicationManager::class]!! as Stub<SimpleAppManager<D>?>).evolve(null).get()!!
 
                     appManager.registerComponents(phase.components)
-                    //(phase as FxApplicationPhase.Configure.RegisterComponents<D>)
-                    phase.receiver.send(AppFlowMessage.ComponentsRegistered())
+
+                    (phase as FxApplicationPhase.Configure.RegisterComponents<D>).receiver.send(AppFlowMessage.ComponentsRegistered())
+                    //println("Here 1")
                     FxApplicationPhase.RunTime<D>(
                             appManager,
-                            receiver{},
+                            scope.receiver{},
                             phase.receiver
                     )
                 }
             }
             is FxApplicationPhase.RunTime -> this@fxApplicationManagerStub.parallel{
+
                 println("runtime@fxApplicationStub")
                 // create flow managing runtime-communication
                 // 1. create stup observing invcoming messages
@@ -94,14 +97,14 @@ fun <D, A: KClass<out SimpleAppManager<D>>> CoroutineScope.fxApplicationManagerS
                         }
                         is AppFlowMessage.Runtime.ShowStage<*> -> this@fxApplicationManagerStub.parallel{
                             //val stage = phase.applicationManager.showStage(message.id)
-                            Parallel<Unit>{
+                            parallel<Unit>{
                                 val stage = phase.applicationManager.showStage(message.id).get()
                                 phase.applicationManager.port.send(AppFlowMessage.FxComponentShown<D>(stage))
                             }
                             AppFlowMessage.Runtime.Wait<D>()
 
                         }
-                        is AppFlowMessage.Runtime.HideStage<*> -> ParallelFx{
+                        is AppFlowMessage.Runtime.HideStage<*> -> this@fxApplicationManagerStub.parallelFx{
                             phase.applicationManager.hideStage(message.id)
                             AppFlowMessage.Runtime.Wait<D>()
                         }
@@ -124,7 +127,7 @@ fun <D, A: KClass<out SimpleAppManager<D>>> CoroutineScope.fxApplicationManagerS
 
                 // terminate all processes
                 // 0. clear config etc
-
+                //phase.applicationManagerPort.send(AppFlowMessage.Terminated())
                 // 1. stop application
                 phase.applicationManager.stop()
 

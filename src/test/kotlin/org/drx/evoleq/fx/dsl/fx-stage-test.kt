@@ -17,12 +17,11 @@ package org.drx.evoleq.fx.dsl
 
 import javafx.scene.Scene
 import javafx.stage.Stage
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import org.drx.evoleq.coroutines.onScope
 import org.drx.evoleq.dsl.parallel
 import org.drx.evoleq.dsl.stub
+import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.test.dsl.fxRunTest
 import org.drx.evoleq.fx.util.launchStage
@@ -33,7 +32,7 @@ class FxStageTest{
 
 
     @Test fun fxStage() = fxRunTest{//runBlocking {
-        val stub = parallel{
+        val stub = DEFAULT_FX_COMPONENT_SCOPE().parallel{
             showStage( testStageConfig() ).get()
             //delay(2_000)
         }.get()
@@ -41,7 +40,7 @@ class FxStageTest{
         //delay (1_000)
     }
 
-    fun testStageConfig() = onScope{scope: CoroutineScope->fxStage<Nothing>(scope){
+    private fun testStageConfig() = onScope{scope: CoroutineScope->fxStage<Nothing>(scope){
         id<StageId>()
         //noStub()
         view{configure{}}
@@ -81,4 +80,45 @@ class FxStageTest{
 
         stub(stub{})
     }}
+
+    //@Test
+    fun configuration() = fxRunTest{
+
+        var done = false
+        var stageDone = false
+        val scope = DEFAULT_FX_COMPONENT_SCOPE()
+        var stage: Stage? = null
+        scope.parallel{
+            stage = fxStage<Unit>(this) {
+                id<Stage>()
+                view{configure{
+                    x = 300.0
+                    y = 400.0
+                    width = 200.0
+                    height = 300.0
+                    title = "jfdklajfdk"
+                }}
+                scene(fxScene{
+                    noStub()
+                    view{configure{}}
+                    root(fxPane{
+                        noStub()
+                        view{configure{}}
+
+                    }){ root -> Scene(root) }
+                    fxRunTime { done = true }
+                })
+                stub(stub{})
+                fxRunTime{stageDone = true}
+            }.show()
+        }
+        withTimeout(30000) {
+            while(!done || !stageDone) {
+                delay(1)
+            }
+        }
+        stage!!.showAndWait()
+        delay(40000)
+
+    }
 }

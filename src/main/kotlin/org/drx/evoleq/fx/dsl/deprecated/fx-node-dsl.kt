@@ -36,6 +36,7 @@ import kotlin.reflect.full.createInstance
 /**
  * @deprecated
  */
+/*
 open class FxNodeComponentConfiguration< N: Node, D> : Configuration<FxNodeComponent<N, D>> {
 
     lateinit var viewConfiguration: ()->N
@@ -197,14 +198,17 @@ open class FxNodeComponentConfiguration< N: Node, D> : Configuration<FxNodeCompo
 
 
 }
+
+ */
 /**
  * @deprecated
  */
-fun <N: Node, D> fxNode(configuration: FxNodeComponentConfiguration<N, D>.()->Unit) = configure(configuration)
+//fun <N: Node, D> fxNode(configuration: FxNodeComponentConfiguration<N, D>.()->Unit) = configure(configuration)
 
 /**
  * @deprecated
  */
+/*
 open class FxNodeLazyConfiguration<N : Node> : Configuration<()->N> {
 
     //lateinit var view : N
@@ -248,12 +252,14 @@ open class FxNodeLazyConfiguration<N : Node> : Configuration<()->N> {
 //open class LazyFxNodeConfiguration<N: Node, D> : Configuration<FxNodeComponent<N,D>> {
 
 //}
-
+*/
 
 
 /**
  * @deprecated
  */
+ /*
+
 fun Button.action(action: ActionEvent.()->Unit): Button {
     this.setOnAction{
         it.action()
@@ -261,3 +267,6 @@ fun Button.action(action: ActionEvent.()->Unit): Button {
     return this
 }
 
+
+
+ */

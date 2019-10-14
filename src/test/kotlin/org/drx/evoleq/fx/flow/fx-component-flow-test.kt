@@ -41,7 +41,7 @@ import org.junit.Test
 class FxComponentFlowTest {
 
 
-    @Test fun componentFlowExample() = fxRunTest{//runBlocking {
+    @Test fun componentFlowExample() = runBlocking {
         val stageConfiguration = onScope{ scope: CoroutineScope ->fxStage<Nothing>(scope) stage@{
             val closeButtonClicked = SimpleBooleanProperty(false)
             id<StageId>()
@@ -207,4 +207,6 @@ class FxComponentFlowTest {
         assert(stub.stubs.size ==3) // 3 because the ApplicationManager is also a sub-stub
 
     }
+
+
 }

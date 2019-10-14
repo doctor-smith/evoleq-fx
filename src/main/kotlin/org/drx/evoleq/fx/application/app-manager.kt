@@ -25,12 +25,17 @@ import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.dsl.ID
 import org.drx.evoleq.stub.Stub
+import java.lang.Exception
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
 class ApplicationManager
 
-val DEFAULT_FX_APPLICATION_SCOPE: ()->CoroutineScope =  {GlobalScope}
+val DEFAULT_FX_APPLICATION_SCOPE: ()->CoroutineScope =  {
+    //println("DEFAULT_FX_APPLICATION_SCOPE")
+    CoroutineScope(Job())
+
+}//{GlobalScope}//{CoroutineScope(SupervisorJob())}//
 
 /**
  * You will have to override the configure method.
@@ -38,7 +43,11 @@ val DEFAULT_FX_APPLICATION_SCOPE: ()->CoroutineScope =  {GlobalScope}
  */
 abstract class AppManager<D>() : Application(), Configuration<Stub<D>> {
 
-    val scope: CoroutineScope = SCOPE
+    val scope: CoroutineScope
+    init{
+        scope = DEFAULT_FX_APPLICATION_SCOPE()
+        SCOPE+scope.coroutineContext
+    }
 
     /**
      * Do not override unless you set TOOLKIT_INITIALIZED = true
@@ -56,7 +65,7 @@ abstract class AppManager<D>() : Application(), Configuration<Stub<D>> {
     companion object Manager{
         val SCOPE: CoroutineScope = DEFAULT_FX_APPLICATION_SCOPE()
         private lateinit var STUB: Stub<*>
-        private var TOOLKIT_INITIALIZED: Boolean = false
+        var TOOLKIT_INITIALIZED: Boolean = false
         //private var STUB_INITIALIZED = false
         protected val REGISTRY: HashMap<ID, Stub<*>> by lazy { HashMap<ID, Stub<*>>() }
         var CALLED = -1
@@ -93,7 +102,7 @@ abstract class AppManager<D>() : Application(), Configuration<Stub<D>> {
                 STUB = app.configure()
                 STUB.stubs[ApplicationManager::class] = stub<AppManager<D>?>{
                     id(ApplicationManager::class)
-                    evolve{ Immediate{app} }
+                    evolve{ Parallel{app} }
                 }
                 STUB_INITIALIZED = true
             } }

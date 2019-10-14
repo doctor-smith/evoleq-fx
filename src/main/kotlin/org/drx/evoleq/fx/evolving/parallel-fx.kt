@@ -35,7 +35,7 @@ class ParallelFx<D>(
 
     private var default: D? = null
 
-    private var job: Job
+    override val job: Job
 
     init {
         job = scope.launch { coroutineScope {
@@ -69,7 +69,8 @@ class ParallelFx<D>(
             }
             job.cancel()
         }
-
+        override val job: Job
+            get() = this@ParallelFx.job
         override suspend fun get(): D = d
     }
 

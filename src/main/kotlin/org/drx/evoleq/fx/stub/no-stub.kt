@@ -15,14 +15,17 @@
  */
 package org.drx.evoleq.fx.stub
 
+import kotlinx.coroutines.CoroutineScope
+import org.drx.evoleq.dsl.DefaultStubScope
 import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.stub.Stub
 import kotlin.reflect.KClass
 
 class NoStub<D> : Stub<D> {
+    override val scope: CoroutineScope  = DefaultStubScope()
+
     override val id: KClass<*>
         get() = this::class
-    override val stubs: HashMap<KClass<*>, Stub<*>>
-        get() = HashMap()
+    override val stubs: HashMap<KClass<*>, Stub<*>> = HashMap()
 }

@@ -28,6 +28,6 @@ fun <D> FxComponentConfiguration<out Any, *>.fxFlowPane(scope: CoroutineScope = 
 }
 
 @Suppress("unused")
-fun <D> fxFlowPane(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE,configuration: FxComponentConfiguration<FlowPane, D>.()->Unit): FxComponent<FlowPane, D> {
+fun <D> fxFlowPane(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: FxComponentConfiguration<FlowPane, D>.()->Unit): FxComponent<FlowPane, D> {
     return fxComponent(scope,configuration)
 }

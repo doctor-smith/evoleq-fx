@@ -15,6 +15,7 @@
  */
 package org.drx.evoleq.fx.dsl
 
+import kotlinx.coroutines.CoroutineScope
 import org.drx.evoleq.dsl.StubConfiguration
 import org.drx.evoleq.dsl.configure
 import org.drx.evoleq.fx.stub.FxStub
@@ -31,6 +32,8 @@ open class FxStubConfiguration<D> : StubConfiguration<D>() {
         val stub = super.configure()
 
         val fxStub = object: FxStub<D>() {
+            override val scope: CoroutineScope
+                get() = stub.scope
             override val id: ID
                 get() = stub.id
             override val stubs: HashMap<ID, Stub<*>>

@@ -30,6 +30,7 @@ import kotlin.reflect.KClass
 /**
  * @deprecated
  */
+/*
 open class FxParentComponentConfiguration<P: Parent,D> : FxNodeComponentConfiguration<P, D>() {
 
     // data related to configuration process
@@ -125,3 +126,5 @@ open class FxParentComponentConfiguration<P: Parent,D> : FxNodeComponentConfigur
 
 
 }
+
+ */

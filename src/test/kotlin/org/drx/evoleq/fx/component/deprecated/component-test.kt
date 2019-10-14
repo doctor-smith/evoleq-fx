@@ -40,7 +40,7 @@ import org.drx.evoleq.stub.Stub
 import org.drx.evoleq.stub.toFlow
 import org.testfx.api.FxRobot
 import java.lang.Thread.sleep
-
+/*
 class ComponentTest {
 
 
@@ -663,3 +663,4 @@ class ComponentTest {
     }
 
 }
+*/

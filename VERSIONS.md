@@ -1,5 +1,5 @@
 ## Versions
-1.2.0: 
+1.2.0: Structured concurrency
 1.1.0: Component-flow and Stable configuration-process
 * Former dsl will still work until version 1.2.0. Related classes moved to ./deprecated and will be removed in version 1.2
 

@@ -28,7 +28,7 @@ fun <D> FxComponentConfiguration<out Any, *>.fxPath(scope: CoroutineScope = this
 }
 
 @Suppress("unused")
-fun <D> fxPath(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE,configuration: FxComponentConfiguration<Path, D>.()->Unit): FxComponent<Path, D> {
+fun <D> fxPath(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: FxComponentConfiguration<Path, D>.()->Unit): FxComponent<Path, D> {
     return fxComponent(scope,configuration)
 }
 

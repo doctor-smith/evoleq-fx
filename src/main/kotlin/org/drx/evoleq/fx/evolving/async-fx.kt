@@ -33,7 +33,7 @@ class AsynqFx<D>(
 
     private var default: D? = null
 
-    private var job: Job
+    override val job: Job
 
     init {
         job = scope.launch {
@@ -67,6 +67,8 @@ class AsynqFx<D>(
             }
             job.cancel()
         }
+        override val job: Job
+            get() = this@AsynqFx.job
 
         override suspend fun get(): D = d
     }

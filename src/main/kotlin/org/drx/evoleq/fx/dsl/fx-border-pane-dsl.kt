@@ -28,7 +28,7 @@ fun <D> FxComponentConfiguration<out Any, *>.fxBorderPane(scope: CoroutineScope 
     return fxComponent(scope,configuration)
 }
 @Suppress("unused")
-fun <D> fxBorderPane(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE,configuration: FxComponentConfiguration<BorderPane,D>.()->Unit): FxComponent<BorderPane, D> {
+fun <D> fxBorderPane(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: FxComponentConfiguration<BorderPane,D>.()->Unit): FxComponent<BorderPane, D> {
     return fxComponent(scope,configuration)
 }
 @Suppress("unused")

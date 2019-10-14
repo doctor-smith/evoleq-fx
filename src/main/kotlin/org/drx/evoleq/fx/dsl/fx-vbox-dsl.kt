@@ -23,4 +23,4 @@ import org.drx.evoleq.fx.component.FxComponent
 fun <D> FxComponentConfiguration<out Any, *>.fxVBox(scope: CoroutineScope = this.scope, configuration: FxComponentConfiguration<VBox, D>.()->Unit): FxComponent<VBox, D> = fxComponent(scope,configuration)
 
 @Suppress("unused")
-fun <D> fxVBox(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE,configuration: FxComponentConfiguration<VBox, D>.()->Unit): FxComponent<VBox, D> = fxComponent(scope,configuration)
+fun <D> fxVBox(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: FxComponentConfiguration<VBox, D>.()->Unit): FxComponent<VBox, D> = fxComponent(scope,configuration)

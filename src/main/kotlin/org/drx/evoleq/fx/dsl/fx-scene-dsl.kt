@@ -29,7 +29,7 @@ fun <D> FxComponentConfiguration<Stage, D>.fxScene(scope: CoroutineScope = this.
 }
 
 @Suppress("unused")
-fun <D> fxScene(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE,configuration: FxComponentConfiguration<Scene, D>.()->Unit): FxComponent<Scene, D> {
+fun <D> fxScene(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: FxComponentConfiguration<Scene, D>.()->Unit): FxComponent<Scene, D> {
     return fxComponent(scope,configuration)
 }
 

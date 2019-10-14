@@ -30,7 +30,7 @@ fun <D> FxComponentConfiguration<out Any, *>.fxScrollPane(scope: CoroutineScope 
 }
 
 @Suppress("unused")
-fun <D> fxScrollPane(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE,configuration: FxComponentConfiguration<ScrollPane, D>.()->Unit): FxComponent<ScrollPane, D> {
+fun <D> fxScrollPane(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: FxComponentConfiguration<ScrollPane, D>.()->Unit): FxComponent<ScrollPane, D> {
     return fxComponent(scope,configuration)
 }
 @Suppress("unused")

@@ -26,7 +26,7 @@ import org.drx.evoleq.fx.component.FxComponent
 fun <D> FxComponentConfiguration<out Any, *>.fxTabPane(scope: CoroutineScope = this.scope, configuration: FxComponentConfiguration<TabPane, D>.()->Unit): FxComponent<TabPane, D> = fxComponent(scope,configuration)
 
 @Suppress("unused")
-fun <D> fxTabPane(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE,configuration: FxComponentConfiguration<TabPane, D>.()->Unit): FxComponent<TabPane, D> = fxComponent(scope,configuration)
+fun <D> fxTabPane(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: FxComponentConfiguration<TabPane, D>.()->Unit): FxComponent<TabPane, D> = fxComponent(scope,configuration)
 
 @Suppress("unused")
 fun <D> FxComponentConfiguration<TabPane, D>.tab(component: FxComponent<Tab, D>) {

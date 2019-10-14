@@ -28,7 +28,7 @@ fun <D> FxComponentConfiguration<out Any, *>.fxAnchorPane(scope: CoroutineScope 
     return fxComponent(scope,configuration)
 }
 
-fun <D> fxAnchorPane(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE,configuration: FxComponentConfiguration<AnchorPane, D>.()->Unit): FxComponent<AnchorPane, D> {
+fun <D> fxAnchorPane(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: FxComponentConfiguration<AnchorPane, D>.()->Unit): FxComponent<AnchorPane, D> {
     return fxComponent(scope,configuration)
 }
 fun Node.leftAnchor(anchor: Number) {

@@ -15,12 +15,15 @@
  */
 package org.drx.evoleq.fx.stub
 
+import kotlinx.coroutines.CoroutineScope
+import org.drx.evoleq.dsl.DefaultStubScope
 import org.drx.evoleq.fx.dsl.ID
 import org.drx.evoleq.stub.Stub
 import kotlin.reflect.KClass
 
 class Tunnel<D> : Stub<D> {
     val children: HashMap<KClass<*>, Stub<*>> by lazy { HashMap<KClass<*>, Stub<*>>() }
+    override val scope: CoroutineScope  = DefaultStubScope()
     override val stubs: HashMap<KClass<*>, Stub<*>>
         get() = children
     override val id: KClass<*>

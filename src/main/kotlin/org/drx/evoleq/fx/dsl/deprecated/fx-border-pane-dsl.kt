@@ -35,6 +35,7 @@ class CenterComponentKey
 /**
  * @deprecated
  */
+/*
 open class FxBorderPaneComponentConfiguration<B: BorderPane,D> : FxParentComponentConfiguration<B, D>() {
 
     var topComponent: FxNodeComponent<*, *>? = null
@@ -186,7 +187,9 @@ open class FxBorderPaneComponentConfiguration<B: BorderPane,D> : FxParentCompone
     }
 }
 
+ */
+
 /**
  * @deprecated
  */
-fun <G : BorderPane, D> fxBorderPane(configuration: FxBorderPaneComponentConfiguration<G, D>.()->Unit) : FxParentComponent<G, D> = configure(configuration) as FxBorderPaneComponent<G, D>
+//fun <G : BorderPane, D> fxBorderPane(configuration: FxBorderPaneComponentConfiguration<G, D>.()->Unit) : FxParentComponent<G, D> = configure(configuration) as FxBorderPaneComponent<G, D>

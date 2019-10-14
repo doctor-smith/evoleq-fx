@@ -28,6 +28,6 @@ fun <D> FxComponentConfiguration<out Any, *>.fxStackPane(scope: CoroutineScope =
 }
 
 @Suppress("unused")
-fun <D> fxStackPane(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE,configuration: FxComponentConfiguration<StackPane, D>.()->Unit): FxComponent<StackPane, D> {
+fun <D> fxStackPane(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: FxComponentConfiguration<StackPane, D>.()->Unit): FxComponent<StackPane, D> {
     return fxComponent(scope,configuration)
 }

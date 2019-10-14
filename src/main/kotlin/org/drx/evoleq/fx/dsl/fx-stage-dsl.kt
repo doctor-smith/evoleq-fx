@@ -19,6 +19,7 @@ import javafx.scene.Scene
 import javafx.stage.Stage
 import javafx.stage.WindowEvent
 import kotlinx.coroutines.CoroutineScope
+import org.drx.evoleq.dsl.DefaultStubScope
 import org.drx.evoleq.fx.application.AppManager
 import org.drx.evoleq.fx.component.FxComponent
 
@@ -26,10 +27,10 @@ import org.drx.evoleq.fx.component.FxComponent
  * Stage
  */
 @Suppress("unused")
-fun <D> Any?.fxStage(scope: CoroutineScope = AppManager.SCOPE, configuration: FxComponentConfiguration<Stage, D>.()->Unit): FxComponent<Stage, D> = fxComponent (scope, configuration )
+fun <D> Any?.fxStage(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(), configuration: FxComponentConfiguration<Stage, D>.()->Unit): FxComponent<Stage, D> = fxComponent (scope, configuration )
 
 @Suppress("unused")
-fun <D> fxStage(scope: CoroutineScope = AppManager.SCOPE,configuration: FxComponentConfiguration<Stage, D>.()->Unit): FxComponent<Stage, D> = fxComponent (scope, configuration )
+fun <D> fxStage(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(), configuration: FxComponentConfiguration<Stage, D>.()->Unit): FxComponent<Stage, D> = fxComponent (scope, configuration )
 
 @Suppress("unused")
 fun <D> FxComponentConfiguration<Stage, D>.scene(component: FxComponent<Scene, D>): FxComponentConfiguration<Stage, D> {

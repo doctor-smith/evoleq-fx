@@ -26,6 +26,7 @@ import kotlin.reflect.KClass
 /**
  * @deprecated
  */
+/*
 open class FxPaneComponentConfiguration<G : Pane, D> : FxParentComponentConfiguration<G, D>() {
 
     override fun configure(): FxPaneComponent<G, D> = object: FxPaneComponent<G, D>(){
@@ -45,7 +46,9 @@ open class FxPaneComponentConfiguration<G : Pane, D> : FxParentComponentConfigur
         override suspend fun evolve(d: D): Evolving<D> = stubConfiguration.evolve(d)
     }
 }
+
+ */
 /**
  * @deprecated
  */
-fun <G : Pane, D> fxPane(configuration: FxPaneComponentConfiguration<G, D>.()->Unit) : FxParentComponent<G, D> = configure(configuration) as FxPaneComponent<G, D>
+//fun <G : Pane, D> fxPane(configuration: FxPaneComponentConfiguration<G, D>.()->Unit) : FxParentComponent<G, D> = configure(configuration) as FxPaneComponent<G, D>

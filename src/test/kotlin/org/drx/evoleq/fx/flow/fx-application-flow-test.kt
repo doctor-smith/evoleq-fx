@@ -15,15 +15,14 @@
  */
 package org.drx.evoleq.fx.flow
 
-import javafx.application.Application
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.Scene
 import javafx.scene.control.Button
 import javafx.stage.Stage
 import javafx.stage.WindowEvent
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import org.drx.evoleq.coroutines.BaseReceiver
 import org.drx.evoleq.coroutines.onScope
 import org.drx.evoleq.dsl.*
@@ -32,11 +31,8 @@ import org.drx.evoleq.dsl.receiver
 import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.flow.intercept
-import org.drx.evoleq.fx.application.BgAppManager
 import org.drx.evoleq.fx.application.SimpleAppManager
 import org.drx.evoleq.fx.dsl.*
-import org.drx.evoleq.fx.dsl.deprecated.action
-import org.drx.evoleq.fx.evolving.ParallelFx
 import org.drx.evoleq.fx.phase.AppFlowMessage
 import org.drx.evoleq.fx.phase.FxApplicationPhase
 import org.drx.evoleq.fx.test.dsl.fxRunTest
@@ -45,32 +41,38 @@ import org.drx.evoleq.stub.toFlow
 import org.drx.evoleq.time.WaitForProperty
 import org.testfx.api.FxRobot
 import kotlin.reflect.KClass
+import org.junit.Test
 
 class FxApplicationFlowTest {
-
+   /* todo flow does not terminate for some reason: -> interplay of receiverStub and its observer?  */
     //@Test
-    fun basics() = fxRunTest{
+    fun basics() = fxRunTest(60_000){
 
         class CloseDialog
 
-        class Data(val initialized: Boolean = false ,val message: AppFlowMessage<Data> = AppFlowMessage.Runtime.Wait<Data>())
+        open class MainFlow
+        class Launch : MainFlow()
+        class Wait : MainFlow()
+        class Teminate : MainFlow()
+
+        class Data(val initialized: Boolean = false ,val message: AppFlowMessage<Data> = AppFlowMessage.Runtime.Wait<Data>(), val mainFlowMessage: MainFlow = Launch())
         var stage : Stage? = null
         var okButton : Button? = null
         var cancelButton : Button? = null
         class App : SimpleAppManager<Data>() {
-            override fun configure(): Stub<Data> = stub appStub@{
+            override fun configure(): Stub<Data> = scope.stub appStub@{
                 // configure flow of this specific application
                 id(App::class)
                 evolve{ data -> when(val message = data.message){
                     is AppFlowMessage.Runtime -> when(message){
-                        is AppFlowMessage.Runtime.EnteredRuntimePhase -> Parallel{
+                        is AppFlowMessage.Runtime.EnteredRuntimePhase -> scope.parallel{
                             Data(data.initialized,AppFlowMessage.Runtime.ShowStage(Stage::class))
                         }
-                        is AppFlowMessage.Runtime.Wait -> Parallel{
+                        is AppFlowMessage.Runtime.Wait -> scope.parallel{
                             val nextMessage = receiverStub.evolve(message).get()
                             Data(data.initialized, nextMessage)
                         }
-                        is AppFlowMessage.Runtime.ShowStage -> Parallel{
+                        is AppFlowMessage.Runtime.ShowStage -> scope.parallel{
                             applicationManagerPort.send(AppFlowMessage.Runtime.ShowStage<Data>(message.id))
                             Data(data.initialized,AppFlowMessage.Runtime.Wait())
                         }
@@ -84,32 +86,33 @@ class FxApplicationFlowTest {
                                     }
                                 ),
                                 gap{
-                                    from{ data -> Parallel{
+                                    from{ data -> scope.parallel{
                                         Data(data.initialized, AppFlowMessage.Runtime.ShowStage(CloseDialog::class))
                                     }}
                                     to{ data, confirm -> when(confirm.message){
-                                        is AppFlowMessage.Runtime.Confirm.Ok<*> -> Parallel{
+                                        is AppFlowMessage.Runtime.Confirm.Ok<*> -> scope.parallel{
                                             applicationManagerPort.send(AppFlowMessage.Runtime.HideStage<Data>(Stage::class))
-                                            Data(true, AppFlowMessage.Runtime.Terminate())
+                                            Data(false, AppFlowMessage.Runtime.Terminate())
                                         }
-                                        is AppFlowMessage.Runtime.Confirm.Cancel<*> -> Parallel{
+                                        is AppFlowMessage.Runtime.Confirm.Cancel<*> -> scope.parallel{
 
                                             Data(data.initialized,AppFlowMessage.DriveStub(stubs[Stage::class]!! as Stub<Data>))
                                         }
-                                        else -> Parallel{Data(data.initialized, AppFlowMessage.Runtime.Wait())}
+                                        else -> scope.parallel{Data(data.initialized, AppFlowMessage.Runtime.Wait())}
                                     }}
                                 }
                             )
-                            else -> Parallel{
+                            else -> scope.parallel{
                                 applicationManagerPort.send(message)
                                 Data(data.initialized,AppFlowMessage.Runtime.Wait())
                             }
                         }
-                        is AppFlowMessage.Runtime.Terminate -> Parallel{
+                        is AppFlowMessage.Runtime.Terminate -> scope.parallel{
+                            println("TERMINATE")
                             applicationManagerPort.send(message)
                             Data(data.initialized, AppFlowMessage.Runtime.Wait())
                         }
-                        is AppFlowMessage.Runtime.Confirm -> Immediate {
+                        is AppFlowMessage.Runtime.Confirm -> scope.parallel {
                             Data(data.initialized, AppFlowMessage.Runtime.Wait())
                         }
                         /*
@@ -119,7 +122,7 @@ class FxApplicationFlowTest {
                         */
 
                     }
-                    is AppFlowMessage.FxComponentShown -> Parallel{
+                    is AppFlowMessage.FxComponentShown -> scope.parallel{
                         //delay(1_000)
                         stubs[message.component.id] = message.component
                         Data(data.initialized, AppFlowMessage.DriveStub(message.component as Stub<Data>))
@@ -132,7 +135,7 @@ class FxApplicationFlowTest {
                                 updateCondition { data -> data.message !is AppFlowMessage.Runtime.HideStage<Data> }
                             }).evolve(data).get()
                         }
-                        CloseDialog::class -> Parallel{
+                        CloseDialog::class -> scope.parallel{
                             val choice = (message.stub as Stub<AppFlowMessage.Runtime.Confirm<Data>>).toFlow<AppFlowMessage.Runtime.Confirm<Data>,Boolean>(
                                     conditions {
                                         testObject(true)
@@ -143,9 +146,13 @@ class FxApplicationFlowTest {
                             applicationManagerPort.send(AppFlowMessage.Runtime.HideStage<Data>(CloseDialog::class))
                             Data(data.initialized, choice)
                         }
-                        else -> Immediate{Data(true, AppFlowMessage.Runtime.Wait())}
+                        else -> scope.immediate{Data(true, AppFlowMessage.Runtime.Wait())}
                     }
-                    else -> Immediate{Data(data.initialized, AppFlowMessage.Runtime.Wait())}
+                    is AppFlowMessage.Terminated -> scope.immediate{
+                        println("TERMINATED")
+                        Data(true,message)
+                    }
+                    else -> scope.immediate{Data(data.initialized, AppFlowMessage.Runtime.Wait())}
                 } }
             }
         }
@@ -177,7 +184,7 @@ class FxApplicationFlowTest {
                 stub(stub{})
             })
             stub(stub{
-                evolve{ Parallel{
+                evolve{ parallel{
                     val b = WaitForProperty(property("close") as SimpleObjectProperty<Boolean>).toChange().get()
                     (property("close") as SimpleObjectProperty<Boolean>).value = false
                     Data(it.initialized, AppFlowMessage.Runtime.HideStage(Stage::class))}
@@ -234,7 +241,7 @@ class FxApplicationFlowTest {
 
             stub(stub{
                 evolve{message -> when(message){
-                    is AppFlowMessage.Runtime.Confirm -> Parallel{
+                    is AppFlowMessage.Runtime.Confirm -> parallel{
                         val choice = WaitForProperty(
                                 clicked
                                 //property("confirm") as SimpleObjectProperty<AppFlowMessage.Runtime.Confirm<Data>>
@@ -251,26 +258,26 @@ class FxApplicationFlowTest {
             stage(CloseDialog::class,closeDialog)
         }
 
-        val port: BaseReceiver<AppFlowMessage<Data>> = receiver{}
-        val portObserver = receivingStub<AppFlowMessage<Data>,AppFlowMessage<Data>> {
-            evolve { Parallel{it} }
+        val port: BaseReceiver<AppFlowMessage<Data>> = GlobalScope.receiver{}
+        val portObserver = GlobalScope.receivingStub<AppFlowMessage<Data>,AppFlowMessage<Data>> {
+            evolve { parallel{it} }
             gap{
-                from{ Immediate{it} }
-                to{ _, response -> Immediate{
+                from{ immediate{it} }
+                to{ _, response -> immediate{
+                    //println("portObserver@testClass")
+                    println("\n>>>>>>>>>>>>>>>>>>>>>> $response \n")
                     response
                 } }
             }
             receiver(port)
         }
 
-        open class MainFlow
-        class Launch : MainFlow()
-        class Wait : MainFlow()
-        class Teminate : MainFlow()
 
+
+        /* TODO make this a real stub */
         val mainStub = stub<Data> mainStub@{
-            evolve{data -> Parallel{
-                val phase = Parallel<FxApplicationPhase<Data>>{
+            evolve{data -> parallel{
+                val phase = parallel<FxApplicationPhase<Data>>{
                     val terminate = fxApplicationManagerFlow<Data, KClass<App>>().evolve(
                         FxApplicationPhase.Launch<Data>(
                             App::class,
@@ -280,25 +287,29 @@ class FxApplicationFlowTest {
                     ).get()
                     terminate
                 }
-                val d = Parallel<Data> {
+                val d = parallel<Data> {
                     val message = portObserver.evolve(AppFlowMessage.Runtime.Wait()).get()
                     //println("hu $message")
-                    when(message){
-                        is AppFlowMessage.AppStubLaunched<*> -> {
+                    when(message) {
+                        is AppFlowMessage.AppStubLaunched<*> -> parallel {
                             val stub = message.stub as Stub<Data>
                             this@mainStub.stubs[stub.id] = stub
                             stub.toFlow<Data, Boolean>(
-                                    conditions{
+                                    conditions {
                                         testObject(true)
-                                        check{b->b}
-                                        updateCondition { data ->  !data.initialized}
+                                        check { b -> b }
+                                        updateCondition { data -> !data.initialized }
                                     }
                             ).evolve(data).get()
-                        }
-                        else -> data
+                        }.get()
+                        is AppFlowMessage.Terminated -> parallel {
+                            println(message)
+                            Data(true, message)
+                        }.get()
+
+                        else -> parallel{data}.get()
                     }
                 }.get()
-                //assert(phase.get() == FxApplicationPhase.Terminate<Data>())
                 d
             }}
         }
@@ -310,14 +321,17 @@ class FxApplicationFlowTest {
                 updateCondition { data -> !data.initialized  }
             }
         )
+
+
+        //
         val res = parallel<Data>{mainFlow.evolve(Data()).get()}
 
-        val click = Parallel<Unit>{
+        val click = parallel<Unit>{
             while(stage == null){
                 kotlinx.coroutines.delay(1)
             }
             delay(1000)
-            ParallelFx<Unit> {
+            parallelFx<Unit> {
                 stage!!.fireEvent(WindowEvent(
                         stage,
                         WindowEvent.WINDOW_CLOSE_REQUEST
@@ -326,15 +340,17 @@ class FxApplicationFlowTest {
             while(okButton == null) {
                 kotlinx.coroutines.delay(1)
             }
-            Parallel<Unit>{
+            parallel<Unit>{
                 FxRobot().clickOn(okButton!!)
             }.get()
         }
-        res.get()
+        //res.get()
         click.get()
 
-        port.actor.close()
+        //port.actor.close()
         //delay(1_000)
+        //cancel()
+        println("'End")
         Unit
     //}.get()()
     }

@@ -20,10 +20,7 @@ import javafx.scene.Group
 import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.layout.Pane
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.plus
-import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.*
 import org.drx.evoleq.dsl.conditions
 import org.drx.evoleq.dsl.flow
 import org.drx.evoleq.dsl.parallel
@@ -53,6 +50,7 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
              * launching phase
              */
             is FxComponentPhase.Launch<*,*> -> this@fxComponentStub.parallel{
+                println("${it::class}")
                 withTimeout(it.timeout){
                     val configuration = it.configuration.get() as FxComponentConfiguration<N,D>
                     this+configuration.scope.coroutineContext
@@ -73,6 +71,7 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
              * PreConfiguration
              */
             is FxComponentPhase.PreConfiguration<*,*> -> this@fxComponentStub.parallel{
+                println("${it::class}")
                 //require(it::class ==  FxComponentPhase.PreConfiguration<N,D>::class)
                 val id = try {
                     withTimeout(it.timeout) { it.id.get() }
@@ -88,12 +87,12 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
                 }
                 val view =  it.view as Parallel<() -> N>
                 if(it.errors.isNotEmpty()){
-                    view.job().cancel()
-                    it.fxChildren.forEach{child -> child.job().cancel()}
-                    it.fxSpecials.forEach{child -> child.job().cancel()}
-                    it.fxRunTime.forEach{child -> child.job().cancel()}
-                    it.stubActions.forEach{child -> child.job().cancel()}
-                    it.view.job().cancel()
+                    view.job.cancel()
+                    it.fxChildren.forEach{child -> child.job.cancel()}
+                    it.fxSpecials.forEach{child -> child.job.cancel()}
+                    it.fxRunTime.forEach{child -> child.job.cancel()}
+                    it.stubActions.forEach{child -> child.job.cancel()}
+                    it.view.job.cancel()
                     FxComponentPhase.TerminationPhase.TerminateWithErrors(it.errors, it.log)
                 } else{
                     it.log.add("$id")
@@ -114,10 +113,12 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
              * Configuration
              */
             is FxComponentPhase.Configuration -> when(it) {
+
                 /**
                  * Setup
                  */
                 is FxComponentPhase.Configuration.Setup<*,*> ->this@fxComponentStub.parallel{
+                    println("${it::class}")
                     //withTimeout(it.timeout) {
                         val fxChildren = arrayListOf(*it.fxChildren.map { c -> withTimeout(it.timeout) {c.get()} }.toTypedArray()) //.filter { child -> child.id != NoStub::class }
                         val fxSpecials = arrayListOf(*it.fxSpecials.map { c -> withTimeout(it.timeout) {c.get()} }.toTypedArray())
@@ -138,6 +139,7 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
                  * AddFxChildren
                  */
                 is FxComponentPhase.Configuration.AddFxChildren<*,*> ->this@fxComponentStub.parallel{
+                    println("${it::class}")
                     /* TODO Error management -> Termination*/
                     val stub = it.stub as Stub<D>
                     if(stub !is NoStub) {
@@ -176,6 +178,7 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
                  * ExtendStub
                  */
                 is FxComponentPhase.Configuration.ExtendStub<*,*> ->this@fxComponentStub.parallel{
+                    println("${it::class}")
                     val actions = it.stubActions.map { action -> action.get() as Stub<D>.()->Unit }
                     val stub = it.stub as Stub<D>
                     //val errors : ArrayList<Exception> by lazy { arrayListOf<Exception>() }
@@ -210,6 +213,7 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
                  * Configure
                  */
                 is FxComponentPhase.Configuration.Configure<*, *> -> this@fxComponentStub.parallel{
+                    println("${it::class}")
                     // collect data
                     it.configuration.idConfiguration = it.id
                     (it.configuration as FxComponentConfiguration<N,D>).stubConfiguration = it.stub as Stub<D>
@@ -242,6 +246,7 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
              * Here, the fxChildren view must be added as children to the view
              */
             is FxComponentPhase.RunTimeConfiguration<*,*> -> this@fxComponentStub.parallel{
+                println("${it::class}")
                 /* TODO Error management -> Termination*/
                 val configuration = it.configuration as FxComponentConfiguration<N, D>
                 val component = configuration.component as FxComponent<N, D>
@@ -311,8 +316,9 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
                 }
             }
             is FxComponentPhase.RunTimePhase.RunTime<*,*> -> {
+                println("${it::class}")
                 /* TODO Error management -> Termination*/
-                val runTimeFlow = flow<FxComponentPhase.RunTimePhase<N, D>, Boolean>{
+                /*val runTimeFlow = flow<FxComponentPhase.RunTimePhase<N, D>, Boolean>{
                     conditions(org.drx.evoleq.dsl.conditions {
                         testObject ( true )
                         check { b ->b }
@@ -323,13 +329,28 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
                         is FxComponentPhase.RunTimePhase.RunTime-> runTimePhase.fxRunTime.fxRun()
                         is FxComponentPhase.RunTimePhase.ShutDown -> this@fxComponentStub.parallel{ runTimePhase }
                     }}
-                }
+                }*/
+                val runTimeFlow = stub<FxComponentPhase.RunTimePhase<N, D>>{
+                    id<FxRunTime<N,D>>()
+                    evolve{runTimePhase -> when(runTimePhase){
+                        is FxComponentPhase.RunTimePhase.RunTime-> runTimePhase.fxRunTime.fxRun()
+                        is FxComponentPhase.RunTimePhase.ShutDown -> this@fxComponentStub.parallel{ runTimePhase }
+                    }}
+                }.toFlow<FxComponentPhase.RunTimePhase<N, D>, Boolean>(
+                    conditions {
+                        testObject ( true )
+                        check { b ->b }
+                        updateCondition { runTimePhase -> (runTimePhase is FxComponentPhase.RunTimePhase.RunTime<*,*>) }
+                    }
+                )
                 runTimeFlow.evolve(it as FxComponentPhase.RunTimePhase.RunTime<N,D>)
             }
             is FxComponentPhase.RunTimePhase.ShutDown<*, *> ->this@fxComponentStub.parallel{
+                println("${it::class}")
                 FxComponentPhase.TerminationPhase.Terminate(log = it.log)
             }
             is FxComponentPhase.TerminationPhase.TerminateWithErrors -> this@fxComponentStub.parallel{
+                println("${it::class}")
                 Parallel<Unit>{
                     it.log.forEach { jt -> println(jt) }
                     it.errors.forEach { error -> println( error )
@@ -337,6 +358,7 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
                 FxComponentPhase.TerminationPhase.Terminate(log = it.log)
             }
             is FxComponentPhase.TerminationPhase.Terminate -> this@fxComponentStub.parallel{
+                println("${it::class}")
                 FxComponentPhase.TerminationPhase.Terminate(log = it.log)
             }
         }

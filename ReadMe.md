@@ -1,4 +1,4 @@
-[ ![Download](https://api.bintray.com/packages/drx/maven/evoleq-fx/images/download.svg?version=1.1.0) ](https://bintray.com/drx/maven/evoleq-fx/1.1.0/link)
+[ ![Download](https://api.bintray.com/packages/drx/maven/evoleq-fx/images/download.svg?version=1.2.0) ](https://bintray.com/drx/maven/evoleq-fx/1.2.0/link)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 

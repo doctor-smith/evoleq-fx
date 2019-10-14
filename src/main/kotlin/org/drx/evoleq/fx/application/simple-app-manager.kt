@@ -40,22 +40,23 @@ abstract class SimpleAppManager<D> : AppManager<D>() {
     lateinit var port: BaseReceiver<AppFlowMessage<D>>
     protected lateinit var receiverStub: Stub<AppFlowMessage<D>>
     init{
-        runBlocking {
-            Parallel<Unit> {
+
+            scope.parallel<Unit> {parallel{
                 port = receiver {}
                 receiverStub = receivingStub<AppFlowMessage<D>, AppFlowMessage<D>> {
                     id(AppManager::class)
                     evolve {
-                        Immediate { it }
+                        Parallel { it }
                     }
                     gap {
-                        from { message -> Immediate { message } }
-                        to { _, message -> Immediate { message } }
+                        from { message -> Parallel { message } }
+                        to { _, message -> Parallel { message } }
                     }
                     receiver(port)
                 }
-            }.get()
-        }
+            }.get() }
+
+
     }
 
     protected val stages: HashMap<ID, Stage> by lazy {
@@ -88,16 +89,11 @@ abstract class SimpleAppManager<D> : AppManager<D>() {
         }
 
     open fun hideStage(id: ID) =
-        scope.parallelFx<Unit> {
+        scope.parallelFx {
             val stage = stages[id]
             if (stage != null) {
                 stages.remove(id)
                 hideStage(stage)
             }
         }
-
-
-
-
-
 }

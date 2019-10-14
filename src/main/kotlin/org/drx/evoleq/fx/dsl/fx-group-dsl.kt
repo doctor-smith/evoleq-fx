@@ -29,6 +29,6 @@ fun <D> FxComponentConfiguration<out Any, *>.fxGroup(scope: CoroutineScope = thi
 }
 
 @Suppress("unused")
-fun <D> fxGroup(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE,configuration: FxComponentConfiguration<Group, D>.()->Unit): FxComponent<Group, D> {
+fun <D> fxGroup(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: FxComponentConfiguration<Group, D>.()->Unit): FxComponent<Group, D> {
     return fxComponent(scope,configuration)
 }

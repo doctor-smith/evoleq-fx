@@ -25,6 +25,7 @@ import kotlin.reflect.KClass
 /**
  * @deprecated
  */
+/*
 open class FxGroupComponentConfiguration<G : Group, D> : FxParentComponentConfiguration<G, D>() {
 
     override fun configure(): FxGroupComponent<G, D> = object: FxGroupComponent<G, D>(){
@@ -47,9 +48,11 @@ open class FxGroupComponentConfiguration<G : Group, D> : FxParentComponentConfig
 
 
 }
+
+ */
 /**
  * @deprecated
  */
-fun <G : Group, D> fxGroup(configuration: FxGroupComponentConfiguration<G, D>.()->Unit) : FxParentComponent<G, D> = configure(configuration) as FxGroupComponent<G, D>
+//fun <G : Group, D> fxGroup(configuration: FxGroupComponentConfiguration<G, D>.()->Unit) : FxParentComponent<G, D> = configure(configuration) as FxGroupComponent<G, D>
 
 //fun <D> fxBaseGroup(configuration: FxGroupComponentConfiguration<Group, D>.()->Unit) = fxGroup(configuration)

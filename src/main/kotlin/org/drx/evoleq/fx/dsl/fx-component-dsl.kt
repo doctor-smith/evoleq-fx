@@ -19,12 +19,7 @@ import javafx.scene.Group
 import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.layout.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.channels.sendBlocking
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.plus
+import kotlinx.coroutines.*
 import org.drx.evoleq.dsl.ArrayListConfiguration
 import org.drx.evoleq.dsl.Configuration
 import org.drx.evoleq.dsl.HashMapConfiguration
@@ -32,7 +27,6 @@ import org.drx.evoleq.dsl.parallel
 import org.drx.evoleq.evolving.Cancellable
 import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.evolving.Parallel
-import org.drx.evoleq.fx.application.IdProvider
 import org.drx.evoleq.fx.application.PreId
 import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.component.FxNoStubComponent
@@ -45,16 +39,13 @@ import org.drx.evoleq.fx.runtime.FxRunTime
 import org.drx.evoleq.fx.stub.NoStub
 import org.drx.evoleq.fx.stub.Tunnel
 import org.drx.evoleq.stub.Stub
-import org.drx.evoleq.time.Change
-import org.drx.evoleq.time.change
-import org.drx.evoleq.time.happen
 import java.lang.Thread.sleep
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
 typealias ID = KClass<*>
 
-val DEFAULT_FX_COMPONENT_SCOPE: CoroutineScope by lazy{ GlobalScope }
+val DEFAULT_FX_COMPONENT_SCOPE: ()-> CoroutineScope = { CoroutineScope(SupervisorJob()) }//GlobalScope }
 
 abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, D>> {
 
@@ -67,7 +58,7 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
     lateinit var stubConfiguration: Stub<D>
     lateinit var viewConfiguration: ()->N
 
-    var scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE
+    var scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE()
 
     // Data related to configuration process
     val launcher = ComponentPhaseLauncher<N,D>()
@@ -79,8 +70,7 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
 
     var fxRunTimeView: N? = null
 
-    /* TODO improve id-provider-stuff */
-    //val idProvider: SendChannel<Change<ID>> = IdProvider
+
     private var keepIdProvider = true
 
     private val properties: HashMap<String, Any?> by lazy { HashMap<String, Any?>() }
@@ -89,15 +79,8 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
 
     override fun configure(): FxComponent<N, D> = when(stubConfiguration) {
         is Tunnel<D> ->  object : FxTunnelComponent<N, D> {
-
-            init{
-                /*
-                if(!keepIdProvider) {
-                    idProvider.close()
-                }
-                */
-            }
-
+            override val scope: CoroutineScope
+                get() = this@FxComponentConfiguration.scope
             override val id: ID
                 get() = idConfiguration
 
@@ -112,13 +95,9 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
             override suspend fun evolve(d: D): Evolving<D> = stubConfiguration.evolve(d)
         }
         is NoStub<D> ->  object : FxNoStubComponent<N, D> {
-            init{
-                /*
-                if(!keepIdProvider) {
-                    idProvider.close()
-                }
-                */
-            }
+
+            override val scope: CoroutineScope
+                get() = this@FxComponentConfiguration.scope
             override val id: ID
                 get() = idConfiguration
 
@@ -133,13 +112,8 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
             override suspend fun evolve(d: D): Evolving<D> = stubConfiguration.evolve(d)
         }
         else ->  object : FxComponent<N, D> {
-            init{
-                /*
-                if(!keepIdProvider) {
-                    idProvider.close()
-                }
-                */
-            }
+            override val scope: CoroutineScope
+                get() = this@FxComponentConfiguration.scope
             override val id: ID
                 get() = idConfiguration
 
@@ -215,16 +189,7 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
     @Suppress("unused")
     fun FxComponentConfiguration<N, D>.noStub() = scope.parallel<Unit>{
         val stub = NoStub<D>()
-/*
-        val change = change<ID>(PreId::class)
-        val changing = change.happen()
-        parallel<Unit>{
-            idProvider.sendBlocking(change)
-        }
-        launcher.id = changing.get()
-        */
         launcher.id = PreId::class
-
         launcher.stub = stub
     }
 
@@ -234,16 +199,7 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
     @Suppress("unused")
     fun FxComponentConfiguration<N, D>.tunnel() = scope.parallel<Unit>{
         val stub = Tunnel<D>()
-/*
-        val change = change<ID>(PreId::class)
-        val changing = change.happen()
-        parallel<Unit>{
-            idProvider.sendBlocking(change)
-        }
-        launcher.id = changing.get()
-        */
         launcher.id = PreId::class
-
         launcher.stub = stub
     }
 
@@ -278,7 +234,7 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
     @Suppress("unused")
     fun  FxComponentConfiguration<N, D>.children(children: ArrayListConfiguration<FxComponent<*, *>>.()->Unit) {
         val list = org.drx.evoleq.dsl.configure(children)
-        launcher.fxChildren.addAll( list.map{ scope.parallel<FxComponent<*,*>> { it }} )
+        launcher.fxChildren.addAll( list.map{ scope.parallel { it }} )
     }
     @Suppress("unused")
     fun <M,E> ArrayListConfiguration<FxComponent<*, *>>.child(child: FxComponent<M, E>) = item(child)
@@ -356,17 +312,17 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
  * Configure an FxComponent
  */
 @Suppress("unused")
-fun <N,D> fxComponent(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE,configuration: FxComponentConfiguration<N,D>.()->Unit): FxComponent<N, D> {
+fun <N,D> fxComponent(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: FxComponentConfiguration<N,D>.()->Unit): FxComponent<N, D> {
 
     var component : FxComponent<N, D>? = null
     var cancelled = false
     val conf = (object : FxComponentConfiguration<N, D>(scope) {})
 
     conf.configuration()
-    // launck component flow and avait termination
+    // launch component flow and await termination
     scope.parallel {
         val l = conf.launcher.launch(conf)
-        val terminationPhase = fxComponentFlow<N, D>().evolve(l)
+        val terminationPhase = parallel{ fxComponentFlow<N, D>().evolve(l) .get() }
         val terminate = terminationPhase.get()
         terminate.log.forEach {
             println(it)
@@ -390,7 +346,7 @@ fun <N,D> fxComponent(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE,configu
             kotlinx.coroutines.delay(1)
         }
         if (!conf.cancel) {
-            //println("finished: ${conf.idConfiguration}")
+            println("finished: ${conf.idConfiguration}")
             component = conf.component
         }
     }
@@ -405,12 +361,19 @@ fun <N,D> fxComponent(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE,configu
     return component!!
 }
 
-fun <N,D> FxComponentConfiguration<N,D>.fxComponent(configuration: FxComponentConfiguration<N,D>.()->Unit): FxComponent<N, D> = fxComponent(this.scope, configuration)
+fun <N,D> FxComponentConfiguration<N,D>.fxComponent(configuration: FxComponentConfiguration<N,D>.()->Unit): FxComponent<N, D> = fxComponent(CoroutineScope(this.scope.coroutineContext), configuration)
 
-fun <N,D> CoroutineScope.fxComponent( configuration: FxComponentConfiguration<N,D>.()->Unit): CoroutineScope.()->FxComponent<N,D> = {
-    this + this@fxComponent.coroutineContext
-    fxComponent(this@fxComponent, configuration)
+/*{
+   return scope.fxComponent(configuration)(scope)
 }
+*/
+/*
+fun <N,D> CoroutineScope.fxComponent( configuration: FxComponentConfiguration<N,D>.()->Unit): CoroutineScope.()->FxComponent<N,D> = {
+    this@fxComponent + this.coroutineContext
+    fxComponent(this, configuration)
+}
+*/
+
 /**
  * Configure the view
  */
@@ -463,6 +426,12 @@ fun constructor(vararg args : Any): Array<out Any> = args
 fun <N> N.style(css: String): N {
     when(this) {
         is Node -> this.style = css
+    }
+    return this
+}
+fun <N> N.cssClass(vararg classes: String): N {
+    when(this){
+        is Node -> classes.forEach { this.styleClass.add(it) }
     }
     return this
 }

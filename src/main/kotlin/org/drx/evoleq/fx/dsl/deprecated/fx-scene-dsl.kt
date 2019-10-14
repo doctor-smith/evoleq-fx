@@ -41,6 +41,7 @@ class RootStubKey
 /**
  * @deprecated
  */
+/*
 open class FxSceneComponentConfiguration<R: Parent, D> : Configuration<FxSceneComponent<R, D>> {
 
     lateinit var stubDef: Stub<D>
@@ -174,8 +175,10 @@ open class FxSceneComponentConfiguration<R: Parent, D> : Configuration<FxSceneCo
         }
     }
 }
+
+ */
 /**
  * @deprecated
  */
-fun <R: Parent, D> fxScene(configuration: FxSceneComponentConfiguration<R, D>.()->Unit): FxSceneComponent<R, D> = configure(configuration)
+//fun <R: Parent, D> fxScene(configuration: FxSceneComponentConfiguration<R, D>.()->Unit): FxSceneComponent<R, D> = configure(configuration)
 

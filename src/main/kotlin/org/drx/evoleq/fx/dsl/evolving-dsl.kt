@@ -22,9 +22,9 @@ import org.drx.evoleq.fx.evolving.ParallelFx
 fun <D> CoroutineScope.parallelFx(
         delay: Long = 1,
         block: CoroutineScope.() -> D
-) : ParallelFx<D> = ParallelFx(delay, this){block()}
+) : ParallelFx<D> = ParallelFx(delay, this){ block() }
 
 fun <D> CoroutineScope.asyncFx(
         delay: Long = 1,
         block: CoroutineScope.() -> D
-) : AsynqFx<D> = AsynqFx(delay, this){block()}
+) : AsynqFx<D> = AsynqFx(delay, this){ block() }

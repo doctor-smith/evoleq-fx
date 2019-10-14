@@ -26,6 +26,7 @@ import kotlin.reflect.KClass
 /**
  * @deprecated
  */
+/*
 open class FxAnchorPaneComponentConfiguration<A: AnchorPane, D> : FxParentComponentConfiguration<A, D>() {
 
     override fun configure(): FxAnchorPaneComponent<A, D> = object: FxAnchorPaneComponent<A, D>() {
@@ -62,7 +63,8 @@ open class FxAnchorPaneComponentConfiguration<A: AnchorPane, D> : FxParentCompon
     }
 
 }
+*/
 /**
  * @deprecated
  */
-fun <A: AnchorPane, D> fxAnchorPane(configuration: FxAnchorPaneComponentConfiguration<A, D>.()->Unit): FxParentComponent<A, D> = configure(configuration) as FxAnchorPaneComponent<A, D>
+//fun <A: AnchorPane, D> fxAnchorPane(configuration: FxAnchorPaneComponentConfiguration<A, D>.()->Unit): FxParentComponent<A, D> = configure(configuration) as FxAnchorPaneComponent<A, D>

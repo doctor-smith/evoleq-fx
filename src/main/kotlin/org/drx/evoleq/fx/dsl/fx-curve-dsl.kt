@@ -35,7 +35,7 @@ fun <D> FxComponentConfiguration<out Any, *>.fxCubicCurve(scope: CoroutineScope 
  *
  */
 @Suppress("unused")
-fun <D> fxCubicCurve(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE,configuration: FxComponentConfiguration<CubicCurve, D>.()->Unit): FxComponent<CubicCurve,D> {
+fun <D> fxCubicCurve(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: FxComponentConfiguration<CubicCurve, D>.()->Unit): FxComponent<CubicCurve,D> {
     return fxComponent(scope,configuration)
 }
 
