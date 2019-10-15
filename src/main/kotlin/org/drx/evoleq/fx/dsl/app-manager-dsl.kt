@@ -18,7 +18,7 @@ package org.drx.evoleq.fx.dsl
 import org.drx.evoleq.dsl.Configuration
 import org.drx.evoleq.dsl.configure
 import org.drx.evoleq.dsl.stub
-import org.drx.evoleq.fx.application.multi.AppManager
+import org.drx.evoleq.fx.application.configration.AppManager
 import org.drx.evoleq.stub.Stub
 import kotlin.reflect.KClass
 

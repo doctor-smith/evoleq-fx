@@ -17,8 +17,8 @@ package org.drx.evoleq.fx.phase
 
 import org.drx.evoleq.coroutines.BaseReceiver
 import org.drx.evoleq.flow.Phase
-import org.drx.evoleq.fx.application.multi.AppManager
-import org.drx.evoleq.fx.application.multi.SimpleAppManager
+import org.drx.evoleq.fx.application.configration.AppManager
+import org.drx.evoleq.fx.application.configration.SimpleAppManager
 import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.dsl.FxComponents
 import org.drx.evoleq.fx.dsl.ID

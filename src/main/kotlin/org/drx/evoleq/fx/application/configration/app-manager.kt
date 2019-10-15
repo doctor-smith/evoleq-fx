@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.evoleq.fx.application.multi
+package org.drx.evoleq.fx.application.configration
 
 import javafx.application.Application
 import javafx.stage.Stage

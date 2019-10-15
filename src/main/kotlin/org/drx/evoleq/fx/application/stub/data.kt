@@ -1,4 +1,4 @@
-package org.drx.evoleq.fx.application.single
+package org.drx.evoleq.fx.application.stub
 
 import javafx.stage.Stage
 import org.drx.evoleq.fx.component.FxComponent

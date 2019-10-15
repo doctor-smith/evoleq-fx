@@ -31,7 +31,7 @@ import org.drx.evoleq.dsl.receiver
 import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.flow.intercept
-import org.drx.evoleq.fx.application.multi.SimpleAppManager
+import org.drx.evoleq.fx.application.configration.SimpleAppManager
 import org.drx.evoleq.fx.dsl.*
 import org.drx.evoleq.fx.phase.AppFlowMessage
 import org.drx.evoleq.fx.phase.FxApplicationPhase
