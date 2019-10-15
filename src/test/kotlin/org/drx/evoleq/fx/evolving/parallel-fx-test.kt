@@ -15,16 +15,10 @@
  */
 package org.drx.evoleq.fx.evolving
 
-import javafx.application.Application
-import javafx.stage.Stage
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import org.drx.evoleq.fx.application.BgAppManager
 import org.drx.evoleq.fx.test.dsl.fxRunTest
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
 import org.testfx.api.FxToolkit
 import java.lang.Thread.sleep

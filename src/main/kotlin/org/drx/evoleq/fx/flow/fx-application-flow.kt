@@ -17,12 +17,10 @@ package org.drx.evoleq.fx.flow
 
 import kotlinx.coroutines.CoroutineScope
 import org.drx.evoleq.dsl.*
-import org.drx.evoleq.evolving.Parallel
-import org.drx.evoleq.fx.application.AppManager
-import org.drx.evoleq.fx.application.ApplicationManager
-import org.drx.evoleq.fx.application.SimpleAppManager
+import org.drx.evoleq.fx.application.multi.AppManager
+import org.drx.evoleq.fx.application.multi.ApplicationManager
+import org.drx.evoleq.fx.application.multi.SimpleAppManager
 import org.drx.evoleq.fx.dsl.parallelFx
-import org.drx.evoleq.fx.evolving.ParallelFx
 import org.drx.evoleq.fx.phase.AppFlowMessage
 import org.drx.evoleq.fx.phase.FxApplicationPhase
 import org.drx.evoleq.stub.Stub

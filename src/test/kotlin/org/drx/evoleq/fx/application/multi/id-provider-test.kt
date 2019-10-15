@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.evoleq.fx.application
+package org.drx.evoleq.fx.application.multi
 
 import javafx.beans.property.SimpleObjectProperty
 import kotlinx.coroutines.delay

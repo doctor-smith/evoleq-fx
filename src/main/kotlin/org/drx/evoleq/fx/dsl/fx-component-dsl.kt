@@ -27,7 +27,7 @@ import org.drx.evoleq.dsl.parallel
 import org.drx.evoleq.evolving.Cancellable
 import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.evolving.Parallel
-import org.drx.evoleq.fx.application.PreId
+import org.drx.evoleq.fx.application.multi.PreId
 import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.component.FxNoStubComponent
 import org.drx.evoleq.fx.component.FxTunnelComponent

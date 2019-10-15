@@ -31,7 +31,7 @@ import org.drx.evoleq.dsl.receiver
 import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.flow.intercept
-import org.drx.evoleq.fx.application.SimpleAppManager
+import org.drx.evoleq.fx.application.multi.SimpleAppManager
 import org.drx.evoleq.fx.dsl.*
 import org.drx.evoleq.fx.phase.AppFlowMessage
 import org.drx.evoleq.fx.phase.FxApplicationPhase
@@ -41,12 +41,11 @@ import org.drx.evoleq.stub.toFlow
 import org.drx.evoleq.time.WaitForProperty
 import org.testfx.api.FxRobot
 import kotlin.reflect.KClass
-import org.junit.Test
 
 class FxApplicationFlowTest {
    /* todo flow does not terminate for some reason: -> interplay of receiverStub and its observer?  */
     //@Test
-    fun basics() = fxRunTest(60_000){
+    fun basicsMulti() = fxRunTest(60_000){
 
         class CloseDialog
 

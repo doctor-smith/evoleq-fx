@@ -17,10 +17,7 @@ package org.drx.evoleq.fx.dsl
 
 import javafx.scene.Scene
 import javafx.stage.Stage
-import javafx.stage.WindowEvent
 import kotlinx.coroutines.CoroutineScope
-import org.drx.evoleq.dsl.DefaultStubScope
-import org.drx.evoleq.fx.application.AppManager
 import org.drx.evoleq.fx.component.FxComponent
 
 /**

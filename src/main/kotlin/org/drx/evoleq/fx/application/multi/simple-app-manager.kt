@@ -13,24 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.evoleq.fx.application
+package org.drx.evoleq.fx.application.multi
 
-import com.sun.org.apache.xml.internal.security.Init.isInitialized
 import javafx.scene.Node
 import javafx.scene.Scene
 import javafx.stage.Stage
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.runBlocking
 import org.drx.evoleq.coroutines.BaseReceiver
 import org.drx.evoleq.dsl.*
 import org.drx.evoleq.evolving.Evolving
-import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.dsl.FxComponents
 import org.drx.evoleq.fx.dsl.ID
 import org.drx.evoleq.fx.dsl.parallelFx
-import org.drx.evoleq.fx.evolving.ParallelFx
 import org.drx.evoleq.fx.phase.AppFlowMessage
 import org.drx.evoleq.stub.Stub
 

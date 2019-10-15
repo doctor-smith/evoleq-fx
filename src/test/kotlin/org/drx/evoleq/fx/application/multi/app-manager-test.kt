@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.evoleq.fx.application
+package org.drx.evoleq.fx.application.multi
 
 import javafx.stage.Stage
 import kotlinx.coroutines.GlobalScope
 import org.drx.evoleq.dsl.stub
+import org.drx.evoleq.fx.application.multi.AppManager
 import org.drx.evoleq.fx.dsl.launchApplicationStub
 import org.drx.evoleq.fx.dsl.parallelFx
 import org.drx.evoleq.fx.test.dsl.fxRunTest

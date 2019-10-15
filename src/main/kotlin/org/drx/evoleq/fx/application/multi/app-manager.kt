@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.evoleq.fx.application
+package org.drx.evoleq.fx.application.multi
 
 import javafx.application.Application
 import javafx.stage.Stage
@@ -21,11 +21,9 @@ import kotlinx.coroutines.*
 import org.drx.evoleq.dsl.Configuration
 import org.drx.evoleq.dsl.parallel
 import org.drx.evoleq.dsl.stub
-import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.dsl.ID
 import org.drx.evoleq.stub.Stub
-import java.lang.Exception
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
@@ -46,7 +44,7 @@ abstract class AppManager<D>() : Application(), Configuration<Stub<D>> {
     val scope: CoroutineScope
     init{
         scope = DEFAULT_FX_APPLICATION_SCOPE()
-        SCOPE+scope.coroutineContext
+        SCOPE +scope.coroutineContext
     }
 
     /**
@@ -85,7 +83,7 @@ abstract class AppManager<D>() : Application(), Configuration<Stub<D>> {
             var STUB_INITIALIZED = false
 
             // eventually launch app
-            if( waitingForToolkit() ) {
+            if(waitingForToolkit()) {
                 launch {
                     coroutineScope {
                         launch(app::class.java)
@@ -116,7 +114,7 @@ abstract class AppManager<D>() : Application(), Configuration<Stub<D>> {
 
         fun <D, C: KClass<out AppManager<D>>> launch(appClass: C): Parallel<Stub<D>> {
             val app = appClass.createInstance()
-            return Manager.launch(app)
+            return launch(app)
         }
 
         @Suppress("UNCHECKED_CAST")
