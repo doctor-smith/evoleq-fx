@@ -26,7 +26,9 @@ import org.drx.evoleq.dsl.parallel
 import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.fx.geometry.Derivation
 import org.drx.evoleq.fx.test.dsl.fxRunTest
+import org.drx.evoleq.fx.test.dsl.showInTestStage
 import org.drx.evoleq.fx.util.showOnStage
+
 import org.junit.Test
 
 class FxCubicCurveTest {

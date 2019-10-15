@@ -24,7 +24,7 @@ import kotlinx.coroutines.delay
 import org.drx.evoleq.dsl.parallel
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.application.configration.AppManager
-import org.drx.evoleq.fx.application.deprecated.SimpleAppManager
+import org.drx.evoleq.fx.application.configration.SimpleAppManager
 import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.dsl.*
 import org.drx.evoleq.stub.Stub
