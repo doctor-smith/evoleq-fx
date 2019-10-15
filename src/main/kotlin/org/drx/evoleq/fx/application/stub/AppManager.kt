@@ -31,7 +31,9 @@ import org.drx.evoleq.stub.Stub
 import org.drx.evoleq.stub.toFlow
 import kotlin.reflect.KClass
 
-
+/**
+ * TODO test
+ */
 abstract class AppManager <Data> : Application(), Stub<AppMessage<Data>> {
     /**
      * Companion
@@ -130,10 +132,11 @@ abstract class AppManager <Data> : Application(), Stub<AppMessage<Data>> {
     /**
      * Evolve data along the application-flow
      */
+    @Suppress("unchecked_cast")
     override suspend fun evolve(d: AppMessage<Data>): Evolving<AppMessage<Data>> = when(val message = d){
         is AppMessage.Request<*> -> when(message) {
             is AppMessage.Request.RegisterStages<*> -> scope.parallel {
-                println("register")
+                // println("register")
                 while(!TOOLKIT_INITIALIZED) {
                     delay(1)
                 }
@@ -141,12 +144,12 @@ abstract class AppManager <Data> : Application(), Stub<AppMessage<Data>> {
                 AppMessage.Response.StagesRegistered<Data>()
             }
             is AppMessage.Request.ShowStage<*> -> scope.parallel {
-                println("show")
+                // println("show")
                 val stub = showStage(message.id).get()
                 AppMessage.Response.StageShown(stub)
             }
             is AppMessage.Request.HideStage -> scope.parallel{
-                println("hide")
+                // println("hide")
                 hideStage(message.id).get()
                 AppMessage.Response.StageHidden<Data>(message.id)
             }
@@ -154,15 +157,15 @@ abstract class AppManager <Data> : Application(), Stub<AppMessage<Data>> {
         }
         is AppMessage.Response<*> -> when(message) {
             is AppMessage.Response.StageShown -> scope.parallel{
-                println("shown")
+                // println("shown")
                 onStageShown(message.stub.id, message)
             }
             is AppMessage.Response.StageHidden -> scope.parallel {
-                println("hidden")
+                // println("hidden")
                 onStageHidden(message.id,message)
             }
             is AppMessage.Response.StagesRegistered -> scope.parallel{
-                println("registered")
+                // println("registered")
                 onStagesRegistered()
             }
 
@@ -179,7 +182,7 @@ abstract class AppManager <Data> : Application(), Stub<AppMessage<Data>> {
                 onError(message as AppMessage.Process.Error<Data>)
             }
             is AppMessage.Process.Terminate<*> -> scope.parallel {
-                println("terminate")
+                // println("terminate")
                 AppMessage.Process.Terminated<Data>()
             }
             is AppMessage.Process.Terminated<*> -> scope.parallel { message }
@@ -297,7 +300,7 @@ abstract class AppManager <Data> : Application(), Stub<AppMessage<Data>> {
             }.get()
             id
         } catch(exception : Exception) {
-            println("Could not hide stage $id: $exception")
+            // println("Could not hide stage $id: $exception")
             id
         }
     }

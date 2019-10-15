@@ -24,7 +24,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import org.drx.evoleq.coroutines.onScope
 import org.drx.evoleq.dsl.stub
-import org.drx.evoleq.fx.dsl.deprecated.StageStubKey
 import org.drx.evoleq.fx.test.dsl.fxRunTest
 import org.drx.evoleq.fx.util.showStage
 import org.drx.evoleq.stub.Key2
@@ -35,7 +34,7 @@ class ScrollPaneTest {
 
     @Test fun scrollPaneBasics() = fxRunTest{//runBlocking {
         val stageComponent = onScope{ scope: CoroutineScope->fxComponent<Stage, Nothing>(scope) {
-            id(StageStubKey::class)
+            id(Stage::class)
             view{configure{title = "ScrollPane"}}
             scene(fxScene {
                 id(SceneId::class)
