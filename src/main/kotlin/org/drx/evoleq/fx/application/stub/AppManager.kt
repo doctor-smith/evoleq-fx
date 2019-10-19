@@ -166,7 +166,7 @@ abstract class AppManager <Data> : Application(), Stub<AppMessage<Data>> {
             }
             is AppMessage.Response.StagesRegistered -> scope.parallel{
                 // println("registered")
-                onStagesRegistered()
+                onStagesRegistered(message)
             }
 
         }
@@ -221,7 +221,7 @@ abstract class AppManager <Data> : Application(), Stub<AppMessage<Data>> {
     /**
      * When stages are registered perform this action
      */
-    abstract fun onStagesRegistered(): AppMessage<Data>
+    abstract fun onStagesRegistered(data: AppMessage<Data>): AppMessage<Data>
 
     /**
      * When a stage is shown, perform this action
