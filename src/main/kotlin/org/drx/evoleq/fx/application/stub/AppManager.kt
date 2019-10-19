@@ -57,7 +57,7 @@ abstract class AppManager <Data> : Application(), Stub<AppMessage<Data>> {
     override fun init() {
 
         scope.parallel {
-            val phase = flow.evolve(AppMessage.Process.Start()).get()
+            val phase = flow.evolve(AppMessage.Process.Start( initData() )).get()
             assert(phase is AppMessage.Process.Terminated)
         }
 
@@ -141,17 +141,17 @@ abstract class AppManager <Data> : Application(), Stub<AppMessage<Data>> {
                     delay(1)
                 }
                 message.stages.forEach { entry -> registry[entry.first] = entry.second  as () -> FxComponent<Stage, Data> }
-                AppMessage.Response.StagesRegistered<Data>()
+                AppMessage.Response.StagesRegistered<Data>(message.data)
             }
             is AppMessage.Request.ShowStage<*> -> scope.parallel {
                 // println("show")
                 val stub = showStage(message.id).get()
-                AppMessage.Response.StageShown(stub)
+                AppMessage.Response.StageShown(stub, message.data)
             }
             is AppMessage.Request.HideStage -> scope.parallel{
                 // println("hide")
                 hideStage(message.id).get()
-                AppMessage.Response.StageHidden<Data>(message.id)
+                AppMessage.Response.StageHidden<Data>(message.id, message.data)
             }
 
         }
@@ -172,18 +172,18 @@ abstract class AppManager <Data> : Application(), Stub<AppMessage<Data>> {
         }
         is AppMessage.Process<*> -> when(message){
             is AppMessage.Process.Start<*> ->  scope.parallel{
-                AppMessage.Request.RegisterStages(stages())
+                AppMessage.Request.RegisterStages(stages(), message.data)
             }
             is AppMessage.Process.DriveStub<*> -> scope.parallel{
                 require(message is AppMessage.Process.DriveStub<Data>)
-                onDriveStub(message.stub, message.initialData)
+                onDriveStub(message.stub, message.data)
             }
             is AppMessage.Process.Error<*> -> scope.parallel {
                 onError(message as AppMessage.Process.Error<Data>)
             }
             is AppMessage.Process.Terminate<*> -> scope.parallel {
                 // println("terminate")
-                AppMessage.Process.Terminated<Data>()
+                AppMessage.Process.Terminated<Data>(message.data)
             }
             is AppMessage.Process.Terminated<*> -> scope.parallel { message }
         }
@@ -211,6 +211,7 @@ abstract class AppManager <Data> : Application(), Stub<AppMessage<Data>> {
      * Abstract Process API
      *
      ******************************************************************************************************************/
+    abstract fun initData(): Data
 
     /**
      * Define stages to be registered
