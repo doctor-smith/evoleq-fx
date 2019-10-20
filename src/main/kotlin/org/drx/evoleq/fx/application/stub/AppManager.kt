@@ -221,17 +221,17 @@ abstract class AppManager <Data> : Application(), Stub<AppMessage<Data>> {
     /**
      * When stages are registered perform this action
      */
-    abstract fun onStagesRegistered(data: AppMessage<Data>): AppMessage<Data>
+    abstract suspend fun onStagesRegistered(data: AppMessage<Data>): AppMessage<Data>
 
     /**
      * When a stage is shown, perform this action
      */
-    abstract fun onStageShown(id: ID, data: AppMessage.Response.StageShown<Data>): AppMessage<Data>
+    abstract suspend fun onStageShown(id: ID, data: AppMessage.Response.StageShown<Data>): AppMessage<Data>
 
     /**
      * When a stage is closed / hidden, perform this action
      */
-    abstract fun onStageHidden(id: ID, data: AppMessage<Data>): AppMessage<Data>
+    abstract suspend fun onStageHidden(id: ID, data: AppMessage<Data>): AppMessage<Data>
 
     /**
      * When a new stub arises
