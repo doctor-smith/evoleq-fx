@@ -284,10 +284,18 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
     }
 
     /**
-     * Add a property
+     * Add / set a property
      */
-    @Suppress("unused")
-    fun <E> FxComponentConfiguration<N, D>.property(name: String,prop: FxComponentConfiguration<N,D>.()->E) {
+    @Suppress("unused", "unchecked_cast")
+    fun <E> FxComponentConfiguration<N, D>.property(name: String, prop: FxComponentConfiguration<N,D>.()->E) {
+        if(properties.containsKey(name)) {
+            val prop = properties["name"]
+            try{
+                prop as E
+            } catch(exception: Exception){
+                throw Exception("Property-Type-Safety Exception: Cannot Change Type of $prop")
+            }
+        }
         properties[name] = prop()
     }
 
