@@ -43,6 +43,9 @@ fun <D> FxComponentConfiguration<TabPane, D>.side(side: Side) {
 fun <D> CoroutineScope.fxTab(configuration: FxComponentConfiguration<Tab, D>.()->Unit): FxComponent<Tab, D> = fxComponent(this,configuration)
 
 @Suppress("unused")
+fun <D> FxComponentConfiguration<TabPane, D>.fxTab(configuration: FxComponentConfiguration<Tab, D>.()->Unit): FxComponent<Tab, D> = fxComponent(scope,configuration)
+
+@Suppress("unused")
 fun<D> FxComponentConfiguration<Tab, D>.content(component: FxComponent<out Node,*>) {
     fxSpecial(component)
     fxRunTime { content = component.show() }

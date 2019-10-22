@@ -346,7 +346,7 @@ fun <N,D> fxComponent(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),confi
             kotlinx.coroutines.delay(1)
         }
         if (!conf.cancel) {
-            println("finished: ${conf.idConfiguration}")
+            //println("finished: ${conf.idConfiguration}")
             component = conf.component
         }
     }
