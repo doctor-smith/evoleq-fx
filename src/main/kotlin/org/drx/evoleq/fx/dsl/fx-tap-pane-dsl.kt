@@ -20,6 +20,7 @@ import javafx.scene.Node
 import javafx.scene.control.Tab
 import javafx.scene.control.TabPane
 import kotlinx.coroutines.CoroutineScope
+import org.drx.evoleq.dsl.ArrayListConfiguration
 import org.drx.evoleq.fx.component.FxComponent
 
 @Suppress("unused")
@@ -44,6 +45,17 @@ fun <D> CoroutineScope.fxTab(configuration: FxComponentConfiguration<Tab, D>.()-
 
 @Suppress("unused")
 fun <D> FxComponentConfiguration<TabPane, D>.fxTab(configuration: FxComponentConfiguration<Tab, D>.()->Unit): FxComponent<Tab, D> = fxComponent(scope,configuration)
+
+@Suppress("unused")
+fun <D> FxComponentConfiguration<TabPane, D>.tabs(configuration: ArrayListConfiguration<FxComponent<Tab,D>>.()->Unit) {
+    val tabs = org.drx.evoleq.dsl.configure(configuration)
+    tabs.forEach {
+        this.tab(it)
+    }
+}
+
+@Suppress("unused")
+fun <D> ArrayListConfiguration<FxComponent<Tab,D>>.tab(tab: FxComponent<Tab, D>) = item(tab)
 
 @Suppress("unused")
 fun<D> FxComponentConfiguration<Tab, D>.content(component: FxComponent<out Node,*>) {
