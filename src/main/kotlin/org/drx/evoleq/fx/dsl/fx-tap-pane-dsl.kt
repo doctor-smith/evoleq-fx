@@ -50,7 +50,10 @@ fun <D> FxComponentConfiguration<TabPane, D>.fxTab(configuration: FxComponentCon
 fun <D> FxComponentConfiguration<TabPane, D>.tabs(configuration: ArrayListConfiguration<FxComponent<Tab,D>>.()->Unit) {
     val tabs = org.drx.evoleq.dsl.configure(configuration)
     tabs.forEach {
-        this.tab(it)
+        fxSpecial(it)
+    }
+    fxRunTime{
+        this.tabs.addAll(tabs.map{it.show()})
     }
 }
 
