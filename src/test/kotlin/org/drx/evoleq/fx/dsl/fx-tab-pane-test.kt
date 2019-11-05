@@ -39,7 +39,7 @@ class TabPaneTest {
                 root(fxTabPane {
                     noStub()
                     view{configure{}}
-                    tab(fxTab {
+                    tab(fxTab<Nothing> {
                         noStub()
                         view{configure{
 
@@ -53,7 +53,7 @@ class TabPaneTest {
                         })
 
                     })
-                    tab(fxTab{
+                    tab(fxTab<Nothing>{
                         noStub()
                         view{configure{}}
                         content(fxButton<Nothing> {

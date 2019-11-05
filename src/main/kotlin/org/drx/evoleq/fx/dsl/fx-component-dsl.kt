@@ -20,6 +20,7 @@ import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.layout.*
 import kotlinx.coroutines.*
+import org.drx.evoleq.coroutines.BaseReceiver
 import org.drx.evoleq.dsl.ArrayListConfiguration
 import org.drx.evoleq.dsl.Configuration
 import org.drx.evoleq.dsl.HashMapConfiguration
@@ -28,17 +29,15 @@ import org.drx.evoleq.evolving.Cancellable
 import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.application.configration.PreId
-import org.drx.evoleq.fx.component.FxComponent
-import org.drx.evoleq.fx.component.FxNoStubComponent
-import org.drx.evoleq.fx.component.FxTunnelComponent
+import org.drx.evoleq.fx.component.*
 import org.drx.evoleq.fx.exception.FxConfigurationException
 import org.drx.evoleq.fx.flow.fxComponentFlow
 import org.drx.evoleq.fx.phase.FxComponentPhase
 import org.drx.evoleq.fx.phase.ComponentPhaseLauncher
 import org.drx.evoleq.fx.runtime.FxRunTime
-import org.drx.evoleq.fx.stub.NoStub
-import org.drx.evoleq.fx.stub.Tunnel
+import org.drx.evoleq.fx.stub.*
 import org.drx.evoleq.stub.Stub
+import org.drx.evoleq.stub.findByKey
 import java.lang.Thread.sleep
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
@@ -96,6 +95,22 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
         }
         is NoStub<D> ->  object : FxNoStubComponent<N, D> {
 
+            override val scope: CoroutineScope
+                get() = this@FxComponentConfiguration.scope
+            override val id: ID
+                get() = idConfiguration
+
+            override val stubs: HashMap<ID, Stub<*>>
+                get() = stubConfiguration.stubs
+
+            override fun show(): N {
+                fxRunTimeView = viewConfiguration()
+                return fxRunTimeView!!
+            }
+
+            override suspend fun evolve(d: D): Evolving<D> = stubConfiguration.evolve(d)
+        }
+        is InputStub<*, D> -> object : FxInputComponent<Any, N, D>((stubConfiguration as InputStub<*,D>).inputReceiver as BaseReceiver<Any>) {
             override val scope: CoroutineScope
                 get() = this@FxComponentConfiguration.scope
             override val id: ID
@@ -203,6 +218,14 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
         launcher.stub = stub
     }
 
+    /**
+     * Usage requires to set id and not to set the stub
+     */
+    fun <I> FxComponentConfiguration<N,D>.onInput(onInput: (I, D)->Evolving<FxInputPhase<D>> ) {
+        val stub = InputStub(onInput)
+        launcher.stub = stub
+    }
+
 
     /**
      * Configure the view
@@ -253,6 +276,21 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
     @Suppress("unused")
     fun FxComponentConfiguration<N, D>.stubAction(action: Stub<D>.()->Unit) {
         launcher.stubActions.add(scope.parallel{action})
+    }
+
+    /**
+     * Find child-stub by id
+     */
+    @Suppress("unused", "unchecked_cast")
+    suspend inline fun <reified I> FxComponentConfiguration<N, D>.child(): Stub<*> {
+        var stub: Stub<*>? = null
+        stubAction{
+            stub = findByKey(I::class)!!
+        }
+        while(stub == null) {
+            delay(1)
+        }
+        return stub!!
     }
 
     /**

@@ -21,7 +21,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.drx.evoleq.dsl.parallel
 import org.drx.evoleq.dsl.stub
+import org.drx.evoleq.evolving.Parallel
+import org.drx.evoleq.fx.component.FxComponent
+import org.drx.evoleq.fx.component.FxInputComponent
+import org.drx.evoleq.fx.component.asFxComponent
+import org.drx.evoleq.fx.component.withInput
+import org.drx.evoleq.fx.stub.FxInputPhase
 import org.drx.evoleq.fx.test.dsl.fxRunTest
+import org.drx.evoleq.stub.findByKey
 import org.junit.Test
 
 class FxButtonTest {
@@ -59,4 +66,49 @@ class FxButtonTest {
     }
 
 
+    @Test fun asInputComponent() = fxRunTest {
+        var inputString : String? = null
+        val button: FxInputComponent<String, Button,Int> = fxButton<Int> {
+            id<Button>()
+            onInput<String> {input, data->
+                scope.parallel{
+                    inputString = input
+                    FxInputPhase.Stop(data +1)
+                }
+            }
+            view{configure{}}
+        }.withInput()
+        Parallel {
+            val result = button.evolve(0).get()
+            //println(result)
+            assert(result == 1)
+        }
+        Parallel {
+            button.input("fuck you")
+            delay(500)
+            assert(inputString != null)
+        }
+
+        val  group = fxGroup<Int>{
+            tunnel()
+            view{configure{}}
+            child(button)
+        }
+
+        val b = group.findByKey(Button::class)!!
+                .asFxComponent<Button,Int>()
+                .withInput<String,Button,Int>()
+        Parallel {
+            val result = b.evolve(0).get()
+            //println(result)
+            assert(result == 1)
+        }
+        Parallel {
+            b.input("fuck you")
+            delay(500)
+            assert(inputString != null)
+        }
+
+        delay(2_000)
+    }
 }
