@@ -15,6 +15,7 @@
  */
 package org.drx.evoleq.fx.component
 
+import org.drx.evoleq.coroutines.BaseReceiver
 import org.drx.evoleq.stub.Stub
 
 interface FxComponent<N, D> : Stub<D> {
@@ -24,3 +25,16 @@ interface FxComponent<N, D> : Stub<D> {
 interface FxNoStubComponent<N, D> : FxComponent<N, D>
 
 interface FxTunnelComponent<N, D> : FxComponent<N, D>
+
+abstract class FxInputComponent<I, N, D>(private val inputReceiver: BaseReceiver<I>) : FxComponent<N,D> {
+
+    suspend fun input(input: I) {
+        inputReceiver.send(input)
+    }
+}
+
+@Suppress("unchecked_cast")
+fun <I, N, D> FxComponent<N, D>.withInput(): FxInputComponent<I, N, D> = this as FxInputComponent<I, N, D>
+
+@Suppress("unchecked_cast")
+fun <N, D> Stub<*>.asFxComponent() : FxComponent<N, D> = this as FxComponent<N, D>
