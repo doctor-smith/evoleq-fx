@@ -30,7 +30,7 @@ fun <D> FxComponentConfiguration<out Any, *>.fxTabPane(scope: CoroutineScope = t
 fun <D> fxTabPane(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: FxComponentConfiguration<TabPane, D>.()->Unit): FxComponent<TabPane, D> = fxComponent(scope,configuration)
 
 @Suppress("unused")
-fun <D> FxComponentConfiguration<TabPane, D>.tab(component: FxComponent<Tab, D>) {
+fun <D, E> FxComponentConfiguration<TabPane, D>.tab(component: FxComponent<Tab, E>) {
     fxSpecial(component)
     fxRunTime { tabs.add(component.show()) }
 }
@@ -44,10 +44,10 @@ fun <D> FxComponentConfiguration<TabPane, D>.side(side: Side) {
 fun <D> CoroutineScope.fxTab(configuration: FxComponentConfiguration<Tab, D>.()->Unit): FxComponent<Tab, D> = fxComponent(this,configuration)
 
 @Suppress("unused")
-fun <D> FxComponentConfiguration<TabPane, D>.fxTab(configuration: FxComponentConfiguration<Tab, D>.()->Unit): FxComponent<Tab, D> = fxComponent(scope,configuration)
+fun <D, E> FxComponentConfiguration<TabPane, D>.fxTab(configuration: FxComponentConfiguration<Tab, E>.()->Unit): FxComponent<Tab, E> = fxComponent(scope,configuration)
 
 @Suppress("unused")
-fun <D> FxComponentConfiguration<TabPane, D>.tabs(configuration: ArrayListConfiguration<FxComponent<Tab,D>>.()->Unit) {
+fun <D> FxComponentConfiguration<TabPane, D>.tabs(configuration: ArrayListConfiguration<FxComponent<Tab,*>>.()->Unit) {
     val tabs = org.drx.evoleq.dsl.configure(configuration)
     tabs.forEach {
         fxSpecial(it)
