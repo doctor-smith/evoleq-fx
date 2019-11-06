@@ -16,6 +16,7 @@
 package org.drx.evoleq.fx.dsl
 
 import javafx.scene.Scene
+import javafx.scene.control.TabPane
 import kotlinx.coroutines.CoroutineScope
 import org.drx.evoleq.coroutines.onScope
 import org.drx.evoleq.dsl.stub
@@ -39,7 +40,7 @@ class TabPaneTest {
                 root(fxTabPane {
                     noStub()
                     view{configure{}}
-                    tab(fxTab<Nothing> {
+                    tab(0,fxTab<Nothing> {
                         noStub()
                         view{configure{
 
@@ -53,7 +54,7 @@ class TabPaneTest {
                         })
 
                     })
-                    tab(fxTab<Nothing>{
+                    tab(1,fxTab<Nothing>{
                         noStub()
                         view{configure{}}
                         content(fxButton<Nothing> {
