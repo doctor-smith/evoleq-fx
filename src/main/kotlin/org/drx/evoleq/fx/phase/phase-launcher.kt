@@ -30,7 +30,7 @@ class ComponentPhaseLauncher<N,D> {
     val fxChildren = ArrayList<Parallel<FxComponent<*, *>>>()
     val fxSpecials = ArrayList<Parallel<FxComponent<*, *>>>()
     val stubActions = ArrayList<Parallel<Stub<D>.() -> Unit>>()
-    val fxRunTime: ArrayList<Parallel<N.() -> Unit>> = ArrayList<Parallel<N.() -> Unit>>()
+    val fxRunTimeConfiguration: ArrayList<Parallel<Pair<Int,N.() -> Unit>>> = ArrayList<Parallel<Pair<Int,N.() -> Unit>>>()
 
     fun launch(configuration: FxComponentConfiguration<N, D>): FxComponentPhase.Launch<N,D> = FxComponentPhase.Launch(
             configuration = configuration.scope.parallel{configuration},
@@ -54,6 +54,7 @@ class ComponentPhaseLauncher<N,D> {
             },
             fxChildren = fxChildren,
             fxSpecials = fxSpecials,
-            stubActions = stubActions
+            stubActions = stubActions,
+            fxRunTimeConfiguration = fxRunTimeConfiguration
     )
 }

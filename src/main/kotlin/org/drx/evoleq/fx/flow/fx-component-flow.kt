@@ -22,7 +22,6 @@ import javafx.scene.Parent
 import javafx.scene.layout.Pane
 import kotlinx.coroutines.*
 import org.drx.evoleq.dsl.conditions
-import org.drx.evoleq.dsl.flow
 import org.drx.evoleq.dsl.parallel
 import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.evolving.Parallel
@@ -61,7 +60,7 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
                             view = it.view as Parallel<()->N>,
                             fxChildren = it.fxChildren,
                             fxSpecials = it.fxSpecials,
-                            fxRunTime =  it.fxRunTime as ArrayList<Parallel<N.()->Unit>>,
+                            fxRunTimeConfiguration =  it.fxRunTimeConfiguration as ArrayList<Parallel<Pair<Int,N.()->Unit>>>,
                             stubActions = it.stubActions as ArrayList<Parallel<Stub<D>.() -> Unit>>,
                             log = it.log
                     )
@@ -90,7 +89,7 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
                     view.job.cancel()
                     it.fxChildren.forEach{child -> child.job.cancel()}
                     it.fxSpecials.forEach{child -> child.job.cancel()}
-                    it.fxRunTime.forEach{child -> child.job.cancel()}
+                    it.fxRunTimeConfiguration.forEach{child -> child.job.cancel()}
                     it.stubActions.forEach{child -> child.job.cancel()}
                     it.view.job.cancel()
                     FxComponentPhase.TerminationPhase.TerminateWithErrors(it.errors, it.log)
@@ -103,7 +102,7 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
                             view = view,
                             fxChildren = it.fxChildren,
                             fxSpecials = it.fxSpecials,
-                            fxRunTime = it.fxRunTime as ArrayList<Parallel<N.() -> Unit>>,
+                            fxRunTimeConfiguration =  it.fxRunTimeConfiguration as ArrayList<Parallel<Pair<Int,N.()->Unit>>>,
                             stubActions = it.stubActions as ArrayList<Parallel<Stub<D>.() -> Unit>>,
                             log = it.log
                     )
@@ -129,7 +128,7 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
                                 view = it.view as Parallel<() -> N>,
                                 fxChildren = fxChildren,
                                 fxSpecials = fxSpecials,
-                                fxRunTime = it.fxRunTime as ArrayList<Parallel<N.() -> Unit>>,
+                                fxRunTimeConfiguration =  it.fxRunTimeConfiguration as ArrayList<Parallel<Pair<Int,N.()->Unit>>>,
                                 stubActions = it.stubActions as ArrayList<Parallel<Stub<D>.() -> Unit>>,
                                 log = it.log
                         )
@@ -169,7 +168,7 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
                             view = it.view as Parallel<()->N>,
                             fxChildren = it.fxChildren,
                             fxSpecials = it.fxSpecials,
-                            fxRunTime =  it.fxRunTime as ArrayList<Parallel<N.()->Unit>>,
+                            fxRunTimeConfiguration =  it.fxRunTimeConfiguration as ArrayList<Parallel<Pair<Int,N.()->Unit>>>,
                             stubActions = it.stubActions as ArrayList<Parallel<Stub<D>.() -> Unit>>,
                             log = it.log
                     )
@@ -204,7 +203,7 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
                                 view = it.view as Parallel<() -> N>,
                                 fxChildren = it.fxChildren,
                                 fxSpecials = it.fxSpecials,
-                                fxRunTime = it.fxRunTime as ArrayList<Parallel<N.() -> Unit>>,
+                                fxRunTimeConfiguration =  it.fxRunTimeConfiguration as ArrayList<Parallel<Pair<Int,N.()->Unit>>>,
                                 log = it.log
                         )
                     }
@@ -236,7 +235,7 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
                         FxComponentPhase.RunTimeConfiguration(
                                 fxChildren = it.fxChildren,
                                 configuration = it.configuration,
-                                fxRunTime = it.fxRunTime as ArrayList<Parallel<N.()->Unit>>,
+                                fxRunTimeConfiguration =  it.fxRunTimeConfiguration as ArrayList<Parallel<Pair<Int,N.()->Unit>>>,
                                 log = it.log
                         )
                     }
@@ -251,6 +250,8 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
                 val configuration = it.configuration as FxComponentConfiguration<N, D>
                 val component = configuration.component as FxComponent<N, D>
                 val fxChildren = it.fxChildren
+
+
                 val scope = configuration.scope
 
                 // wait for fxRuntimeView
@@ -275,6 +276,24 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
                     FxComponentPhase.TerminationPhase.TerminateWithErrors(it.errors, it.log)
                 }
                 else {
+                    // perform fxRuntimeConfigurationActions
+                    val fxRuntimeConfiguration = it.fxRunTimeConfiguration
+                            .map{action -> action.get() as Pair<Int,N.()->Unit>}
+                            .sortedWith(Comparator{ o1, o2 ->
+                                when(o1 == null) {
+                                    true -> when(o2 == null) {
+                                        true -> 0
+                                        false -> -1
+                                    }
+                                    false -> when(o2 == null) {
+                                        true -> -1
+                                        false -> o1.first.compareTo(o2.first)
+                                    }
+                                }
+                            })
+                            .map{pair -> pair.second}
+                    fxRuntimeConfiguration.forEach{ view!!.it() }
+
                     // setup fxRuntime
                     val fxRunTime = object : FxRunTime<N, D>() {
                         override val phase: FxComponentPhase.RunTimePhase<N, D>
@@ -287,6 +306,31 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
                             get() = scope
 
                     }
+
+
+/*
+                    fxRunTime.fxRunTime node@{
+
+                        // order by index and then map to action - second entry of pair
+                        fxRuntimeConfiguration
+                                .sortedWith(Comparator{ o1, o2 ->
+                                    when(o1 == null) {
+                                        true -> when(o2 == null) {
+                                            true -> 0
+                                            false -> -1
+                                        }
+                                        false -> when(o2 == null) {
+                                            true -> -1
+                                            false -> o1.first.compareTo(o2.first)
+                                        }
+                                    }
+                                })
+                                .map{pair -> pair.second}
+                                .forEach { this@node.it() }
+                    }
+
+
+ */
 
                     // add children
                     if (view!!.isFxParent()) {

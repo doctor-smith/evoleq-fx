@@ -305,8 +305,8 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
     }
 
     @Suppress("unused")
-    fun FxComponentConfiguration<N, D>.fxRunTimeConfig(action: N.()->Unit) = scope.parallel<Unit>{
-        launcher.fxRunTime.add(Parallel{action})
+    fun FxComponentConfiguration<N, D>.fxRunTimeConfig(index: Int = 0,action: N.()->Unit) = scope.parallel<Unit>{
+        launcher.fxRunTimeConfiguration.add(Parallel{index to action})
     }
 
 

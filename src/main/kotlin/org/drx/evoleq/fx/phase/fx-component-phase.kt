@@ -61,9 +61,9 @@ sealed class FxComponentPhase(open val log: ArrayList<String> = arrayListOf(),op
              */
             val fxSpecials: ArrayList<Parallel<FxComponent<*, *>>> = arrayListOf(),
             /**
-             * fxRunTime-actions
+             * fxRunTime-actions to be performed during configuration
              */
-            val fxRunTime: ArrayList<Parallel<N.()->Unit>> = arrayListOf(),
+            val fxRunTimeConfiguration: ArrayList<Parallel<Pair<Int,N.()->Unit>>> = arrayListOf(),
             /**
              * Actions to be performed on the stub
              */
@@ -111,9 +111,9 @@ sealed class FxComponentPhase(open val log: ArrayList<String> = arrayListOf(),op
              */
             val fxSpecials: ArrayList<Parallel<FxComponent<*, *>>>,
             /**
-             * fxRunTime-actions
+             * fxRunTime-actions to be performed during configuration
              */
-            val fxRunTime: ArrayList<Parallel<N.()->Unit>>,
+            val fxRunTimeConfiguration: ArrayList<Parallel<Pair<Int,N.()->Unit>>>,
             /**
              * Actions to be performed on the stub
              */
@@ -163,9 +163,9 @@ sealed class FxComponentPhase(open val log: ArrayList<String> = arrayListOf(),op
                  */
                 val fxSpecials: ArrayList<Parallel<FxComponent<*, *>>>,
                 /**
-                 * fxRunTime-actions
+                 * fxRunTime-actions to be performed during configuration
                  */
-                val fxRunTime: ArrayList<Parallel<N.()->Unit>>,
+                val fxRunTimeConfiguration: ArrayList<Parallel<Pair<Int,N.()->Unit>>>,
                 /**
                  * Actions to be performed on the stub
                  */
@@ -210,9 +210,9 @@ sealed class FxComponentPhase(open val log: ArrayList<String> = arrayListOf(),op
                  */
                 val fxSpecials: ArrayList<FxComponent<*, *>>,
                 /**
-                 * fxRunTime-actions
+                 * fxRunTime-actions to be performed during configuration
                  */
-                val fxRunTime: ArrayList<Parallel<N.()->Unit>>,
+                val fxRunTimeConfiguration: ArrayList<Parallel<Pair<Int,N.()->Unit>>>,
                 /**
                  * Actions to be performed on the stub
                  */
@@ -257,9 +257,9 @@ sealed class FxComponentPhase(open val log: ArrayList<String> = arrayListOf(),op
                  */
                 val fxSpecials: ArrayList<FxComponent<*, *>>,
                 /**
-                 * fxRunTime-actions
+                 * fxRunTime-actions to be performed during configuration
                  */
-                val fxRunTime: ArrayList<Parallel<N.()->Unit>>,
+                val fxRunTimeConfiguration: ArrayList<Parallel<Pair<Int,N.()->Unit>>>,
                 /**
                  * Actions to be performed on the stub
                  */
@@ -304,9 +304,9 @@ sealed class FxComponentPhase(open val log: ArrayList<String> = arrayListOf(),op
                  */
                 val fxSpecials:ArrayList<FxComponent<*, *>>,
                 /**
-                 * fxRunTime-actions
+                 * fxRunTime-actions to be performed during configuration
                  */
-                val fxRunTime: ArrayList<Parallel<N.()->Unit>>,
+                val fxRunTimeConfiguration: ArrayList<Parallel<Pair<Int,N.()->Unit>>>,
                 /**
                  * log
                  */
@@ -326,9 +326,9 @@ sealed class FxComponentPhase(open val log: ArrayList<String> = arrayListOf(),op
             /* TODO think about managing parent-child-relations between fx-handleRequests-times within this phase. This would require the components to know their FxRunTime */
             val configuration: FxComponentConfiguration<N, D>,
             /**
-             * fxRunTime-actions
+             * fxRunTime-actions to be performed during configuration
              */
-            val fxRunTime: ArrayList<Parallel<N.()->Unit>>,
+            val fxRunTimeConfiguration: ArrayList<Parallel<Pair<Int,N.()->Unit>>>,
             /**
              * log
              */
