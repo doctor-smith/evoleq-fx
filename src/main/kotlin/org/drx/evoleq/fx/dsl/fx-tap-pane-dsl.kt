@@ -30,9 +30,15 @@ fun <D> FxComponentConfiguration<out Any, *>.fxTabPane(scope: CoroutineScope = t
 fun <D> fxTabPane(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: FxComponentConfiguration<TabPane, D>.()->Unit): FxComponent<TabPane, D> = fxComponent(scope,configuration)
 
 @Suppress("unused")
-fun <D, E> FxComponentConfiguration<TabPane, D>.tab(index: Int = Int.MAX_VALUE,component: FxComponent<Tab, E>) {
+fun <D, E> FxComponentConfiguration<TabPane, D>.tab(index: Int,component: FxComponent<Tab, E>) {
     fxSpecial(component)
     fxRunTimeConfig(index) { tabs.add(component.show()) }
+}
+
+@Suppress("unused")
+fun <D, E> FxComponentConfiguration<TabPane, D>.tab(component: FxComponent<Tab, E>) {
+    fxSpecial(component)
+    fxRunTimeConfig { tabs.add(component.show()) }
 }
 
 @Suppress("unused")
