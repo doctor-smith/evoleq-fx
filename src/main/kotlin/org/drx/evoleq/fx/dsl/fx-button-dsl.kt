@@ -34,8 +34,6 @@ fun <D> fxButton(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configurat
     return fxComponent(scope,configuration)
 }
 
-//fun <D> CoroutineScope.fxButton(configuration: FxComponentConfiguration<Button, D>.()->Unit): CoroutineScope.()->FxComponent<Button, D> = this.fxComponent(configuration)
-
 
 @Suppress("unused")
 fun <B : ButtonBase> B.action(action: ActionEvent.()->Unit): B {
