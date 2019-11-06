@@ -30,14 +30,14 @@ fun <D> FxComponentConfiguration<out Any, *>.fxTabPane(scope: CoroutineScope = t
 fun <D> fxTabPane(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: FxComponentConfiguration<TabPane, D>.()->Unit): FxComponent<TabPane, D> = fxComponent(scope,configuration)
 
 @Suppress("unused")
-fun <D, E> FxComponentConfiguration<TabPane, D>.tab(component: FxComponent<Tab, E>) {
+fun <D, E> FxComponentConfiguration<TabPane, D>.tab(index: Int = Int.MAX_VALUE,component: FxComponent<Tab, E>) {
     fxSpecial(component)
-    fxRunTime { tabs.add(component.show()) }
+    fxRunTimeConfig(index) { tabs.add(component.show()) }
 }
 
 @Suppress("unused")
 fun <D> FxComponentConfiguration<TabPane, D>.side(side: Side) {
-    fxRunTime { this.side = side  }
+    fxRunTimeConfig { this.side = side  }
 }
 
 @Suppress("unused")
@@ -63,5 +63,5 @@ fun <D> ArrayListConfiguration<FxComponent<Tab,D>>.tab(tab: FxComponent<Tab, D>)
 @Suppress("unused")
 fun<D> FxComponentConfiguration<Tab, D>.content(component: FxComponent<out Node,*>) {
     fxSpecial(component)
-    fxRunTime { content = component.show() }
+    fxRunTimeConfig { content = component.show() }
 }

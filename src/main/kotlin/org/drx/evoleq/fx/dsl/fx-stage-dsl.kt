@@ -32,7 +32,7 @@ fun <D> fxStage(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(), configurat
 @Suppress("unused")
 fun <D> FxComponentConfiguration<Stage, D>.scene(component: FxComponent<Scene, D>): FxComponentConfiguration<Stage, D> {
     child(component)
-    fxRunTime { scene = component.show() }
+    fxRunTimeConfig { scene = component.show() }
     return this
 }
 

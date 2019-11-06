@@ -63,14 +63,14 @@ fun <P: Parent, D> FxComponentConfiguration<Scene, D>.root(component: CoroutineS
 
 @Suppress("unused")
 fun < D> FxComponentConfiguration<Scene, D>.stylesheet(stylesheet: String) {
-    fxRunTime {
+    fxRunTimeConfig {
         stylesheets.add(stylesheet)
     }
 }
 
 @Suppress("unused")
 fun < D> FxComponentConfiguration<Scene, D>.stylesheets(stylesheets: ArrayList<String>) {
-    fxRunTime {
+    fxRunTimeConfig {
         stylesheets.addAll(stylesheets)
     }
 }

@@ -29,7 +29,7 @@ fun <D> fxTooltip(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configura
 @Suppress("unused")
 fun <C : Control, D> FxComponentConfiguration<C, D>.tooltip(component: FxComponent<Tooltip, D>) {
     fxSpecial(component)
-    fxRunTime{
+    fxRunTimeConfig{
         tooltip = component.show()
     }
 }

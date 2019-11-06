@@ -36,7 +36,7 @@ fun <D> fxScrollPane(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),config
 @Suppress("unused")
 fun <C : Node, D> FxComponentConfiguration<ScrollPane, D>.content(component: FxComponent<C, D>)  {
     fxSpecial( component )
-    fxRunTime {
+    fxRunTimeConfig {
         content = component.show()
     }
 }

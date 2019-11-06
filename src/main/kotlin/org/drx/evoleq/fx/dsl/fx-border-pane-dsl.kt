@@ -34,7 +34,7 @@ fun <D> fxBorderPane(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),config
 @Suppress("unused")
 fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.top(component: FxComponent<C, D>)  {
     fxSpecial( component )
-    fxRunTime {
+    fxRunTimeConfig {
         top =  component.show()
     }
 }
@@ -48,21 +48,21 @@ fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.bottom(component: FxCo
 @Suppress("unused")
 fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.left(component: FxComponent<C, D>)  {
     fxSpecial( component )
-    fxRunTime {
+    fxRunTimeConfig {
         left =  component.show()
     }
 }
 @Suppress("unused")
 fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.right(component: FxComponent<C, D>)  {
     fxSpecial( component )
-    fxRunTime {
+    fxRunTimeConfig {
         right =  component.show()
     }
 }
 @Suppress("unused")
 fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.center(component: FxComponent<C, D>)  {
     fxSpecial( component )
-    fxRunTime {
+    fxRunTimeConfig {
         center =  component.show()
     }
 }
