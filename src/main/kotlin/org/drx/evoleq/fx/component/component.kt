@@ -31,6 +31,9 @@ abstract class FxInputComponent<I, N, D>(private val inputReceiver: BaseReceiver
     suspend fun input(input: I) {
         inputReceiver.send(input)
     }
+
+    //suspend fun onStart(data: D): D = data
+    //suspend fun onStop(data: D): D = data
 }
 
 @Suppress("unchecked_cast")

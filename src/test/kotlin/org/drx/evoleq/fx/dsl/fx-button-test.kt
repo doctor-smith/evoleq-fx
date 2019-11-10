@@ -76,6 +76,14 @@ class FxButtonTest {
                     FxInputPhase.Stop(data +1)
                 }
             }
+            onStart{
+                println("onStart: $it")
+                it
+            }
+            onStop{
+                println("onStop: $it")
+                it
+            }
             view{configure{}}
         }.withInput()
         Parallel {
@@ -100,6 +108,7 @@ class FxButtonTest {
                 .withInput<String,Button,Int>()
         Parallel {
             val result = b.evolve(0).get()
+
             //println(result)
             assert(result == 1)
         }

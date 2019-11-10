@@ -225,7 +225,20 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
         val stub = InputStub(onInput)
         launcher.stub = stub
     }
-
+    fun FxComponentConfiguration<N, D>.onStart(onStart: (D)->D) {
+        stubAction {
+            if (launcher.stub is InputStub<*, *>) {
+                (launcher.stub as InputStub<Any, D>).onStart = onStart
+            }
+        }
+    }
+    fun FxComponentConfiguration<N, D>.onStop(onStop: (D)->D) {
+        stubAction {
+            if (launcher.stub is InputStub<*, *>) {
+                (launcher.stub as InputStub<Any, D>).onStop = onStop
+            }
+        }
+    }
 
     /**
      * Configure the view
@@ -272,6 +285,7 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
 
     /**
      * Perform an action on the stub and its children
+     * during phase [FxComponentPhase.Configuration.ExtendStub]
      */
     @Suppress("unused")
     fun FxComponentConfiguration<N, D>.stubAction(action: Stub<D>.()->Unit) {

@@ -35,6 +35,7 @@ sealed class FxInputPhase<D>(open val data: D) {
     data class Start<D>(override val data: D) : FxInputPhase<D>(data)
     data class Wait<D>(override val data: D) : FxInputPhase<D>(data)
     data class Stop<D>(override val data: D) : FxInputPhase< D>(data)
+    data class Stopped<D>(override val data: D) : FxInputPhase< D>(data)
 }
 class InputStub<I, D>(private val onInput: (I, D)-> Evolving<FxInputPhase<D>>) : Stub<D> {
     override val scope: CoroutineScope by lazy{ DefaultStubScope() }
@@ -52,26 +53,36 @@ class InputStub<I, D>(private val onInput: (I, D)-> Evolving<FxInputPhase<D>>) :
         inputReceiver.onNext(scope){input -> inputStack.add(input)}
     }
 
+    var onStart: (D)->D = {d -> d}
+    private fun onStartBase(data: D):D  = onStart(data)
+
+    var onStop: (D)->D = {d -> d}
+    private fun onStopBase(data: D): D = onStop(data)
+
     private val innerStub = stub<FxInputPhase<D>>{
         id<FxInputStub>()
         evolve{ phase -> when(phase) {
             is FxInputPhase.Start -> scope.parallel {
-                /* TODO insert onStart(data) ? */
-                FxInputPhase.Wait<D>(phase.data)
+                FxInputPhase.Wait( onStartBase( phase.data ) )
             }
             is FxInputPhase.Wait -> {
                 inputStack.onNext{ input ->
                     onInput(input, phase.data)
                 }
             }
-            is FxInputPhase.Stop -> scope.parallel{phase}
+            is FxInputPhase.Stop -> scope.parallel{
+                FxInputPhase.Stopped(onStopBase(phase.data))
+            }
+            is FxInputPhase.Stopped -> scope.parallel{
+                phase
+            }
         } }
     }
     private val innerFlow = innerStub.toFlow<FxInputPhase<D>, Boolean>(
             conditions{
                 testObject(true)
                 check{b -> b}
-                updateCondition { phase -> phase !is FxInputPhase.Stop }
+                updateCondition { phase -> phase !is FxInputPhase.Stopped }
             }
     )
 }
