@@ -221,18 +221,21 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
     /**
      * Usage requires to set id and not to set the stub
      */
+    @Suppress("unused")
     fun <I> FxComponentConfiguration<N,D>.onInput(onInput: (I, D)->Evolving<FxInputPhase<D>> ) {
         val stub = InputStub(onInput)
         launcher.stub = stub
     }
-    fun FxComponentConfiguration<N, D>.onStart(onStart: (D)->D) {
+    @Suppress("unused")
+    fun FxComponentConfiguration<N, D>.onStart(onStart: suspend (D)->D) {
         stubAction {
             if (launcher.stub is InputStub<*, *>) {
                 (launcher.stub as InputStub<Any, D>).onStart = onStart
             }
         }
     }
-    fun FxComponentConfiguration<N, D>.onStop(onStop: (D)->D) {
+    @Suppress("unused")
+    fun FxComponentConfiguration<N, D>.onStop(onStop: suspend (D)->D) {
         stubAction {
             if (launcher.stub is InputStub<*, *>) {
                 (launcher.stub as InputStub<Any, D>).onStop = onStop

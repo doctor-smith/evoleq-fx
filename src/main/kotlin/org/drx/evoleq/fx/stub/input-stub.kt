@@ -53,11 +53,11 @@ class InputStub<I, D>(private val onInput: (I, D)-> Evolving<FxInputPhase<D>>) :
         inputReceiver.onNext(scope){input -> inputStack.add(input)}
     }
 
-    var onStart: (D)->D = {d -> d}
-    private fun onStartBase(data: D):D  = onStart(data)
+    var onStart: suspend (D)->D = {d -> d}
+    private suspend fun onStartBase(data: D):D  = onStart(data)
 
-    var onStop: (D)->D = {d -> d}
-    private fun onStopBase(data: D): D = onStop(data)
+    var onStop: suspend (D)->D = {d -> d}
+    private suspend fun onStopBase(data: D): D = onStop(data)
 
     private val innerStub = stub<FxInputPhase<D>>{
         id<FxInputStub>()
