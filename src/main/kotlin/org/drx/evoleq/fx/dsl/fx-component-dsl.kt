@@ -74,7 +74,7 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
 
     private val properties: HashMap<String, Any?> by lazy { HashMap<String, Any?>() }
 
-
+    private val processes: HashMap<ID, Evolving<Any>> by lazy { hashMapOf<ID, Evolving<Any>>() }
 
     override fun configure(): FxComponent<N, D> = when(stubConfiguration) {
         is Tunnel<D> ->  object : FxTunnelComponent<N, D> {
@@ -242,6 +242,25 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
             }
         }
     }
+
+    /**
+     * Process management
+     */
+    @Suppress("unused")
+    suspend fun FxComponentConfiguration<N, D>.processes(put : suspend HashMap<ID, Evolving<Any>>.()->Pair<ID, Evolving<Any>>): FxComponentConfiguration<N, D> {
+        val pair = processes.put()
+        processes[pair.first] = pair.second as Evolving<Any>
+        return this
+    }
+    @Suppress("unused")
+    fun FxComponentConfiguration<N, D>.processes(id: ID) : Evolving<Any> = processes[id]!!
+
+    @Suppress("unused")
+    fun FxComponentConfiguration<N, D>.removeProcess(id: ID) = processes.remove(id)
+
+    @Suppress("unused")
+    fun FxComponentConfiguration<N, D>.processes() = processes
+
 
     /**
      * Configure the view
