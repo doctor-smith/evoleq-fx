@@ -37,7 +37,7 @@ import kotlin.reflect.KClass
 /**
  * TODO test
  */
-abstract class AppManager <in Input,Data> : Application(), Stub<AppMessage<Data>> {
+abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
     /**
      * Companion
      */
@@ -145,7 +145,7 @@ abstract class AppManager <in Input,Data> : Application(), Stub<AppMessage<Data>
                 while(!TOOLKIT_INITIALIZED) {
                     delay(1)
                 }
-                message.stages.forEach { entry -> registry[entry.first] = entry.second  as (suspend (Input)->Unit) -> FxComponent<Stage, Data> }
+                message.stages.forEach { entry -> registry[entry.first] = entry.second  as () -> FxComponent<Stage, Data> }
                 AppMessage.Response.StagesRegistered<Data>(message.data)
             }
             is AppMessage.Request.ShowStage<*> -> scope.parallel {
@@ -260,7 +260,7 @@ abstract class AppManager <in Input,Data> : Application(), Stub<AppMessage<Data>
     /**
      * Registry for fx-stages
      */
-    private val registry: HashMap<ID, (suspend (Input)->Unit)->FxComponent<Stage, Data>> = hashMapOf()
+    private val registry: HashMap<ID, ()->FxComponent<Stage, Data>> = hashMapOf()
 
     /**
      * Registry of running stages
@@ -269,12 +269,12 @@ abstract class AppManager <in Input,Data> : Application(), Stub<AppMessage<Data>
     /**
      * Show a registered stage
      */
-    private fun showStage(id: ID, output: suspend (Input)->Unit = {Unit}): Evolving<Stub<Data>> = scope.parallel {
+    private fun showStage(id: ID): Evolving<Stub<Data>> = scope.parallel {
 
         val stubPicker = registry[id]!!
         //println("get stub")
 
-        val stub: FxComponent<Stage,Data> = stubPicker(output)
+        val stub: FxComponent<Stage,Data> = stubPicker()
 
         //println("stub got")
         parallelFx{
