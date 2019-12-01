@@ -20,8 +20,11 @@ import javafx.stage.Stage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import org.drx.evoleq.coroutines.onNext
 import org.drx.evoleq.dsl.conditions
+import org.drx.evoleq.dsl.onNext
 import org.drx.evoleq.dsl.parallel
+import org.drx.evoleq.dsl.receiver
 import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.flow.SuspendedFlow
 import org.drx.evoleq.fx.component.FxComponent
@@ -34,13 +37,15 @@ import kotlin.reflect.KClass
 /**
  * TODO test
  */
-abstract class AppManager <Data> : Application(), Stub<AppMessage<Data>> {
+abstract class AppManager <in Input,Data> : Application(), Stub<AppMessage<Data>> {
     /**
      * Companion
      */
     companion object Manager{
         var TOOLKIT_INITIALIZED: Boolean = false
     }
+
+
 
     /******************************************************************************************************************
      *
@@ -178,6 +183,11 @@ abstract class AppManager <Data> : Application(), Stub<AppMessage<Data>> {
                 require(message is AppMessage.Process.DriveStub<Data>)
                 onDriveStub(message.stub, message.data)
             }
+            is AppMessage.Process.Wait<*> -> scope.parallel {
+                inputStack.onNext {input ->
+                    onInput(input, message.data)
+                }
+            }
             is AppMessage.Process.Error<*> -> scope.parallel {
                 onError(message as AppMessage.Process.Error<Data>)
             }
@@ -308,10 +318,45 @@ abstract class AppManager <Data> : Application(), Stub<AppMessage<Data>> {
 
     /******************************************************************************************************************
      *
-     * IO
+     * Input
      *
      ******************************************************************************************************************/
+    private val inputReceiver = CoroutineScope(Job()).receiver<Input> {  }
+    private val  inputStack = arrayListOf<Input>()
 
-    //val outputStack: ArrayList<Any> by lazy{ arrayListOf<Any>() }
+    abstract  fun  onInput(input: Input, data:  Data): AppMessage<Data>
 
+    @Suppress("unused")
+    suspend fun input(input: Input) = inputReceiver.send(input)
+
+    /******************************************************************************************************************
+     *
+     * Processes API
+     *
+     *****************************************************************************************************************/
+
+    private val processes: HashMap<ID, Evolving<Any>> by lazy { hashMapOf<ID, Evolving<Any>>() }
+
+    @Suppress("unused")
+    fun processes(put : Pair<ID, Evolving<Any>>): Unit {
+        processes[put.first] = put.second
+    }
+
+    @Suppress("unused")
+    fun processes(id: ID) : Evolving<Any> = processes[id]!!
+
+    @Suppress("unused")
+    fun removeProcess(id: ID) = processes.remove(id)
+
+    @Suppress("unused")
+    fun processes() = processes
+
+    /******************************************************************************************************************
+     *
+     * Initialization
+     *
+     ******************************************************************************************************************/
+    init{
+        inputReceiver.onNext(scope){input -> inputStack.add(input)}
+    }
 }

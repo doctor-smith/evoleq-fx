@@ -34,6 +34,7 @@ sealed class AppMessage<Data>(open val data: Data) {
     sealed class Process<Data>(override val data: Data) : AppMessage<Data>(data) {
         class Start<Data>(override val data: Data) : Process<Data>(data)
         data class DriveStub<Data>(val stub: Stub<Data>, override val data: Data) : Process<Data>(data)
+        data class Wait<Data>(override val data: Data) : Process<Data>(data)
         data class Error<Data>(val stageId: ID, override val data: Data, val throwable: Throwable): Process<Data>(data)
         class Terminate<Data>(override val data: Data) : Process<Data>(data)
         class Terminated<Data>(override val data: Data) : Process<Data>(data)

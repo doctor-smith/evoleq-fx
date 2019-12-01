@@ -247,10 +247,8 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
      * Process management
      */
     @Suppress("unused")
-    suspend fun FxComponentConfiguration<N, D>.processes(put : suspend HashMap<ID, Evolving<Any>>.()->Pair<ID, Evolving<Any>>): FxComponentConfiguration<N, D> {
-        val pair = processes.put()
-        processes[pair.first] = pair.second as Evolving<Any>
-        return this
+    fun FxComponentConfiguration<N, D>.processes(put: Pair<ID, Evolving<Any>>): Unit {
+        processes[put.first] = put.second as Evolving<Any>
     }
     @Suppress("unused")
     fun FxComponentConfiguration<N, D>.processes(id: ID) : Evolving<Any> = processes[id]!!
