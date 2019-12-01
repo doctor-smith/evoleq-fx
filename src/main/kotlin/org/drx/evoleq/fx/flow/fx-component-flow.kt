@@ -31,6 +31,7 @@ import org.drx.evoleq.fx.component.FxNoStubComponent
 import org.drx.evoleq.fx.component.FxTunnelComponent
 import org.drx.evoleq.fx.dsl.FxComponentConfiguration
 import org.drx.evoleq.fx.dsl.isFxParent
+import org.drx.evoleq.fx.dsl.parallelFx
 import org.drx.evoleq.fx.exception.FxConfigurationException
 import org.drx.evoleq.fx.phase.FxComponentPhase
 import org.drx.evoleq.fx.runtime.FxRunTime
@@ -276,6 +277,20 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
                     FxComponentPhase.TerminationPhase.TerminateWithErrors(it.errors, it.log)
                 }
                 else {
+                    // setup fxRuntime
+                    val fxRunTime = object : FxRunTime<N, D>() {
+                        override val phase: FxComponentPhase.RunTimePhase<N, D>
+                            get() = FxComponentPhase.RunTimePhase.RunTime(this, it.log)
+                        override val view: N
+                            get() = view!!
+                        override val component: FxComponent<N, D>
+                            get() = component
+                        override val scope: CoroutineScope
+                            get() = scope
+
+                    }
+
+
                     // perform fxRuntimeConfigurationActions
                     val fxRuntimeConfiguration = it.fxRunTimeConfiguration
                             .map{action -> action.get() as Pair<Int,N.()->Unit>}
@@ -292,46 +307,9 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
                                 }
                             })
                             .map{pair -> pair.second}
-                    fxRuntimeConfiguration.forEach{ view!!.it() }
-
-                    // setup fxRuntime
-                    val fxRunTime = object : FxRunTime<N, D>() {
-                        override val phase: FxComponentPhase.RunTimePhase<N, D>
-                            get() = FxComponentPhase.RunTimePhase.RunTime(this, it.log)
-                        override val view: N
-                            get() = view!!
-                        override val component: FxComponent<N, D>
-                            get() = component
-                        override val scope: CoroutineScope
-                            get() = scope
-
+                    fxRunTime.fxRunTime {
+                        fxRuntimeConfiguration.forEach { this.it() }
                     }
-
-
-/*
-                    fxRunTime.fxRunTime node@{
-
-                        // order by index and then map to action - second entry of pair
-                        fxRuntimeConfiguration
-                                .sortedWith(Comparator{ o1, o2 ->
-                                    when(o1 == null) {
-                                        true -> when(o2 == null) {
-                                            true -> 0
-                                            false -> -1
-                                        }
-                                        false -> when(o2 == null) {
-                                            true -> -1
-                                            false -> o1.first.compareTo(o2.first)
-                                        }
-                                    }
-                                })
-                                .map{pair -> pair.second}
-                                .forEach { this@node.it() }
-                    }
-
-
- */
-
                     // add children
                     if (view!!.isFxParent()) {
                         fxRunTime.fxRunTime {
