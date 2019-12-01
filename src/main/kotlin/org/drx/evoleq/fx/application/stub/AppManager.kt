@@ -183,10 +183,8 @@ abstract class AppManager <in Input,Data> : Application(), Stub<AppMessage<Data>
                 require(message is AppMessage.Process.DriveStub<Data>)
                 onDriveStub(message.stub, message.data)
             }
-            is AppMessage.Process.Wait<*> -> scope.parallel {
-                inputStack.onNext {input ->
-                    onInput(input, message.data)
-                }
+            is AppMessage.Process.Wait<*> -> inputStack.onNext {
+                input -> onInput(input, message.data)
             }
             is AppMessage.Process.Error<*> -> scope.parallel {
                 onError(message as AppMessage.Process.Error<Data>)
@@ -324,7 +322,7 @@ abstract class AppManager <in Input,Data> : Application(), Stub<AppMessage<Data>
     private val inputReceiver = CoroutineScope(Job()).receiver<Input> {  }
     private val  inputStack = arrayListOf<Input>()
 
-    abstract  fun  onInput(input: Input, data:  Data): AppMessage<Data>
+    abstract  fun  onInput(input: Input, data:  Data): Evolving<AppMessage<Data>>
 
     @Suppress("unused")
     suspend fun input(input: Input) = inputReceiver.send(input)
