@@ -338,8 +338,9 @@ abstract class AppManager <in Input,Data> : Application(), Stub<AppMessage<Data>
     private val processes: HashMap<ID, Evolving<Any>> by lazy { hashMapOf<ID, Evolving<Any>>() }
 
     @Suppress("unused")
-    fun processes(put : Pair<ID, Evolving<Any>>): Unit {
-        processes[put.first] = put.second
+    suspend fun processes(put: suspend HashMap<ID, Evolving<Any>>.()->Pair<ID, Evolving<Any>>): Unit {
+        val pair = processes.put()
+        processes[pair.first] = pair.second as Evolving<Any>
     }
 
     @Suppress("unused")
