@@ -36,5 +36,11 @@ abstract class FxInputComponent<I, N, D>(private val inputReceiver: BaseReceiver
 @Suppress("unchecked_cast")
 fun <I, N, D> FxComponent<N, D>.withInput(): FxInputComponent<I, N, D> = this as FxInputComponent<I, N, D>
 
+//@Suppress("unchecked_cast")
+//fun <I> FxComponent<*, *>.withInput(): FxInputComponent<I, *, *> = this as FxInputComponent<I, *, *>
+
 @Suppress("unchecked_cast")
 fun <N, D> Stub<*>.asFxComponent() : FxComponent<N, D> = this as FxComponent<N, D>
+
+@Suppress("unchecked_cast")
+fun <I> Stub<*>.withInput(): FxInputComponent<I, *, *> = this as FxInputComponent<I, *, *>
