@@ -328,6 +328,28 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
 
     /******************************************************************************************************************
      *
+     * Outputs
+     *
+     ******************************************************************************************************************/
+
+    private val outputs: HashMap<ID, (Nothing)->Unit> by lazy { hashMapOf<ID, (Nothing)->Unit>()}
+
+    @Suppress("unused")
+    fun outputs(put: ()->Pair<ID, (Nothing)->Unit>) {
+        val pair = put()
+        outputs[pair.first] = pair.second
+    }
+
+    @Suppress("unused")
+    fun outputs(id: ID): (Nothing)->Unit = outputs[id]!!
+
+    @Suppress("unused")
+    fun removeOutput(id: ID) {
+        outputs.remove(id)
+    }
+
+    /******************************************************************************************************************
+     *
      * Processes API
      *
      *****************************************************************************************************************/
