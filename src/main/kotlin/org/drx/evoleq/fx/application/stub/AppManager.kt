@@ -332,10 +332,13 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
      *
      ******************************************************************************************************************/
 
-    private val outputs: HashMap<ID, out (Nothing)->Evolving<Unit>> by lazy { hashMapOf<ID, (Nothing)->Evolving<Unit>>()}
+    private val outputs: HashMap<ID, (Nothing)->Evolving<Unit>> by lazy { hashMapOf<ID, (Nothing)->Evolving<Unit>>()}
 
     @Suppress("unused")
-    fun outputs(put: ()->Pair<ID, out (Nothing)->Evolving<Unit>>) { outputs{ put() } }
+    fun outputs(put: ()->Pair<ID, out (Nothing)->Evolving<Unit>>) {
+        val pair = put()
+        outputs[pair.first] = pair.second
+    }
 
     @Suppress("unused")
     fun outputs(id: ID): (Nothing)->Evolving<Unit> = outputs[id]!!
