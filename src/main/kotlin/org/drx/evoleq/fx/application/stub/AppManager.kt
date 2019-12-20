@@ -150,24 +150,24 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
             }
             is AppMessage.Request.ShowStage<*> -> scope.parallel {
                 // println("show")
-                val stub = showStage(message.id).get()
-                AppMessage.Response.StageShown(stub, message.data)
+                val stub = showStage(message.id, message.processId).get()
+                AppMessage.Response.StageShown(stub,message.processId, message.data)
             }
             is AppMessage.Request.HideStage -> scope.parallel{
                 // println("hide")
-                hideStage(message.id).get()
-                AppMessage.Response.StageHidden<Data>(message.id, message.data)
+                hideStage(message.id, message.processId).get()
+                AppMessage.Response.StageHidden<Data>(message.id, message.processId, message.data)
             }
 
         }
         is AppMessage.Response<*> -> when(message) {
             is AppMessage.Response.StageShown -> scope.parallel{
                 // println("shown")
-                onStageShown(message.stub.id, message)
+                onStageShown(message.stub.id, message.processId, message)
             }
             is AppMessage.Response.StageHidden -> scope.parallel {
                 // println("hidden")
-                onStageHidden(message.id,message)
+                onStageHidden(message.id, message.processId, message)
             }
             is AppMessage.Response.StagesRegistered -> scope.parallel{
                 // println("registered")
@@ -181,7 +181,7 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
             }
             is AppMessage.Process.DriveStub<*> -> scope.parallel{
                 require(message is AppMessage.Process.DriveStub<Data>)
-                onDriveStub(message.stub, message.data)
+                onDriveStub(message.stub, message.processId, message.data)
             }
             is AppMessage.Process.Wait<*> -> inputStack.onNext {
                 input -> onInput(input, message.data)
@@ -234,17 +234,17 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
     /**
      * When a stage is shown, perform this action
      */
-    abstract suspend fun onStageShown(id: ID, data: AppMessage.Response.StageShown<Data>): AppMessage<Data>
+    abstract suspend fun onStageShown(id: ID, processId: ID?, data: AppMessage.Response.StageShown<Data>): AppMessage<Data>
 
     /**
      * When a stage is closed / hidden, perform this action
      */
-    abstract suspend fun onStageHidden(id: ID, data: AppMessage<Data>): AppMessage<Data>
+    abstract suspend fun onStageHidden(id: ID, processId: ID?, data: AppMessage<Data>): AppMessage<Data>
 
     /**
      * When a new stub arises
      */
-    abstract suspend fun onDriveStub(stub: Stub<Data>, initialData: Data): AppMessage<Data>
+    abstract suspend fun onDriveStub(stub: Stub<Data>, processId: ID?, initialData: Data): AppMessage<Data>
 
     /**
      *
@@ -269,7 +269,7 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
     /**
      * Show a registered stage
      */
-    private fun showStage(id: ID): Evolving<Stub<Data>> = scope.parallel {
+    private fun showStage(id: ID, processId: ID?): Evolving<Stub<Data>> = scope.parallel {
 
         val stubPicker = registry[id]!!
         //println("get stub")
@@ -279,7 +279,11 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
         //println("stub got")
         parallelFx{
             val stage = stub.show()
-            stages[id] = stage
+            if(processId != null) {
+                stages[processId] = stage
+            } else {
+                stages[id] = stage
+            }
             showStage(stage)
         }
 
@@ -299,17 +303,17 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
     /**
      * Hide atege
      */
-    private fun hideStage(id: ID): Evolving<ID> = scope.parallel{
+    private fun hideStage(id: ID, processId: ID?): Evolving<ID> = scope.parallel{
         try{
             parallelFx {
-                val stage = stages[id]!!
+                val stage = stages[processId ?: id]!!//if(processId == null){stages[id]!!} else { stages[processId]!! }
                 stage.close()
-                stages.remove(id)
+                stages.remove(processId ?: id)
             }.get()
             id
         } catch(exception : Exception) {
             // println("Could not hide stage $id: $exception")
-            id
+            processId ?: id
         }
     }
 

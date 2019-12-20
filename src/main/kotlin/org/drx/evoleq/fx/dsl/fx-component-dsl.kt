@@ -15,6 +15,7 @@
  */
 package org.drx.evoleq.fx.dsl
 
+import javafx.collections.ObservableList
 import javafx.scene.Group
 import javafx.scene.Node
 import javafx.scene.Parent
@@ -218,6 +219,11 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
         launcher.stub = stub
     }
 
+    /******************************************************************************************************************
+     *
+     * Input component structure
+     *
+     ******************************************************************************************************************/
     /**
      * Usage requires to set id and not to set the stub
      */
@@ -243,9 +249,12 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
         }
     }
 
-    /**
+    /******************************************************************************************************************
+     *
      * Process management
-     */
+     *
+     ******************************************************************************************************************/
+
     @Suppress("unused")
     suspend fun FxComponentConfiguration<N, D>.processes(put: suspend HashMap<ID, Evolving<Any>>.()->Pair<ID, Evolving<Any>>): Unit {
         val pair = processes.put()
@@ -315,6 +324,7 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
 
     /**
      * Find child-stub by id
+     * Hint: works only during configuration phase
      */
     @Suppress("unused", "unchecked_cast")
     suspend inline fun <reified I> FxComponentConfiguration<N, D>.child(): Stub<*> {
@@ -329,6 +339,50 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
     }
 
     /**
+     * Register actions which have to executed on the FX Thread
+     * but before the configuration flow enters the Runtime Phase
+     */
+    @Suppress("unused")
+    fun FxComponentConfiguration<N, D>.fxRunTimeConfig(index: Int = Int.MAX_VALUE,action: N.()->Unit) = scope.parallel<Unit>{
+        launcher.fxRunTimeConfiguration.add(Parallel{index to action})
+    }
+    /******************************************************************************************************************
+     *
+     * Runtime actions
+     *
+     ******************************************************************************************************************/
+
+
+    @Suppress("unused")
+    suspend fun FxComponentConfiguration<N, D>.runtimeChild(pair: Pair<ID,Stub<*>>) {
+        while(component == null) {
+            delay(1)
+        }
+        component!!.stubs[pair.first] = pair.second
+    }
+    @Suppress("unused")
+    suspend fun FxComponentConfiguration<N, D>.removeRuntimeChild(id: ID) {
+        while(component == null) {
+            delay(1)
+        }
+        component!!.stubs.remove(id)
+    }
+    @Suppress("unused")
+    suspend fun FxComponentConfiguration<N, D>.runtimeChild(id : ID): Stub<*>? {
+        while (component == null) {
+            delay(1)
+        }
+        return component!!.stubs[id]
+    }
+    @Suppress("unused")
+    suspend fun FxComponentConfiguration<N, D>.fxRuntimeChild(pair: Pair<ID,FxComponent<out Node,*>>) {
+        while(component == null) {
+            delay(1)
+        }
+        component!!.stubs[pair.first] = pair.second
+        (component!!.show() as Node).fxChildren()!!.add(pair.second.show())
+    }
+    /**
      * Perform an action on the component during fx-runtime
      */
     @Suppress("unused")
@@ -339,14 +393,9 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
         fxRunTime!!.fxRunTime(action)
     }
 
-    @Suppress("unused")
-    fun FxComponentConfiguration<N, D>.fxRunTimeConfig(index: Int = Int.MAX_VALUE,action: N.()->Unit) = scope.parallel<Unit>{
-        launcher.fxRunTimeConfiguration.add(Parallel{index to action})
-    }
-
 
     /**
-     * Shutdow the component-flow
+     * Shutdown the component-flow
      */
     @Suppress("unused")
     fun FxComponentConfiguration<N, D>.shutdown() = scope.parallel<Unit> {
@@ -356,6 +405,11 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
         fxRunTime!!.shutdown()
     }
 
+    /******************************************************************************************************************
+     *
+     * Properties
+     *
+     ******************************************************************************************************************/
     /**
      * Add / set a property
      */
@@ -444,17 +498,6 @@ fun <N,D> fxComponent(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),confi
 
 fun <N,D> FxComponentConfiguration<N,D>.fxComponent(configuration: FxComponentConfiguration<N,D>.()->Unit): FxComponent<N, D> = fxComponent(CoroutineScope(this.scope.coroutineContext), configuration)
 
-/*{
-   return scope.fxComponent(configuration)(scope)
-}
-*/
-/*
-fun <N,D> CoroutineScope.fxComponent( configuration: FxComponentConfiguration<N,D>.()->Unit): CoroutineScope.()->FxComponent<N,D> = {
-    this@fxComponent + this.coroutineContext
-    fxComponent(this, configuration)
-}
-*/
-
 /**
  * Configure the view
  */
@@ -531,6 +574,15 @@ fun < P: Parent>P.hasModifiableChildren(): Boolean = try {
     this::class.java.getMethod("getChildren") != null
 } catch(exception : Exception){ false }
 
+fun <V: Node> V.fxChildren(): ObservableList<Node>? = when(this) {
+    is Group -> children
+    is Pane -> children
+    is Parent -> when {
+        this.hasModifiableChildren() -> this::class.java.getMethod("getChildren").invoke(this) as ObservableList<Node>
+        else -> null
+    }
+    else -> null
+}
 
 
 

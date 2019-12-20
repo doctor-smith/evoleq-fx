@@ -8,7 +8,7 @@ object Config {
         // val version = "1.1.0" // Configuration Flow and Dsl improvements
         // val version = "1.1.1" // ApplicationFlow and new Dsl features
         // val version = "1.2.0"
-        val version = "1.3.0"
+        val version = "1.3.1"
         val artifactId = "evoleq-fx"
     }
 
