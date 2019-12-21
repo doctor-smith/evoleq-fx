@@ -38,7 +38,7 @@ class AppManagerTest {
         /**
          * Define stages to be registered
          */
-        override fun stages(): ArrayList<Pair<ID,suspend () -> FxComponent<Stage, Int>>> =
+        override suspend fun stages(): ArrayList<Pair<ID,suspend () -> FxComponent<Stage, Int>>> =
             arrayListOf(Stage::class to stage() )
 
 
