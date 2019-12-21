@@ -22,6 +22,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import org.drx.evoleq.coroutines.onScope
+import org.drx.evoleq.coroutines.onScopeSuspended
 import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.evolving.Immediate
 import org.drx.evoleq.fx.geometry.Derivation
@@ -34,7 +35,7 @@ class FxPathTest {
 
     @Test
     fun fxPath() = fxRunTest{//runBlocking {
-        val stageComponent = onScope{ scope: CoroutineScope ->fxStage<Unit>(scope) {
+        val stageComponent = onScopeSuspended{ scope: CoroutineScope ->fxStage<Unit>(scope) {
             id<StageId>()
             view{configure{}}
             scene(fxScene{

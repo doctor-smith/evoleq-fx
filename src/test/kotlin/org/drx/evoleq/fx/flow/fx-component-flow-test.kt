@@ -27,6 +27,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.drx.evoleq.coroutines.onScope
+import org.drx.evoleq.coroutines.onScopeSuspended
 import org.drx.evoleq.dsl.parallel
 import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.evolving.Immediate
@@ -42,7 +43,7 @@ class FxComponentFlowTest {
 
 
     @Test fun componentFlowExample() = runBlocking {
-        val stageConfiguration = onScope{ scope: CoroutineScope ->fxStage<Nothing>(scope) stage@{
+        val stageConfiguration = onScopeSuspended{ scope: CoroutineScope ->fxStage<Nothing>(scope) stage@{
             val closeButtonClicked = SimpleBooleanProperty(false)
             id<StageId>()
             view{
@@ -152,7 +153,7 @@ class FxComponentFlowTest {
     }
 
     @Test fun tunnelsAndNoStubs() = fxRunTest{//runBlocking{
-        val stageComponent = onScope{ scope: CoroutineScope ->fxStage<Unit> {
+        val stageComponent = onScopeSuspended{ scope: CoroutineScope ->fxStage<Unit> {
             id<StageId>()
             view{configure{}}
             stub(stub{})

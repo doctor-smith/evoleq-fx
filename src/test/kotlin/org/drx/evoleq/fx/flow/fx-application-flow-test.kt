@@ -25,6 +25,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import org.drx.evoleq.coroutines.BaseReceiver
 import org.drx.evoleq.coroutines.onScope
+import org.drx.evoleq.coroutines.onScopeSuspended
 import org.drx.evoleq.dsl.*
 import org.drx.evoleq.dsl.gap
 import org.drx.evoleq.dsl.receiver
@@ -156,7 +157,7 @@ class FxApplicationFlowTest {
             }
         }
 
-        val mainStage = onScope{scope: CoroutineScope ->fxStage<Data>(scope) {
+        val mainStage = onScopeSuspended{scope: CoroutineScope ->fxStage<Data>(scope) {
             id<Stage>()
             properties{
                 "close" to SimpleObjectProperty<Boolean>(false)
@@ -192,7 +193,7 @@ class FxApplicationFlowTest {
 
         }}
 
-        val  closeDialog =onScope{scope: CoroutineScope -> fxStage<AppFlowMessage.Runtime.Confirm<Data>>(scope){
+        val  closeDialog =onScopeSuspended{scope: CoroutineScope -> fxStage<AppFlowMessage.Runtime.Confirm<Data>>(scope){
             id<CloseDialog>()
             val clicked = SimpleObjectProperty<AppFlowMessage.Runtime.Confirm<Data>>()
             //properties{"confirm" to SimpleObjectProperty<AppFlowMessage.Runtime.Confirm<Data>>() }

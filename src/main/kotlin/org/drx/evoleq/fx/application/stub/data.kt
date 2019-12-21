@@ -46,7 +46,7 @@ sealed class AppMessage<Data>(
         )
 
         data class RegisterStages<Data>(
-                val stages:  ArrayList<Pair<ID, ()-> FxComponent<Stage, Data>>>,
+                val stages:  ArrayList<Pair<ID, suspend ()-> FxComponent<Stage, Data>>>,
                 override val data: Data
         ) : Request<Data>(
                 data

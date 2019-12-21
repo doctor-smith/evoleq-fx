@@ -15,13 +15,17 @@
  */
 package org.drx.evoleq.fx.dsl
 
+import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
 import javafx.scene.shape.SVGPath
 import javafx.scene.shape.StrokeLineJoin
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import org.drx.evoleq.coroutines.onScope
+import org.drx.evoleq.coroutines.onScopeSuspended
+import org.drx.evoleq.coroutines.suspended
 import org.drx.evoleq.dsl.stub
+import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.test.dsl.fxRunTest
 import org.drx.evoleq.fx.util.showOnStage
 import org.drx.evoleq.fx.util.showNodeOnStage
@@ -31,7 +35,7 @@ class FxSvgPathTest{
 
     //@Test
     fun fxSvgPath() = fxRunTest{//runBlocking{
-        val path = onScope{scope: CoroutineScope -> fxSvgPath<Nothing>{
+        val path = onScopeSuspended{scope: CoroutineScope -> fxSvgPath<Nothing>{
             id<SVGPath>()
             stub(stub{})
             view{configure {
@@ -76,7 +80,7 @@ class FxSvgPathTest{
 
     //@Test
     fun heart() = fxRunTest{
-        val heart = {org.drx.evoleq.fx.dsl.fxSvgPath<Nothing> {
+        val heart: suspend ()-> FxComponent<SVGPath,Nothing> = {org.drx.evoleq.fx.dsl.fxSvgPath<Nothing> {
             noStub()
             view{configure {
                 fill = Color.TRANSPARENT
@@ -125,7 +129,7 @@ class FxSvgPathTest{
                 }
             } }
         }}
-        val pane = {fxStackPane<Nothing> {
+        val pane:suspend ()-> FxComponent<StackPane,Nothing> = {fxStackPane<Nothing> {
             noStub()
             view{configure{
                 style = "-fx-padding: 10 "

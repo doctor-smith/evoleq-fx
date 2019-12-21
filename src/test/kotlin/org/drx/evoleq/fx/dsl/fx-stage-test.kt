@@ -19,6 +19,7 @@ import javafx.scene.Scene
 import javafx.stage.Stage
 import kotlinx.coroutines.*
 import org.drx.evoleq.coroutines.onScope
+import org.drx.evoleq.coroutines.onScopeSuspended
 import org.drx.evoleq.dsl.parallel
 import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.evolving.Parallel
@@ -40,7 +41,7 @@ class FxStageTest{
         //delay (1_000)
     }
 
-    private fun testStageConfig() = onScope{scope: CoroutineScope->fxStage<Nothing>(scope){
+    private suspend fun testStageConfig() = onScopeSuspended{scope: CoroutineScope->fxStage<Nothing>(scope){
         id<StageId>()
         //noStub()
         view{configure{}}

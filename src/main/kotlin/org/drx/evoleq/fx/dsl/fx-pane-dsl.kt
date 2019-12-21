@@ -23,11 +23,11 @@ import org.drx.evoleq.fx.component.FxComponent
  * Pane
  */
 @Suppress("unused")
-fun <D> FxComponentConfiguration<out Any, *>.fxPane(scope: CoroutineScope = this.scope, configuration: FxComponentConfiguration<Pane, D>.()->Unit): FxComponent<Pane, D> {
+suspend fun <D> FxComponentConfiguration<out Any, *>.fxPane(scope: CoroutineScope = this.scope, configuration: suspend FxComponentConfiguration<Pane, D>.()->Unit): FxComponent<Pane, D> {
     return fxComponent(scope,configuration)
 }
 
 @Suppress("unused")
-fun <D> fxPane(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: FxComponentConfiguration<Pane, D>.()->Unit): FxComponent<Pane, D> {
+suspend fun <D> fxPane(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: suspend FxComponentConfiguration<Pane, D>.()->Unit): FxComponent<Pane, D> {
     return fxComponent(scope,configuration)
 }

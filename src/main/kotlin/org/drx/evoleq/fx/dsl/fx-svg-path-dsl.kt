@@ -22,12 +22,12 @@ import org.drx.evoleq.fx.component.FxComponent
 
 
 @Suppress("unused")
-fun <D> FxComponentConfiguration<out Any, *>.fxSvgPath(scope: CoroutineScope = this.scope, configuration: FxComponentConfiguration<SVGPath, D>.()->Unit): FxComponent<SVGPath, D> {
+suspend fun <D> FxComponentConfiguration<out Any, *>.fxSvgPath(scope: CoroutineScope = this.scope, configuration: suspend FxComponentConfiguration<SVGPath, D>.()->Unit): FxComponent<SVGPath, D> {
     return fxComponent(scope,configuration)
 }
 
 @Suppress("unused")
-fun <D> fxSvgPath(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: FxComponentConfiguration<SVGPath, D>.()->Unit): FxComponent<SVGPath, D> {
+suspend fun <D> fxSvgPath(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: suspend FxComponentConfiguration<SVGPath, D>.()->Unit): FxComponent<SVGPath, D> {
     return fxComponent(scope,configuration)
 }
 

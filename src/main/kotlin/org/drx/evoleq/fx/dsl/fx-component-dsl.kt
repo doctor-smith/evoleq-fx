@@ -22,6 +22,7 @@ import javafx.scene.Parent
 import javafx.scene.layout.*
 import kotlinx.coroutines.*
 import org.drx.evoleq.coroutines.BaseReceiver
+import org.drx.evoleq.coroutines.suspended
 import org.drx.evoleq.dsl.ArrayListConfiguration
 import org.drx.evoleq.dsl.Configuration
 import org.drx.evoleq.dsl.HashMapConfiguration
@@ -282,7 +283,7 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
      * Add a child-component
      */
     @Suppress("unused")
-    fun <M,E> FxComponentConfiguration<N, D>.child(child: FxComponent<M, E>) {
+    suspend fun <M,E> FxComponentConfiguration<N, D>.child(child: FxComponent<M, E>) {
         launcher.fxChildren.add( scope.parallel { child } )
     }
 
@@ -290,7 +291,7 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
      * Add a child-component
      */
     @Suppress("unused")
-    fun <M,E> FxComponentConfiguration<N, D>.child(child: CoroutineScope.(CoroutineScope)->FxComponent<M, E>) {
+    suspend fun <M,E> FxComponentConfiguration<N, D>.child(child: suspend CoroutineScope.(CoroutineScope)->FxComponent<M, E>) {
         launcher.fxChildren.add( scope.parallel { child(scope) } )
     }
 
@@ -298,12 +299,16 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
      * Add children
      */
     @Suppress("unused")
-    fun  FxComponentConfiguration<N, D>.children(children: ArrayListConfiguration<FxComponent<*, *>>.()->Unit) {
-        val list = org.drx.evoleq.dsl.configure(children)
+    suspend fun  FxComponentConfiguration<N, D>.children(children: suspend ArrayListConfiguration<FxComponent<*, *>>.()->Unit) {
+        val list = org.drx.evoleq.dsl.configureSuspended(children)
         launcher.fxChildren.addAll( list.map{ scope.parallel { it }} )
     }
     @Suppress("unused")
-    fun <M,E> ArrayListConfiguration<FxComponent<*, *>>.child(child: FxComponent<M, E>) = item(child)
+    suspend fun <M,E> ArrayListConfiguration<FxComponent<*, *>>.child(child: FxComponent<M, E>) = itemSuspended(child)
+
+    private suspend fun <M,E> ArrayListConfiguration<FxComponent<*, *>>.itemSuspended(child: FxComponent<M, E>) {
+        item(child)
+    }
 
     /**
      * Add an fx-special component
@@ -447,7 +452,8 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
  * Configure an FxComponent
  */
 @Suppress("unused")
-fun <N,D> fxComponent(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: FxComponentConfiguration<N,D>.()->Unit): FxComponent<N, D> {
+suspend
+fun <N,D> fxComponent(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: suspend  FxComponentConfiguration<N,D>.()->Unit): FxComponent<N, D> {
 
     var component : FxComponent<N, D>? = null
     var cancelled = false
@@ -486,17 +492,17 @@ fun <N,D> fxComponent(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),confi
         }
     }
     while(component == null && !cancelled){
-        sleep(1)
+        delay(1)
         //delay(1)
     }
     if(cancelled) {
-        sleep(100)
+        delay(100)
         throw FxConfigurationException.ConfigurationCancelled()
     }
     return component!!
 }
-
-fun <N,D> FxComponentConfiguration<N,D>.fxComponent(configuration: FxComponentConfiguration<N,D>.()->Unit): FxComponent<N, D> = fxComponent(CoroutineScope(this.scope.coroutineContext), configuration)
+suspend
+fun <N,D> FxComponentConfiguration<N,D>.fxComponent(configuration: suspend  FxComponentConfiguration<N,D>.()->Unit): FxComponent<N, D> = fxComponent(CoroutineScope(this.scope.coroutineContext), configuration)
 
 /**
  * Configure the view

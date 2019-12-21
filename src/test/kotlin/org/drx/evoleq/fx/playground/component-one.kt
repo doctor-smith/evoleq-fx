@@ -24,6 +24,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import org.drx.evoleq.coroutines.onScope
+import org.drx.evoleq.coroutines.onScopeSuspended
 import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.fx.dsl.*
 import org.drx.evoleq.fx.test.dsl.fxRunTest
@@ -45,7 +46,7 @@ class ComponentOneTest {
     }
 */
     @Test fun go() = fxRunTest{//runBlocking {
-        val stageComponent = onScope{ scope: CoroutineScope ->  fxStage<Nothing>( scope ){
+        val stageComponent = onScopeSuspended{ scope: CoroutineScope ->  fxStage<Nothing>( scope ){
             id<StageId>()
             view { configure {
                 //isResizable = false

@@ -22,6 +22,7 @@ import javafx.scene.layout.VBox
 import javafx.stage.Stage
 import kotlinx.coroutines.*
 import org.drx.evoleq.coroutines.onScope
+import org.drx.evoleq.coroutines.onScopeSuspended
 import org.drx.evoleq.dsl.parallel
 import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.fx.stub.NoStub
@@ -38,11 +39,11 @@ class FxComponentDslTest {
 
     @Test
     fun children()=fxRunTest{// {
-        val c = onScope{scope: CoroutineScope ->fxComponent<Group,Nothing>(scope) {
+        val c = onScopeSuspended(){scope: CoroutineScope ->fxComponent<Group,Nothing>(scope) {
             tunnel()
             view { configure {  } }
             children {
-                item(fxStackPane<Int> {
+                child(fxStackPane<Int> {
                     id<Key1>()
                     view { configure {  } }
                     stub(stub{})
@@ -64,7 +65,7 @@ class FxComponentDslTest {
     fun configureWithConstructorData() = fxRunTest{//runBlocking {
         var done1: Boolean = false
         var done2: Boolean = false
-        val c = onScope{s: CoroutineScope->fxGroup<Nothing>(s){
+        val c = onScopeSuspended{s: CoroutineScope->fxGroup<Nothing>(s){
             noStub()
             view{configure{}}
             child(fxButton {
@@ -91,7 +92,7 @@ class FxComponentDslTest {
         var buttonJob : Job? = null
         var buttonJobCancelled = false
 
-        val stage = onScope{scope: CoroutineScope -> fxStage<Int>(scope) {
+        val stage = onScopeSuspended{scope: CoroutineScope -> fxStage<Int>(scope) {
             id<Stage>()
             view{configure{}}
             scene(fxScene{
@@ -152,7 +153,7 @@ class FxComponentDslTest {
 
     @Test
     fun orderOfCreation() = fxRunTest {
-         val component = onScope{scope: CoroutineScope ->fxStage<Nothing> (scope) {
+         val component = onScopeSuspended{scope: CoroutineScope ->fxStage<Nothing> (scope) {
              id<Stage>()
              view { configure {} }
              scene(fxScene {
@@ -182,7 +183,7 @@ class FxComponentDslTest {
 
     @Test(expected = Exception::class)
     fun doNotSetId() = fxRunTest {
-        val component = onScope{scope: CoroutineScope ->fxComponent<Button, Nothing> (scope) {
+        val component = onScopeSuspended{scope: CoroutineScope ->fxComponent<Button, Nothing> (scope) {
             view{configure{}}
             stub(stub{})
         } }//parallel{component(GlobalScope)}.get()
@@ -190,7 +191,7 @@ class FxComponentDslTest {
     }
     @Test(expected = Exception::class)
     fun doNotSetStub() = fxRunTest {
-        val component = onScope{scope: CoroutineScope ->fxComponent<Button, Nothing> (scope) {
+        val component = onScopeSuspended{scope: CoroutineScope ->fxComponent<Button, Nothing> (scope) {
             id<NoStub<Nothing>>()
             view{configure{}}
         } }//parallel{component(GlobalScope)}.get()
@@ -198,7 +199,7 @@ class FxComponentDslTest {
     }
     @Test(expected = Exception::class)
     fun doNotSetView() = fxRunTest {
-        val component = onScope{scope: CoroutineScope ->fxComponent<Button, Nothing> (scope) {
+        val component = onScopeSuspended{scope: CoroutineScope ->fxComponent<Button, Nothing> (scope) {
             id<NoStub<Nothing>>()
             stub(stub{})
         } }//parallel{component(GlobalScope)}.get()

@@ -27,7 +27,7 @@ import org.drx.evoleq.fx.geometry.Derivation
  * CubicCurve
  */
 @Suppress("unused")
-fun <D> FxComponentConfiguration<out Any, *>.fxCubicCurve(scope: CoroutineScope = this.scope, configuration: FxComponentConfiguration<CubicCurve, D>.()->Unit): FxComponent<CubicCurve,D> {
+suspend fun <D> FxComponentConfiguration<out Any, *>.fxCubicCurve(scope: CoroutineScope = this.scope, configuration:suspend  FxComponentConfiguration<CubicCurve, D>.()->Unit): FxComponent<CubicCurve,D> {
     return fxComponent(scope,configuration)
 }
 
@@ -35,7 +35,7 @@ fun <D> FxComponentConfiguration<out Any, *>.fxCubicCurve(scope: CoroutineScope 
  *
  */
 @Suppress("unused")
-fun <D> fxCubicCurve(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: FxComponentConfiguration<CubicCurve, D>.()->Unit): FxComponent<CubicCurve,D> {
+suspend fun <D> fxCubicCurve(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration:suspend  FxComponentConfiguration<CubicCurve, D>.()->Unit): FxComponent<CubicCurve,D> {
     return fxComponent(scope,configuration)
 }
 

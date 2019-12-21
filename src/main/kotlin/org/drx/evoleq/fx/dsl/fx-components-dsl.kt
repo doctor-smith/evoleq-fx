@@ -24,17 +24,17 @@ import org.drx.evoleq.dsl.configure
 import org.drx.evoleq.fx.component.FxComponent
 
 data class FxComponents(
-        val stages: HashMap<ID, CoroutineScope.(CoroutineScope)->FxComponent<Stage, *>>,
+        val stages: HashMap<ID, suspend CoroutineScope.(CoroutineScope)->FxComponent<Stage, *>>,
         val scenes: HashMap<ID,CoroutineScope.(CoroutineScope)->FxComponent<Scene, *>>,
         val nodes: HashMap<ID,CoroutineScope.(CoroutineScope)->FxComponent<Node, *>>
 )
 
 open class FxComponentsConfiguration : Configuration<FxComponents> {
-    private val stages: HashMap<ID,CoroutineScope.(CoroutineScope)->FxComponent<Stage, *>> = hashMapOf()
+    private val stages: HashMap<ID, suspend CoroutineScope.(CoroutineScope)->FxComponent<Stage, *>> = hashMapOf()
     private val scenes: HashMap<ID,CoroutineScope.(CoroutineScope)->FxComponent<Scene, *>> = hashMapOf()
     private val nodes: HashMap<ID,CoroutineScope.(CoroutineScope)->FxComponent<Node, *>> = hashMapOf()
 
-    fun stage(id: ID, stage: CoroutineScope.(CoroutineScope)->FxComponent<Stage, *>){
+    fun stage(id: ID, stage:suspend  CoroutineScope.(CoroutineScope)->FxComponent<Stage, *>){
         stages[id] = stage
     }
 

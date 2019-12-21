@@ -23,12 +23,12 @@ import kotlinx.coroutines.CoroutineScope
 import org.drx.evoleq.fx.component.FxComponent
 
 @Suppress("unused")
-fun <D> FxComponentConfiguration<out Any, *>.fxPath(scope: CoroutineScope = this.scope, configuration: FxComponentConfiguration<Path, D>.()->Unit): FxComponent<Path, D> {
+suspend fun <D> FxComponentConfiguration<out Any, *>.fxPath(scope: CoroutineScope = this.scope, configuration: suspend FxComponentConfiguration<Path, D>.()->Unit): FxComponent<Path, D> {
     return fxComponent(scope,configuration)
 }
 
 @Suppress("unused")
-fun <D> fxPath(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: FxComponentConfiguration<Path, D>.()->Unit): FxComponent<Path, D> {
+suspend fun <D> fxPath(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: suspend FxComponentConfiguration<Path, D>.()->Unit): FxComponent<Path, D> {
     return fxComponent(scope,configuration)
 }
 

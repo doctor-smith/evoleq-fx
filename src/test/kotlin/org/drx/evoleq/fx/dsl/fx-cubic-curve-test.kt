@@ -22,6 +22,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import org.drx.evoleq.coroutines.onScope
+import org.drx.evoleq.coroutines.onScopeSuspended
 import org.drx.evoleq.dsl.parallel
 import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.fx.geometry.Derivation
@@ -34,7 +35,7 @@ import org.junit.Test
 class FxCubicCurveTest {
 
     @Test fun basics() = fxRunTest{//runBlocking{
-        val curve = onScope{scope: CoroutineScope -> fxCubicCurve<Nothing>(scope) {
+        val curve = onScopeSuspended(){scope: CoroutineScope -> fxCubicCurve<Nothing>(scope) {
             id<CubicCurve>()
             view{configure {
                 stroke = Color.RED
@@ -44,7 +45,7 @@ class FxCubicCurveTest {
             }}
             stub(stub{})
         }}
-        val pane = onScope{scope: CoroutineScope->fxStackPane<Nothing>(scope) {
+        val pane = onScopeSuspended{scope: CoroutineScope->fxStackPane<Nothing>(scope) {
             id<Pane>()
             view{configure {
                 prefHeight = 300.0

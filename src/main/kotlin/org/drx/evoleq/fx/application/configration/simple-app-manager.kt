@@ -58,8 +58,8 @@ abstract class SimpleAppManager<D> : AppManager<D>() {
     protected val stages: HashMap<ID, Stage> by lazy {
         HashMap<ID, Stage>()
     }
-    protected val stageComponents: HashMap<ID, CoroutineScope.(CoroutineScope)->FxComponent<Stage, *>> by lazy {
-        HashMap<ID, CoroutineScope.(CoroutineScope)->FxComponent<Stage, *>>()
+    protected val stageComponents: HashMap<ID, suspend CoroutineScope.(CoroutineScope)->FxComponent<Stage, *>> by lazy {
+        HashMap<ID, suspend CoroutineScope.(CoroutineScope)->FxComponent<Stage, *>>()
     }
     protected val sceneComponents: HashMap<ID, CoroutineScope.(CoroutineScope)->FxComponent<Scene, *>> by lazy {
         HashMap<ID, CoroutineScope.(CoroutineScope)->FxComponent<Scene, *>>()

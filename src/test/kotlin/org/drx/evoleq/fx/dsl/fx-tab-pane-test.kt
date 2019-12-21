@@ -19,6 +19,7 @@ import javafx.scene.Scene
 import javafx.scene.control.TabPane
 import kotlinx.coroutines.CoroutineScope
 import org.drx.evoleq.coroutines.onScope
+import org.drx.evoleq.coroutines.onScopeSuspended
 import org.drx.evoleq.dsl.stub
 import org.drx.evoleq.fx.test.dsl.fxRunTest
 import org.drx.evoleq.fx.util.showStage
@@ -32,7 +33,7 @@ class TabPaneTest {
     fun basics() = fxRunTest{//runBlocking {
         var done = false
 
-        val stageComponent = onScope{scope: CoroutineScope ->fxStage<Nothing>(scope){
+        val stageComponent = onScopeSuspended(){scope: CoroutineScope ->fxStage<Nothing>(scope){
             id<StageId>()
             view{configure{}}
             scene(fxScene {

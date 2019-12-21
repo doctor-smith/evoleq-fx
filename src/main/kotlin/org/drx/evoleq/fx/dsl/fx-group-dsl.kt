@@ -24,11 +24,11 @@ import org.drx.evoleq.fx.component.FxComponent
  * Button
  */
 @Suppress("unused")
-fun <D> FxComponentConfiguration<out Any, *>.fxGroup(scope: CoroutineScope = this.scope, configuration: FxComponentConfiguration<Group, D>.()->Unit): FxComponent<Group, D> {
+suspend fun <D> FxComponentConfiguration<out Any, *>.fxGroup(scope: CoroutineScope = this.scope, configuration: suspend FxComponentConfiguration<Group, D>.()->Unit): FxComponent<Group, D> {
     return fxComponent(scope,configuration)
 }
 
 @Suppress("unused")
-fun <D> fxGroup(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: FxComponentConfiguration<Group, D>.()->Unit): FxComponent<Group, D> {
+suspend fun <D> fxGroup(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: suspend FxComponentConfiguration<Group, D>.()->Unit): FxComponent<Group, D> {
     return fxComponent(scope,configuration)
 }

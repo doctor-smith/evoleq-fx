@@ -145,7 +145,7 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
                 while(!TOOLKIT_INITIALIZED) {
                     delay(1)
                 }
-                message.stages.forEach { entry -> registry[entry.first] = entry.second  as () -> FxComponent<Stage, Data> }
+                message.stages.forEach { entry -> registry[entry.first] = entry.second  as suspend () -> FxComponent<Stage, Data> }
                 AppMessage.Response.StagesRegistered<Data>(message.data)
             }
             is AppMessage.Request.ShowStage<*> -> scope.parallel {
@@ -224,7 +224,7 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
     /**
      * Define stages to be registered
      */
-    abstract fun stages(): ArrayList<Pair<ID, ()->FxComponent<Stage,Data>>>
+    abstract suspend fun stages(): ArrayList<Pair<ID,suspend ()->FxComponent<Stage,Data>>>
 
     /**
      * When stages are registered perform this action
@@ -260,7 +260,7 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
     /**
      * Registry for fx-stages
      */
-    private val registry: HashMap<ID, ()->FxComponent<Stage, Data>> = hashMapOf()
+    private val registry: HashMap<ID,suspend ()->FxComponent<Stage, Data>> = hashMapOf()
 
     /**
      * Registry of running stages

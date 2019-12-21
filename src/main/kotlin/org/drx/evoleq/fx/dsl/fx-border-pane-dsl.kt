@@ -24,43 +24,43 @@ import org.drx.evoleq.fx.component.FxComponent
  * BorderPane
  */
 @Suppress("unused")
-fun <D> FxComponentConfiguration<out Any, *>.fxBorderPane(scope: CoroutineScope = this.scope, configuration: FxComponentConfiguration<BorderPane,D>.()->Unit): FxComponent<BorderPane, D> {
+suspend fun <D> FxComponentConfiguration<out Any, *>.fxBorderPane(scope: CoroutineScope = this.scope, configuration: suspend FxComponentConfiguration<BorderPane,D>.()->Unit): FxComponent<BorderPane, D> {
     return fxComponent(scope,configuration)
 }
 @Suppress("unused")
-fun <D> fxBorderPane(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: FxComponentConfiguration<BorderPane,D>.()->Unit): FxComponent<BorderPane, D> {
+suspend fun <D> fxBorderPane(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration:suspend  FxComponentConfiguration<BorderPane,D>.()->Unit): FxComponent<BorderPane, D> {
     return fxComponent(scope,configuration)
 }
 @Suppress("unused")
-fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.top(component: FxComponent<C, D>)  {
+suspend fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.top(component: FxComponent<C, D>)  {
     fxSpecial( component )
     fxRunTimeConfig {
         top =  component.show()
     }
 }
 @Suppress("unused")
-fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.bottom(component: FxComponent<C, D>)  {
+suspend fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.bottom(component: FxComponent<C, D>)  {
     fxSpecial( component )
     fxRunTime {
         bottom =  component.show()
     }
 }
 @Suppress("unused")
-fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.left(component: FxComponent<C, D>)  {
+suspend fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.left(component: FxComponent<C, D>)  {
     fxSpecial( component )
     fxRunTimeConfig {
         left =  component.show()
     }
 }
 @Suppress("unused")
-fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.right(component: FxComponent<C, D>)  {
+suspend fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.right(component: FxComponent<C, D>)  {
     fxSpecial( component )
     fxRunTimeConfig {
         right =  component.show()
     }
 }
 @Suppress("unused")
-fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.center(component: FxComponent<C, D>)  {
+suspend fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.center(component: FxComponent<C, D>)  {
     fxSpecial( component )
     fxRunTimeConfig {
         center =  component.show()

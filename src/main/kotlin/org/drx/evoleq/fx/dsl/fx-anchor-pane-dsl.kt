@@ -24,11 +24,11 @@ import org.drx.evoleq.fx.component.FxComponent
  * AnchorPane
  */
 @Suppress("unused")
-fun <D> FxComponentConfiguration<out Any, *>.fxAnchorPane(scope: CoroutineScope = this.scope, configuration: FxComponentConfiguration<AnchorPane, D>.()->Unit): FxComponent<AnchorPane, D> {
+suspend fun <D> FxComponentConfiguration<out Any, *>.fxAnchorPane(scope: CoroutineScope = this.scope, configuration: suspend FxComponentConfiguration<AnchorPane, D>.()->Unit): FxComponent<AnchorPane, D> {
     return fxComponent(scope,configuration)
 }
 
-fun <D> fxAnchorPane(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: FxComponentConfiguration<AnchorPane, D>.()->Unit): FxComponent<AnchorPane, D> {
+suspend fun <D> fxAnchorPane(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration:suspend  FxComponentConfiguration<AnchorPane, D>.()->Unit): FxComponent<AnchorPane, D> {
     return fxComponent(scope,configuration)
 }
 fun Node.leftAnchor(anchor: Number) {

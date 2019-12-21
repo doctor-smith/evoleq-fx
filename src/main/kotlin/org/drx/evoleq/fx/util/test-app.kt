@@ -46,7 +46,7 @@ fun <D> CoroutineScope.showStage(stageComponent: FxComponent<Stage, D>): Paralle
     stub
 }
 
-fun <D> CoroutineScope.showStage(stageComponent: CoroutineScope.(CoroutineScope)-> FxComponent<Stage, D>): Parallel<Stub<D>> = parallel {
+fun <D> CoroutineScope.showStage(stageComponent:suspend  CoroutineScope.(CoroutineScope)-> FxComponent<Stage, D>): Parallel<Stub<D>> = parallel {
 
     class TestApp : SimpleAppManager<D>() {
         var component: FxComponent<Stage,D>? = null
@@ -127,7 +127,7 @@ fun <D> CoroutineScope.launchStage(stageComponent:CoroutineScope.(CoroutineScope
     stub
 }
 
-fun <P : Parent,D> CoroutineScope.showOnStage(parentComponent: FxComponent<P, D>): Parallel<Stub<D>> =
+suspend fun <P : Parent,D> CoroutineScope.showOnStage(parentComponent: FxComponent<P, D>): Parallel<Stub<D>> =
 
         launchStage(fxStage<D> {
             id<StageId>()
@@ -141,7 +141,7 @@ fun <P : Parent,D> CoroutineScope.showOnStage(parentComponent: FxComponent<P, D>
             })
         })
 
-fun <P : Parent,D> CoroutineScope.showOnStage(parentComponent: CoroutineScope.(CoroutineScope)->FxComponent<P, D>): Parallel<Stub<D>> = parallel{
+suspend fun <P : Parent,D> CoroutineScope.showOnStage(parentComponent: suspend CoroutineScope.(CoroutineScope)->FxComponent<P, D>): Parallel<Stub<D>> = parallel{
 
         var component: FxComponent<P,D>? = null
 
@@ -178,7 +178,7 @@ fun <P : Parent,D> CoroutineScope.showOnStage(parentComponent: CoroutineScope.(C
     launchTestStage(stageComponent).get()
 }*/
 
-fun <N : Node, D> CoroutineScope.showNodeOnStage(nodeComponent: FxComponent<N, D>): Parallel<Stub<D>> = parallel{
+suspend fun <N : Node, D> CoroutineScope.showNodeOnStage(nodeComponent: FxComponent<N, D>): Parallel<Stub<D>> = parallel{
     val group = fxGroup<D>{
         tunnel()
         view{configure{}}
@@ -187,7 +187,7 @@ fun <N : Node, D> CoroutineScope.showNodeOnStage(nodeComponent: FxComponent<N, D
     showOnStage(group).get()
 }
 
-fun <N : Node, D> CoroutineScope.showNodeOnStage(nodeComponent: CoroutineScope.(CoroutineScope)-> FxComponent<N, D>): Parallel<Stub<D>> = parallel{
+suspend fun <N : Node, D> CoroutineScope.showNodeOnStage(nodeComponent: suspend CoroutineScope.(CoroutineScope)-> FxComponent<N, D>): Parallel<Stub<D>> = parallel{
     val group = fxGroup<D>{
         tunnel()
         view{configure{}}
