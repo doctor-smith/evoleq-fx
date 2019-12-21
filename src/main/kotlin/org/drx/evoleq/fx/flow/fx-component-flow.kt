@@ -338,20 +338,7 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
                 }
             }
             is FxComponentPhase.RunTimePhase.RunTime<*,*> -> {
-                // println("${it::class}")
                 /* TODO Error management -> Termination*/
-                /*val runTimeFlow = flow<FxComponentPhase.RunTimePhase<N, D>, Boolean>{
-                    conditions(org.drx.evoleq.dsl.conditions {
-                        testObject ( true )
-                        check { b ->b }
-                        updateCondition { runTimePhase -> (runTimePhase is FxComponentPhase.RunTimePhase.RunTime<*,*>) }
-
-                    })
-                    flow{ runTimePhase -> when(runTimePhase){
-                        is FxComponentPhase.RunTimePhase.RunTime-> runTimePhase.fxRunTime.fxRun()
-                        is FxComponentPhase.RunTimePhase.ShutDown -> this@fxComponentStub.parallel{ runTimePhase }
-                    }}
-                }*/
                 val runTimeFlow = stub<FxComponentPhase.RunTimePhase<N, D>>{
                     id<FxRunTime<N,D>>()
                     evolve{runTimePhase -> when(runTimePhase){
