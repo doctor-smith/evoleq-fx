@@ -23,10 +23,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import org.drx.evoleq.coroutines.blockUntil
 import org.drx.evoleq.coroutines.onNext
-import org.drx.evoleq.dsl.conditions
-import org.drx.evoleq.dsl.onNext
-import org.drx.evoleq.dsl.parallel
-import org.drx.evoleq.dsl.receiver
+import org.drx.evoleq.dsl.*
 import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.flow.SuspendedFlow
 import org.drx.evoleq.fx.component.FxComponent
@@ -63,12 +60,10 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
      * Launches the application flow and calls onFxInit
      */
     override fun init() {
-
         scope.parallel {
             val phase = flow.evolve(AppMessage.Process.Start( initData() )).get()
             assert(phase is AppMessage.Process.Terminated)
         }
-
         onFxInit()
     }
 
@@ -100,17 +95,17 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
      ******************************************************************************************************************/
 
     /**
-     *
+     * Called in the start method of JavaFX-Application
      */
     open fun onFxStart(){}
 
     /**
-     *
+     * Called in the init function of this class
      */
     open fun onFxInit(){}
 
     /**
-     *
+     * Called in the stop method of JavaFX-Application
      */
     open fun onFxStop(){}
 
@@ -123,7 +118,7 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
      ******************************************************************************************************************/
 
     /**
-     * Id
+     * Id of the AppManager
      */
     override val id: KClass<*>
         get() = AppManager::class
@@ -144,43 +139,31 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
     override suspend fun evolve(d: AppMessage<Data>): Evolving<AppMessage<Data>> = when(val message = d){
         is AppMessage.Request<*> -> when(message) {
             is AppMessage.Request.RegisterStages<*> -> scope.parallel {
-                println("register")
                 blockUntil(TOOLKIT_INITIALIZED){ tI -> tI == true }
-                /*
-                while(!TOOLKIT_INITIALIZED) {
-                    delay(1)
+                message.stages.forEach {
+                    entry -> registry[entry.first] = entry.second  as suspend () -> FxComponent<Stage, Data>
                 }
-
-                 */
-                message.stages.forEach { entry -> registry[entry.first] = entry.second  as suspend () -> FxComponent<Stage, Data> }
                 AppMessage.Response.StagesRegistered<Data>(message.data)
             }
             is AppMessage.Request.ShowStage<*> -> scope.parallel {
-                // println("show")
                 val stub = showStage(message.id, message.processId).get()
-                AppMessage.Response.StageShown(stub,message.processId, message.data)
+                AppMessage.Response.StageShown(stub, message.processId, message.data)
             }
             is AppMessage.Request.HideStage -> scope.parallel{
-                // println("hide")
                 hideStage(message.id, message.processId).get()
                 AppMessage.Response.StageHidden<Data>(message.id, message.processId, message.data)
             }
-
         }
         is AppMessage.Response<*> -> when(message) {
             is AppMessage.Response.StageShown -> scope.parallel{
-                // println("shown")
                 onStageShown(message.stub.id, message.processId, message)
             }
             is AppMessage.Response.StageHidden -> scope.parallel {
-                // println("hidden")
                 onStageHidden(message.id, message.processId, message)
             }
             is AppMessage.Response.StagesRegistered -> scope.parallel{
-                // println("registered")
                 onStagesRegistered(message)
             }
-
         }
         is AppMessage.Process<*> -> when(message){
             is AppMessage.Process.Start<*> ->  scope.parallel{
@@ -197,8 +180,6 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
                 onError(message as AppMessage.Process.Error<Data>)
             }
             is AppMessage.Process.Terminate<*> -> scope.parallel {
-                // println("terminate")
-
                 AppMessage.Process.Terminated<Data>(message.data)
             }
             is AppMessage.Process.Terminated<*> -> scope.parallel { message }
@@ -292,11 +273,9 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
     private fun showStage(id: ID, processId: ID?): Evolving<Stub<Data>> = scope.parallel {
 
         val stubPicker = registry[id]!!
-        //println("get stub")
 
         val stub: FxComponent<Stage,Data> = stubPicker()
 
-        //println("stub got")
         parallelFx{
             val stage = stub.show()
             if(processId != null) {
@@ -306,7 +285,6 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
             }
             showStage(stage)
         }
-
         stub
     }
 
@@ -321,18 +299,17 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
     }
 
     /**
-     * Hide atege
+     * Hide stage
      */
     private fun hideStage(id: ID, processId: ID?): Evolving<ID> = scope.parallel{
         try{
             parallelFx {
-                val stage = stages[processId ?: id]!!//if(processId == null){stages[id]!!} else { stages[processId]!! }
+                val stage = stages[processId ?: id]!!
                 stage.close()
                 stages.remove(processId ?: id)
             }.get()
             id
         } catch(exception : Exception) {
-            // println("Could not hide stage $id: $exception")
             processId ?: id
         }
     }
@@ -342,11 +319,25 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
      * Input
      *
      ******************************************************************************************************************/
-    private val inputReceiver = CoroutineScope(Job()).receiver<Input> {  }
-    private val  inputStack = arrayListOf<Input>()
 
+    /**
+     * InputReceiver
+     */
+    private val inputReceiver = CoroutineScope(Job()).receiver<Input> {  }
+
+    /**
+     * InputStack
+     */
+    private val  inputStack = smartArrayListOf<Input>()
+
+    /**
+     * Called in the waiting-phase ([AppMessage.Process.Wait]) of the application flow
+     */
     abstract  fun  onInput(input: Input, data:  Data): Evolving<AppMessage<Data>>
 
+    /**
+     * Input function. Use this function to pass input to the appöication (-flow)
+     */
     @Suppress("unused")
     suspend fun input(input: Input) = inputReceiver.send(input)
 
@@ -356,17 +347,30 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
      *
      ******************************************************************************************************************/
 
+    /**
+     * Outputs:
+     */
     private val outputs: HashMap<ID, (Nothing)->Evolving<Unit>> by lazy { hashMapOf<ID, (Nothing)->Evolving<Unit>>()}
 
+    /**
+     * Register an output-function
+     */
     @Suppress("unused")
     fun outputs(put: ()->Pair<ID, out (Nothing)->Evolving<Unit>>) {
         val pair = put()
         outputs[pair.first] = pair.second
     }
 
+    /**
+     * Retrieve an output function
+     * Hint: Throws an exception if the desired output does not exist
+     */
     @Suppress("unused")
     fun outputs(id: ID): (Nothing)->Evolving<Unit> = outputs[id]!!
 
+    /**
+     * Remove an output function
+     */
     @Suppress("unused")
     fun removeOutput(id: ID) {
         outputs.remove(id)
@@ -378,20 +382,35 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
      *
      *****************************************************************************************************************/
 
+    /**
+     * Processes:
+     */
     private val processes: HashMap<ID, Evolving<Any>> by lazy { hashMapOf<ID, Evolving<Any>>() }
 
+    /**
+     * Register a process
+     */
     @Suppress("unused")
     suspend fun processes(put: suspend HashMap<ID, Evolving<Any>>.()->Pair<ID, Evolving<Any>>): Unit {
         val pair = processes.put()
         processes[pair.first] = pair.second as Evolving<Any>
     }
 
+    /**
+     * Get a process
+     */
     @Suppress("unused")
     fun processes(id: ID) : Evolving<Any> = processes[id]!!
 
+    /**
+     * Remove a process
+     */
     @Suppress("unused")
     fun removeProcess(id: ID) = processes.remove(id)
 
+    /**
+     * Get processes
+     */
     @Suppress("unused")
     fun processes() = processes
 
