@@ -82,7 +82,19 @@ class InputStub<I, D>(private val onInput: (I, D)-> Evolving<FxInputPhase<D>>) :
             conditions{
                 testObject(true)
                 check{b -> b}
-                updateCondition { phase -> phase !is FxInputPhase.Stopped }
+                updateCondition { phase ->
+                    if(phase is FxInputPhase.Stopped){
+                        try{inputReceiver.actor.close()}catch(ignored: Exception){
+                            println("Closing inputReceiver.actor: Error")
+                            ignored.stackTrace
+                        }
+                        try{inputReceiver.channel.close()}catch(ignored: Exception){
+                            println("Closing inputReceiver.channel: Error")
+                            ignored.stackTrace
+                        }
+                    }
+                    phase !is FxInputPhase.Stopped
+                }
             }
     )
 }

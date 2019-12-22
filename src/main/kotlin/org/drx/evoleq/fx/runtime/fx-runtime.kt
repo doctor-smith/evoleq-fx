@@ -17,9 +17,11 @@ package org.drx.evoleq.fx.runtime
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
+import org.drx.evoleq.coroutines.blockWhileEmpty
 import org.drx.evoleq.dsl.parallel
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.fx.component.FxComponent
+import org.drx.evoleq.fx.dsl.ID
 import org.drx.evoleq.fx.dsl.parallelFx
 import org.drx.evoleq.fx.evolving.ParallelFx
 import org.drx.evoleq.fx.exception.FxConfigurationException
@@ -37,6 +39,7 @@ abstract class  FxRunTime<N , D> {
     fun fxRun() : Parallel<FxComponentPhase.RunTimePhase<N, D>> = scope.parallel{
 
         var nextPhase = phase
+        //actions.blockWhileEmpty()
 
         while(actions.isEmpty()){
             delay(1)
@@ -53,6 +56,7 @@ abstract class  FxRunTime<N , D> {
             phase.errors.add(FxConfigurationException.FxRunTime(component.id, this@FxRunTime, n::class,  exception))
             phase.errors.add(exception)
             shutdown = true
+            //shutdown()
         }
         if(shutdown){
             nextPhase = FxComponentPhase.RunTimePhase.ShutDown(phase.log)
@@ -65,6 +69,23 @@ abstract class  FxRunTime<N , D> {
     }
     fun shutdown() = scope.parallel<Unit>{
         val action:N.()->Unit = {shutdown = true}
+        //val toRemove = arrayListOf<ID>()
+        /*
+        component.stubs.forEach {
+            val stub = it.value
+            if(stub is FxComponent<*,*>){
+                //toRemove.add(it.key)
+                stub.stop()
+            }
+        }
+
+         */
+        /*
+        toRemove.forEach {
+            component.stubs.remove(it)
+        }
+
+         */
         actions.add(0, action)
     }
 }

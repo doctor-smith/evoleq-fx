@@ -341,7 +341,7 @@ sealed class FxComponentPhase(open val log: ArrayList<String> = arrayListOf(),op
         /**
          * Execute blocks declared using the fxRunTime-function
          */
-        data class RunTime<N, D>(val fxRunTime: FxRunTime<N, D>, override val log: ArrayList<String>) : RunTimePhase<N, D>(log = log)
+        data class RunTime<N, D>(val fxRunTime: FxRunTime<N, D>,val configuration: FxComponentConfiguration<N,D>, override val log: ArrayList<String>) : RunTimePhase<N, D>(log = log)
         class ShutDown<N, D>(override val log: ArrayList<String>) : RunTimePhase<N, D>(log = log)
     }
 

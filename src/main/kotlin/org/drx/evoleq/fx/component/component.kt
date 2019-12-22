@@ -20,6 +20,7 @@ import org.drx.evoleq.stub.Stub
 
 interface FxComponent<N, D> : Stub<D> {
     fun show(): N
+    fun stop()
 }
 
 interface FxNoStubComponent<N, D> : FxComponent<N, D>
@@ -30,6 +31,13 @@ abstract class FxInputComponent<I, N, D>(private val inputReceiver: BaseReceiver
 
     suspend fun input(input: I) {
         inputReceiver.send(input)
+    }
+
+    suspend fun closeInput() {
+        try {
+            inputReceiver.actor.close()
+            inputReceiver.channel.close()
+        } catch(ignored: Exception) {}
     }
 }
 

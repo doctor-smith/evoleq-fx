@@ -30,6 +30,7 @@ import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.component.FxNoStubComponent
 import org.drx.evoleq.fx.component.FxTunnelComponent
 import org.drx.evoleq.fx.dsl.FxComponentConfiguration
+import org.drx.evoleq.fx.dsl.ID
 import org.drx.evoleq.fx.dsl.isFxParent
 import org.drx.evoleq.fx.dsl.parallelFx
 import org.drx.evoleq.fx.exception.FxConfigurationException
@@ -50,7 +51,6 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
              * launching phase
              */
             is FxComponentPhase.Launch<*,*> -> this@fxComponentStub.parallel{
-                // println("${it::class}")
                 withTimeout(it.timeout){
                     val configuration = it.configuration.get() as FxComponentConfiguration<N,D>
                     this+configuration.scope.coroutineContext
@@ -71,8 +71,6 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
              * PreConfiguration
              */
             is FxComponentPhase.PreConfiguration<*,*> -> this@fxComponentStub.parallel{
-                // println("${it::class}")
-                //require(it::class ==  FxComponentPhase.PreConfiguration<N,D>::class)
                 val id = try {
                     withTimeout(it.timeout) { it.id.get() }
                 } catch (exception: Exception) {
@@ -118,7 +116,7 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
                  * Setup
                  */
                 is FxComponentPhase.Configuration.Setup<*,*> ->this@fxComponentStub.parallel{
-                    // println("${it::class}")
+
                     //withTimeout(it.timeout) {
                         val fxChildren = arrayListOf(*it.fxChildren.map { c -> withTimeout(it.timeout) {c.get()} }.toTypedArray()) //.filter { child -> child.id != NoStub::class }
                         val fxSpecials = arrayListOf(*it.fxSpecials.map { c -> withTimeout(it.timeout) {c.get()} }.toTypedArray())
@@ -143,22 +141,34 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
                     /* TODO Error management -> Termination*/
                     val stub = it.stub as Stub<D>
                     if(stub !is NoStub) {
-                        it.fxChildren.filter{child -> child !is FxNoStubComponent<*, *> }.forEach { child ->
-                            // forward all children of tunnels
-                            if(child is FxTunnelComponent){
-                                child.stubs.forEach  { entry -> stub.stubs[entry.key] = entry.value }
-                            }
-                            else {
-                                stub.stubs[child.id] = child
+                        it.fxChildren/*filter{child -> child !is FxNoStubComponent<*, *> }*/.forEach { child ->
+                            when (child) {
+                                is FxNoStubComponent -> {
+                                    it.configuration.anonymousComponents.add(child)
+                                }
+                                // forward all children of tunnels
+                                is FxTunnelComponent -> {
+                                    it.configuration.anonymousComponents.add(child)
+                                    child.stubs.forEach  { entry -> stub.stubs[entry.key] = entry.value }
+                                }
+                                else -> {
+                                    stub.stubs[child.id] = child
+                                }
                             }
                         }
-                        it.fxSpecials.filter{child -> child !is FxNoStubComponent<*, *> }.forEach { child ->
-                            // forward all children of tunnels
-                            if(child is FxTunnelComponent){
-                                child.stubs.forEach  { entry -> stub.stubs[entry.key] = entry.value }
-                            }
-                            else {
-                                stub.stubs[child.id] = child
+                        it.fxSpecials/*.filter{child -> child !is FxNoStubComponent<*, *> }*/.forEach { child ->
+                            when (child) {
+                                is FxNoStubComponent -> {
+                                    it.configuration.anonymousComponents.add(child)
+                                }
+                                // forward all children of tunnels
+                                is FxTunnelComponent -> {
+                                    it.configuration.anonymousComponents.add(child)
+                                    child.stubs.forEach  { entry -> stub.stubs[entry.key] = entry.value }
+                                }
+                                else -> {
+                                    stub.stubs[child.id] = child
+                                }
                             }
                         }
                     }
@@ -178,7 +188,6 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
                  * ExtendStub
                  */
                 is FxComponentPhase.Configuration.ExtendStub<*,*> ->this@fxComponentStub.parallel{
-                    // println("${it::class}")
                     val actions = it.stubActions.map { action -> action.get() as Stub<D>.()->Unit }
                     val stub = it.stub as Stub<D>
                     //val errors : ArrayList<Exception> by lazy { arrayListOf<Exception>() }
@@ -213,7 +222,7 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
                  * Configure
                  */
                 is FxComponentPhase.Configuration.Configure<*, *> -> this@fxComponentStub.parallel{
-                    // println("${it::class}")
+
                     // collect data
                     it.configuration.idConfiguration = it.id
                     (it.configuration as FxComponentConfiguration<N,D>).stubConfiguration = it.stub as Stub<D>
@@ -251,8 +260,6 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
                 val configuration = it.configuration as FxComponentConfiguration<N, D>
                 val component = configuration.component as FxComponent<N, D>
                 val fxChildren = it.fxChildren
-
-
                 val scope = configuration.scope
 
                 // wait for fxRuntimeView
@@ -280,17 +287,14 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
                     // setup fxRuntime
                     val fxRunTime = object : FxRunTime<N, D>() {
                         override val phase: FxComponentPhase.RunTimePhase<N, D>
-                            get() = FxComponentPhase.RunTimePhase.RunTime(this, it.log)
+                            get() = FxComponentPhase.RunTimePhase.RunTime(this,configuration, it.log)
                         override val view: N
                             get() = view!!
                         override val component: FxComponent<N, D>
                             get() = component
                         override val scope: CoroutineScope
                             get() = scope
-
                     }
-
-
                     // perform fxRuntimeConfigurationActions
                     val fxRuntimeConfiguration = it.fxRunTimeConfiguration
                             .map{action -> action.get() as Pair<Int,N.()->Unit>}
@@ -334,7 +338,8 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
                         }
                     }
                     configuration.fxRunTime = fxRunTime
-                    FxComponentPhase.RunTimePhase.RunTime(fxRunTime, it.log)
+                    configuration.fxRunTimeProperty.value = fxRunTime
+                    FxComponentPhase.RunTimePhase.RunTime(fxRunTime,configuration, it.log)
                 }
             }
             is FxComponentPhase.RunTimePhase.RunTime<*,*> -> {
@@ -349,21 +354,40 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
                     conditions {
                         testObject ( true )
                         check { b ->b }
-                        updateCondition { runTimePhase -> (runTimePhase is FxComponentPhase.RunTimePhase.RunTime<*,*>) }
+                        updateCondition { runTimePhase ->
+                            if(runTimePhase is FxComponentPhase.RunTimePhase.ShutDown<*,*>) {
+                                scope.parallel {
+                                    val configuration = it.configuration
+                                    val component = configuration.component!!
+                                    component.stubs.forEach {
+                                        val stub = it.value
+                                        if (stub is FxComponent<*, *>) {
+                                            stub.stop()
+                                        }
+                                    }
+                                    configuration.anonymousComponents.forEach { anonymousComponent ->
+                                        anonymousComponent.stop()
+                                    }
+                                    component.stop()
+                                }
+                            }
+                            (runTimePhase is FxComponentPhase.RunTimePhase.RunTime<*,*>)
+                        }
                     }
                 )
                 runTimeFlow.evolve(it as FxComponentPhase.RunTimePhase.RunTime<N,D>)
             }
             is FxComponentPhase.RunTimePhase.ShutDown<*, *> ->this@fxComponentStub.parallel{
-                println("${it::class}")
+
                 FxComponentPhase.TerminationPhase.Terminate(log = it.log)
             }
             is FxComponentPhase.TerminationPhase.TerminateWithErrors -> this@fxComponentStub.parallel{
-                // println("${it::class}")
-                Parallel<Unit>{
-                    it.log.forEach { jt -> println(jt) }
-                    it.errors.forEach { error -> println( error )
-                }}
+                println("\n*****************************************************************************************")
+                println("Terminated with errors: id = \n${it::class}")
+                println("Errors:")
+                it.errors.forEach { error -> println( error )
+                    println("*****************************************************************************************")
+                }
                 FxComponentPhase.TerminationPhase.Terminate(log = it.log)
             }
             is FxComponentPhase.TerminationPhase.Terminate -> this@fxComponentStub.parallel{

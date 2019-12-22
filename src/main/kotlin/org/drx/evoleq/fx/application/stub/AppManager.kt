@@ -16,10 +16,12 @@
 package org.drx.evoleq.fx.application.stub
 
 import javafx.application.Application
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.stage.Stage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import org.drx.evoleq.coroutines.blockUntil
 import org.drx.evoleq.coroutines.onNext
 import org.drx.evoleq.dsl.conditions
 import org.drx.evoleq.dsl.onNext
@@ -29,6 +31,7 @@ import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.flow.SuspendedFlow
 import org.drx.evoleq.fx.component.FxComponent
 import org.drx.evoleq.fx.dsl.parallelFx
+import org.drx.evoleq.fx.stub.FxInputPhase
 import org.drx.evoleq.stub.ID
 import org.drx.evoleq.stub.Stub
 import org.drx.evoleq.stub.toFlow
@@ -42,7 +45,7 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
      * Companion
      */
     companion object Manager{
-        var TOOLKIT_INITIALIZED: Boolean = false
+        val TOOLKIT_INITIALIZED = SimpleBooleanProperty( false )
     }
 
 
@@ -76,7 +79,7 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
      * Calls onFxInit
      */
     override fun start(primaryStage: Stage?) {
-        TOOLKIT_INITIALIZED = true
+        TOOLKIT_INITIALIZED.value = true
         onFxStart()
     }
 
@@ -141,10 +144,14 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
     override suspend fun evolve(d: AppMessage<Data>): Evolving<AppMessage<Data>> = when(val message = d){
         is AppMessage.Request<*> -> when(message) {
             is AppMessage.Request.RegisterStages<*> -> scope.parallel {
-                // println("register")
+                println("register")
+                blockUntil(TOOLKIT_INITIALIZED){ tI -> tI == true }
+                /*
                 while(!TOOLKIT_INITIALIZED) {
                     delay(1)
                 }
+
+                 */
                 message.stages.forEach { entry -> registry[entry.first] = entry.second  as suspend () -> FxComponent<Stage, Data> }
                 AppMessage.Response.StagesRegistered<Data>(message.data)
             }
@@ -191,6 +198,7 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
             }
             is AppMessage.Process.Terminate<*> -> scope.parallel {
                 // println("terminate")
+
                 AppMessage.Process.Terminated<Data>(message.data)
             }
             is AppMessage.Process.Terminated<*> -> scope.parallel { message }
@@ -210,7 +218,19 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
         conditions{
             testObject(true)
             check{ b -> b }
-            updateCondition { message -> message !is AppMessage.Process.Terminated<*> }
+            updateCondition { message ->
+                if(message is AppMessage.Process.Terminated){
+                    try{inputReceiver.actor.close()}catch(ignored: Exception){
+                        println("Closing inputReceiver.actor of AppManager: Error")
+                        ignored.stackTrace
+                    }
+                    try{inputReceiver.channel.close()}catch(ignored: Exception){
+                        println("Closing inputReceiver.channel of AppManager: Error")
+                        ignored.stackTrace
+                    }
+                }
+                message !is AppMessage.Process.Terminated<*>
+            }
         }
     ) }
 

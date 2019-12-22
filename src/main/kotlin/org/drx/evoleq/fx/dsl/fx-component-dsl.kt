@@ -15,6 +15,7 @@
  */
 package org.drx.evoleq.fx.dsl
 
+import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
 import javafx.scene.Group
 import javafx.scene.Node
@@ -22,6 +23,7 @@ import javafx.scene.Parent
 import javafx.scene.layout.*
 import kotlinx.coroutines.*
 import org.drx.evoleq.coroutines.BaseReceiver
+import org.drx.evoleq.coroutines.blockUntil
 import org.drx.evoleq.coroutines.suspended
 import org.drx.evoleq.dsl.ArrayListConfiguration
 import org.drx.evoleq.dsl.Configuration
@@ -64,11 +66,12 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
     // Data related to configuration process
     val launcher = ComponentPhaseLauncher<N,D>()
     var fxRunTime: FxRunTime<N, D>? = null
-
+    val fxRunTimeProperty = SimpleObjectProperty<FxRunTime<N,D>>(null)
     var finish: Boolean = false
     var cancel: Boolean = false
+    var stopping: Boolean = false
     var component: FxComponent<N, D>? = null
-
+    val anonymousComponents: ArrayList<FxComponent<*,*>> by lazy{ arrayListOf<FxComponent<*,*>>() }
     var fxRunTimeView: N? = null
 
 
@@ -79,7 +82,7 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
     private val processes: HashMap<ID, Evolving<Any>> by lazy { hashMapOf<ID, Evolving<Any>>() }
 
     override fun configure(): FxComponent<N, D> = when(stubConfiguration) {
-        is Tunnel<D> ->  object : FxTunnelComponent<N, D> {
+        is Tunnel<D> -> object : FxTunnelComponent<N, D> {
             override val scope: CoroutineScope
                 get() = this@FxComponentConfiguration.scope
             override val id: ID
@@ -89,13 +92,19 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
                 get() = stubConfiguration.stubs
 
             override fun show(): N {
-                fxRunTimeView = viewConfiguration()
+                if(fxRunTimeView == null) {
+                    fxRunTimeView = viewConfiguration()
+                }
                 return fxRunTimeView!!
+            }
+
+            override fun stop() {
+                shutdown()
             }
 
             override suspend fun evolve(d: D): Evolving<D> = stubConfiguration.evolve(d)
         }
-        is NoStub<D> ->  object : FxNoStubComponent<N, D> {
+        is NoStub<D> -> object : FxNoStubComponent<N, D> {
 
             override val scope: CoroutineScope
                 get() = this@FxComponentConfiguration.scope
@@ -106,8 +115,14 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
                 get() = stubConfiguration.stubs
 
             override fun show(): N {
-                fxRunTimeView = viewConfiguration()
+                if(fxRunTimeView == null) {
+                    fxRunTimeView = viewConfiguration()
+                }
                 return fxRunTimeView!!
+            }
+
+            override fun stop() {
+                shutdown()
             }
 
             override suspend fun evolve(d: D): Evolving<D> = stubConfiguration.evolve(d)
@@ -122,8 +137,14 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
                 get() = stubConfiguration.stubs
 
             override fun show(): N {
-                fxRunTimeView = viewConfiguration()
+                if(fxRunTimeView == null) {
+                    fxRunTimeView = viewConfiguration()
+                }
                 return fxRunTimeView!!
+            }
+
+            override fun stop() {
+                shutdown()
             }
 
             override suspend fun evolve(d: D): Evolving<D> = stubConfiguration.evolve(d)
@@ -138,8 +159,14 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
                 get() = stubConfiguration.stubs
 
             override fun show(): N {
-                fxRunTimeView = viewConfiguration()
+                if(fxRunTimeView == null) {
+                    fxRunTimeView = viewConfiguration()
+                }
                 return fxRunTimeView!!
+            }
+
+            override fun stop() {
+                shutdown()
             }
 
             override suspend fun evolve(d: D): Evolving<D> = stubConfiguration.evolve(d)
@@ -392,10 +419,10 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
      */
     @Suppress("unused")
     fun FxComponentConfiguration<N, D>.fxRunTime(action: N.()->Unit) = scope.parallel<Unit>{
-        while(fxRunTime == null) {
-            kotlinx.coroutines.delay(1)
+        if(!stopping  && !cancel) {
+            blockUntil(fxRunTimeProperty) { rT -> rT != null }
+            fxRunTime!!.fxRunTime(action)
         }
-        fxRunTime!!.fxRunTime(action)
     }
 
 
@@ -404,10 +431,17 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
      */
     @Suppress("unused")
     fun FxComponentConfiguration<N, D>.shutdown() = scope.parallel<Unit> {
-        while(fxRunTime == null) {
-            kotlinx.coroutines.delay(1)
+        if(!stopping && !cancel) {
+            stopping = true
+            blockUntil(fxRunTimeProperty) { rT -> rT != null }
+            /*
+            while(fxRunTime == null) {
+                kotlinx.coroutines.delay(1)
+            }
+
+             */
+            fxRunTime!!.shutdown()
         }
-        fxRunTime!!.shutdown()
     }
 
     /******************************************************************************************************************
@@ -465,9 +499,12 @@ fun <N,D> fxComponent(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),confi
         val l = conf.launcher.launch(conf)
         val terminationPhase = parallel{ fxComponentFlow<N, D>().evolve(l) .get() }
         val terminate = terminationPhase.get()
+        println("\n*****************************************************************************************************")
+        println("Log (FxComponent Terminated):")
         terminate.log.forEach {
             println(it)
         }
+        println("*****************************************************************************************************")
         assert(
             terminate is FxComponentPhase.TerminationPhase.TerminateWithErrors ||
             terminate is FxComponentPhase.TerminationPhase.Terminate
