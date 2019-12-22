@@ -34,10 +34,14 @@ abstract class FxInputComponent<I, N, D>(private val inputReceiver: BaseReceiver
     }
 
     suspend fun closeInput() {
-        try {
-            inputReceiver.actor.close()
-            inputReceiver.channel.close()
-        } catch(ignored: Exception) {}
+        try{inputReceiver.actor.close()}catch(ignored: Exception){
+            println("Closing inputReceiver.actor: Error")
+            ignored.stackTrace
+        }
+        try{inputReceiver.channel.close()}catch(ignored: Exception){
+            println("Closing inputReceiver.channel: Error")
+            ignored.stackTrace
+        }
     }
 }
 
