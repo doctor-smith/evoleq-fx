@@ -430,9 +430,12 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
         if(!stopping  && !cancel) {
             blockUntil(componentProperty) { cP -> cP != null }
             component!!.stubs[pair.first] = pair.second
+
             fxRunTime {
                 (component!!.show() as Node).fxChildren()!!.add(pair.second.show())
             }
+
+
         }
     }
     /**
@@ -449,6 +452,7 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
 
     /**
      * Shutdown the component-flow
+     * Hint: Also closes the input channels when the underlying component is an [FxInputComponent]
      */
     @Suppress("unused")
     fun FxComponentConfiguration<N, D>.shutdown() = scope.parallel<Unit> {
@@ -456,6 +460,9 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
             stopping = true
             blockUntil(fxRunTimeProperty) { rT -> rT != null }
             fxRunTime!!.shutdown()
+            if(component!! is FxInputComponent<*,N,D>) {
+                (component!! as FxInputComponent<*,N,D>).closeInput()
+            }
         }
     }
 
