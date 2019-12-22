@@ -71,6 +71,7 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
     var cancel: Boolean = false
     var stopping: Boolean = false
     var component: FxComponent<N, D>? = null
+    val componentProperty = SimpleObjectProperty<FxComponent<N,D>>(null)
     val anonymousComponents: ArrayList<FxComponent<*,*>> by lazy{ arrayListOf<FxComponent<*,*>>() }
     var fxRunTimeView: N? = null
 
@@ -201,14 +202,6 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
      */
     @Suppress("unused")
     fun  FxComponentConfiguration<N, D>.nextId() = scope.parallel<Unit> {
-
-        /*val change = Change<ID>(PreId::class)
-        val changing = change.happen()
-        parallel<Unit>{
-            idProvider.sendBlocking(change)
-        }
-        launcher.id = changing.get()
-        */
         launcher.id = PreId::class
     }
 
@@ -330,9 +323,16 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
         val list = org.drx.evoleq.dsl.configureSuspended(children)
         launcher.fxChildren.addAll( list.map{ scope.parallel { it }} )
     }
+
+    /**
+     * Add a child component to an [ArrayListConfiguration]
+     */
     @Suppress("unused")
     suspend fun <M,E> ArrayListConfiguration<FxComponent<*, *>>.child(child: FxComponent<M, E>) = itemSuspended(child)
 
+    /**
+     * Auxiliary function
+     */
     private suspend fun <M,E> ArrayListConfiguration<FxComponent<*, *>>.itemSuspended(child: FxComponent<M, E>) {
         item(child)
     }
@@ -384,35 +384,56 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
      *
      ******************************************************************************************************************/
 
-
+    /**
+     * Register a child stub at component runtime
+     * Hint: Works if configuration flow is neither stopping nor cancelled
+     */
     @Suppress("unused")
     suspend fun FxComponentConfiguration<N, D>.runtimeChild(pair: Pair<ID,Stub<*>>) {
-        while(component == null) {
-            delay(1)
+        if(!stopping  && !cancel) {
+            blockUntil(componentProperty) { cP -> cP != null }
+            component!!.stubs[pair.first] = pair.second
         }
-        component!!.stubs[pair.first] = pair.second
     }
+
+    /**
+     * Remove a child stub at component runtime
+     * Hint: Works if configuration flow is neither stopping nor cancelled
+     */
     @Suppress("unused")
     suspend fun FxComponentConfiguration<N, D>.removeRuntimeChild(id: ID) {
-        while(component == null) {
-            delay(1)
+        if(!stopping  && !cancel) {
+            blockUntil(componentProperty) { cP -> cP != null }
+            component!!.stubs.remove(id)
         }
-        component!!.stubs.remove(id)
     }
+
+    /**
+     * Get a child stub at component runtime
+     * Hint: Works if configuration flow is neither stopping nor cancelled
+     */
     @Suppress("unused")
     suspend fun FxComponentConfiguration<N, D>.runtimeChild(id : ID): Stub<*>? {
-        while (component == null) {
-            delay(1)
+        if(!stopping  && !cancel) {
+            blockUntil(componentProperty) { cP -> cP != null }
+            return component!!.stubs[id]
         }
-        return component!!.stubs[id]
+        return null
     }
+
+    /**
+     * Register a child [FxComponent] at component runtime and add it to the runTimeView children
+     * Hint: Works if configuration flow is neither stopping nor cancelled
+     */
     @Suppress("unused")
     suspend fun FxComponentConfiguration<N, D>.fxRuntimeChild(pair: Pair<ID,FxComponent<out Node,*>>) {
-        while(component == null) {
-            delay(1)
+        if(!stopping  && !cancel) {
+            blockUntil(componentProperty) { cP -> cP != null }
+            component!!.stubs[pair.first] = pair.second
+            fxRunTime {
+                (component!!.show() as Node).fxChildren()!!.add(pair.second.show())
+            }
         }
-        component!!.stubs[pair.first] = pair.second
-        (component!!.show() as Node).fxChildren()!!.add(pair.second.show())
     }
     /**
      * Perform an action on the component during fx-runtime
@@ -434,12 +455,6 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
         if(!stopping && !cancel) {
             stopping = true
             blockUntil(fxRunTimeProperty) { rT -> rT != null }
-            /*
-            while(fxRunTime == null) {
-                kotlinx.coroutines.delay(1)
-            }
-
-             */
             fxRunTime!!.shutdown()
         }
     }

@@ -240,6 +240,7 @@ fun<N,D> CoroutineScope.fxComponentStub(): Stub<FxComponentPhase> = stub{
                     else {
                         val component = it.configuration.configure()
                         it.configuration.component = component
+                        it.configuration.componentProperty.value = component
                         it.configuration.finish = true
 
                         FxComponentPhase.RunTimeConfiguration(
