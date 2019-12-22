@@ -47,7 +47,7 @@ class InputStub<I, D>(private val onInput: (I, D)-> Evolving<FxInputPhase<D>>) :
     override suspend fun evolve(d: D): Evolving<D> = innerFlow.evolve(FxInputPhase.Start(d)).map(suspended{ phase: FxInputPhase<D> -> phase.data })
 
     val inputReceiver = CoroutineScope(Job()).receiver<I> {  }
-    private val inputStack = arrayListOf<I>()
+    private val inputStack = smartArrayListOf<I>()
 
     init{
         inputReceiver.onNext(scope){input -> inputStack.add(input)}
@@ -82,19 +82,7 @@ class InputStub<I, D>(private val onInput: (I, D)-> Evolving<FxInputPhase<D>>) :
             conditions{
                 testObject(true)
                 check{b -> b}
-                updateCondition { phase ->
-                    if(phase is FxInputPhase.Stopped){
-                        try{inputReceiver.actor.close()}catch(ignored: Exception){
-                            println("Closing inputReceiver.actor: Error")
-                            ignored.stackTrace
-                        }
-                        try{inputReceiver.channel.close()}catch(ignored: Exception){
-                            println("Closing inputReceiver.channel: Error")
-                            ignored.stackTrace
-                        }
-                    }
-                    phase !is FxInputPhase.Stopped
-                }
+                updateCondition { phase -> phase !is FxInputPhase.Stopped }
             }
     )
 }
