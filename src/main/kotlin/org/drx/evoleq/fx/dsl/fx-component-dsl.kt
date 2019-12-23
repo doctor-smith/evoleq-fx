@@ -57,23 +57,27 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
     }
 
     // Component Data
-    lateinit var idConfiguration: ID
-    lateinit var stubConfiguration: Stub<D>
-    lateinit var viewConfiguration: ()->N
+    internal lateinit var idConfiguration: ID
+    internal lateinit var stubConfiguration: Stub<D>
+    internal lateinit var viewConfiguration: ()->N
 
-    var scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE()
+    internal var scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE()
 
     // Data related to configuration process
     val launcher = ComponentPhaseLauncher<N,D>()
-    var fxRunTime: FxRunTime<N, D>? = null
-    val fxRunTimeProperty = SimpleObjectProperty<FxRunTime<N,D>>(null)
-    var finish: Boolean = false
-    var cancel: Boolean = false
-    var stopping: Boolean = false
-    var component: FxComponent<N, D>? = null
-    val componentProperty = SimpleObjectProperty<FxComponent<N,D>>(null)
-    val anonymousComponents: ArrayList<FxComponent<*,*>> by lazy{ arrayListOf<FxComponent<*,*>>() }
-    var fxRunTimeView: N? = null
+    internal var fxRunTime: FxRunTime<N, D>? = null
+    internal val fxRunTimeProperty = SimpleObjectProperty<FxRunTime<N,D>>(null)
+    internal var finish: Boolean = false
+    internal var cancel: Boolean = false
+    internal var stopping: Boolean = false
+    internal var component: FxComponent<N, D>?
+        get() = componentProperty.value
+        set(value) { if(value != null) {
+            componentProperty.value = value
+        } }
+    internal val componentProperty = SimpleObjectProperty<FxComponent<N,D>>(null)
+    internal val anonymousComponents: ArrayList<FxComponent<*,*>> by lazy{ arrayListOf<FxComponent<*,*>>() }
+    internal var fxRunTimeView: N? = null
 
 
     private var keepIdProvider = true
@@ -200,6 +204,7 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
     /**
      * Take next  Id
      */
+    @Deprecated("No longer supported", ReplaceWith("scope.parallel<Unit> { launcher.id = PreId::class }", "org.drx.evoleq.dsl.parallel", "org.drx.evoleq.fx.application.configration.PreId"))
     @Suppress("unused")
     fun  FxComponentConfiguration<N, D>.nextId() = scope.parallel<Unit> {
         launcher.id = PreId::class
@@ -208,6 +213,7 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
     /**
      *
      */
+    @Deprecated("IdProvider is no longer supported")
     @Suppress("unused")
     fun FxComponentConfiguration<N, D>.keepIdProvider() {
         keepIdProvider = true
@@ -239,56 +245,6 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
         launcher.id = PreId::class
         launcher.stub = stub
     }
-
-    /******************************************************************************************************************
-     *
-     * Input component structure
-     *
-     ******************************************************************************************************************/
-    /**
-     * Usage requires to set id and not to set the stub
-     */
-    @Suppress("unused")
-    fun <I> FxComponentConfiguration<N,D>.onInput(onInput: (I, D)->Evolving<FxInputPhase<D>> ) {
-        val stub = InputStub(onInput)
-        launcher.stub = stub
-    }
-    @Suppress("unused")
-    fun FxComponentConfiguration<N, D>.onStart(onStart: suspend (D)->D) {
-        stubAction {
-            if (launcher.stub is InputStub<*, *>) {
-                (launcher.stub as InputStub<Any, D>).onStart = onStart
-            }
-        }
-    }
-    @Suppress("unused")
-    fun FxComponentConfiguration<N, D>.onStop(onStop: suspend (D)->D) {
-        stubAction {
-            if (launcher.stub is InputStub<*, *>) {
-                (launcher.stub as InputStub<Any, D>).onStop = onStop
-            }
-        }
-    }
-
-    /******************************************************************************************************************
-     *
-     * Process management
-     *
-     ******************************************************************************************************************/
-
-    @Suppress("unused")
-    suspend fun FxComponentConfiguration<N, D>.processes(put: suspend HashMap<ID, Evolving<Any>>.()->Pair<ID, Evolving<Any>>): Unit {
-        val pair = processes.put()
-        processes[pair.first] = pair.second as Evolving<Any>
-    }
-    @Suppress("unused")
-    fun FxComponentConfiguration<N, D>.processes(id: ID) : Evolving<Any> = processes[id]!!
-
-    @Suppress("unused")
-    fun FxComponentConfiguration<N, D>.removeProcess(id: ID) = processes.remove(id)
-
-    @Suppress("unused")
-    fun FxComponentConfiguration<N, D>.processes() = processes
 
 
     /**
@@ -378,6 +334,63 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
     fun FxComponentConfiguration<N, D>.fxRunTimeConfig(index: Int = Int.MAX_VALUE,action: N.()->Unit) = scope.parallel<Unit>{
         launcher.fxRunTimeConfiguration.add(Parallel{index to action})
     }
+
+    /******************************************************************************************************************
+     *
+     * Input component structure
+     *
+     ******************************************************************************************************************/
+    /**
+     * Usage requires to set id and not to set the stub
+     */
+    @Suppress("unused")
+    fun <I> FxComponentConfiguration<N,D>.onInput(onInput: (I, D)->Evolving<FxInputPhase<D>> ) {
+        val stub = InputStub(onInput)
+        launcher.stub = stub
+    }
+    @Suppress("unused")
+    fun FxComponentConfiguration<N, D>.onStart(onStart: suspend (D)->D) {
+        stubAction {
+            if (launcher.stub is InputStub<*, *>) {
+                (launcher.stub as InputStub<Any, D>).onStart = onStart
+            }
+        }
+    }
+    @Suppress("unused")
+    fun FxComponentConfiguration<N, D>.onStop(onStop: suspend (D)->D) {
+        stubAction {
+            if (launcher.stub is InputStub<*, *>) {
+                (launcher.stub as InputStub<Any, D>).onStop = onStop
+            }
+        }
+    }
+
+    /******************************************************************************************************************
+     *
+     * Process management
+     *
+     ******************************************************************************************************************/
+
+    @Suppress("unused")
+    suspend fun FxComponentConfiguration<N, D>.processes(put: suspend HashMap<ID, Evolving<Any>>.()->Pair<ID, Evolving<Any>>): Unit {
+        val pair = processes.put()
+        processes[pair.first] = pair.second as Evolving<Any>
+    }
+    @Suppress("unused")
+    fun FxComponentConfiguration<N, D>.processes(id: ID) : Evolving<Any> = processes[id]!!
+
+    @Suppress("unused")
+    fun FxComponentConfiguration<N, D>.removeProcess(id: ID) = processes.remove(id)
+
+    @Suppress("unused")
+    fun FxComponentConfiguration<N, D>.processes() = processes
+
+    /******************************************************************************************************************
+     *
+     * Outputs
+     *
+     ******************************************************************************************************************/
+
     /******************************************************************************************************************
      *
      * Runtime actions
@@ -385,13 +398,28 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
      ******************************************************************************************************************/
 
     /**
+     * Get component
+     */
+    fun FxComponentConfiguration<N, D>.component(): FxComponent<N,D>? = componentProperty.value
+
+    /**
+     *
+     */
+    suspend fun FxComponentConfiguration<N, D>.runtimeComponent(): FxComponent<N,D> = when {
+        !(cancel) -> {
+            blockUntil(componentProperty) { c -> c != null }
+            component!!
+        }
+        else -> throw FxConfigurationException.ConfigurationCancelled()
+    }
+    /**
      * Register a child stub at component runtime
      * Hint: Works if configuration flow is neither stopping nor cancelled
      */
     @Suppress("unused")
     suspend fun FxComponentConfiguration<N, D>.runtimeChild(pair: Pair<ID,Stub<*>>) {
         if(!stopping  && !cancel) {
-            blockUntil(componentProperty) { cP -> cP != null }
+            blockUntil(componentProperty) { c -> c != null }
             component!!.stubs[pair.first] = pair.second
         }
     }
@@ -403,7 +431,7 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
     @Suppress("unused")
     suspend fun FxComponentConfiguration<N, D>.removeRuntimeChild(id: ID) {
         if(!stopping  && !cancel) {
-            blockUntil(componentProperty) { cP -> cP != null }
+            blockUntil(componentProperty) { c -> c != null }
             component!!.stubs.remove(id)
         }
     }
@@ -415,7 +443,7 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
     @Suppress("unused")
     suspend fun FxComponentConfiguration<N, D>.runtimeChild(id : ID): Stub<*>? {
         if(!stopping  && !cancel) {
-            blockUntil(componentProperty) { cP -> cP != null }
+            blockUntil(componentProperty) { c -> c != null }
             return component!!.stubs[id]
         }
         return null
@@ -428,7 +456,7 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
     @Suppress("unused")
     suspend fun FxComponentConfiguration<N, D>.fxRuntimeChild(pair: Pair<ID,FxComponent<out Node,*>>) {
         if(!stopping  && !cancel) {
-            blockUntil(componentProperty) { cP -> cP != null }
+            blockUntil(componentProperty) { c -> c != null }
             component!!.stubs[pair.first] = pair.second
 
             fxRunTime {
