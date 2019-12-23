@@ -19,7 +19,7 @@ object Config {
     object Versions {
         val kotlin = "1.3.50"
         val coroutines = "1.3.1"
-        val evoleq = "1.1.0"
+        val evoleq = "1.1.1"
 
         val testEvoleq = "1.0.1"
         val testEvoleqFx = "1.0.1"
