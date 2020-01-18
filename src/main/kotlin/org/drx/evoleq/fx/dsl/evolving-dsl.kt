@@ -16,14 +16,17 @@
 package org.drx.evoleq.fx.dsl
 
 import kotlinx.coroutines.CoroutineScope
+import org.drx.evoleq.dsl.EvoleqDsl
 import org.drx.evoleq.fx.evolving.AsynqFx
 import org.drx.evoleq.fx.evolving.ParallelFx
 
+@EvoleqDsl
 fun <D> CoroutineScope.parallelFx(
         delay: Long = 1,
         block: CoroutineScope.() -> D
 ) : ParallelFx<D> = ParallelFx(delay, this){ block() }
 
+@EvoleqDsl
 fun <D> CoroutineScope.asyncFx(
         delay: Long = 1,
         block: CoroutineScope.() -> D

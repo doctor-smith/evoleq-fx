@@ -27,6 +27,7 @@ import org.drx.evoleq.fx.geometry.Derivation
  * CubicCurve
  */
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <D> FxComponentConfiguration<out Any, *>.fxCubicCurve(scope: CoroutineScope = this.scope, configuration:suspend  FxComponentConfiguration<CubicCurve, D>.()->Unit): FxComponent<CubicCurve,D> {
     return fxComponent(scope,configuration)
 }
@@ -35,10 +36,12 @@ suspend fun <D> FxComponentConfiguration<out Any, *>.fxCubicCurve(scope: Corouti
  *
  */
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <D> fxCubicCurve(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration:suspend  FxComponentConfiguration<CubicCurve, D>.()->Unit): FxComponent<CubicCurve,D> {
     return fxComponent(scope,configuration)
 }
 
+@EvoleqFxDsl
 fun <D> FxComponentConfiguration<CubicCurve, D>.startVelocity(configuration: Point2DConfiguration.()->Unit) {
     val velocity = point(configuration)
     fxRunTimeConfig {
@@ -47,6 +50,7 @@ fun <D> FxComponentConfiguration<CubicCurve, D>.startVelocity(configuration: Poi
     }
 }
 
+@EvoleqFxDsl
 fun <D> FxComponentConfiguration<CubicCurve, D>.endVelocity(configuration: Point2DConfiguration.()->Unit) {
     val velocity = point(configuration)
     fxRunTimeConfig {
@@ -55,18 +59,21 @@ fun <D> FxComponentConfiguration<CubicCurve, D>.endVelocity(configuration: Point
     }
 }
 
+@EvoleqFxDsl
 fun CubicCurve.startVelocity(configuration: Point2DConfiguration.()->Unit) {
     val velocity = point(configuration)
     controlX1 = startX + velocity.x / 3
     controlY1 = startY + velocity.y / 3
 }
 
+@EvoleqFxDsl
 fun CubicCurve.endVelocity(configuration: Point2DConfiguration.()->Unit) {
     val velocity = point(configuration)
     controlX1 = endX - velocity.x / 3
     controlY1 = endY - velocity.y / 3
 }
 
+@EvoleqFxDsl
 fun CubicCurve.start(derivation: Derivation) {
 
     startX = derivation.x.value
@@ -83,6 +90,7 @@ fun CubicCurve.start(derivation: Derivation) {
 
 }
 
+@EvoleqFxDsl
 fun CubicCurve.end(derivation: Derivation) {
 
     endX = derivation.x.value

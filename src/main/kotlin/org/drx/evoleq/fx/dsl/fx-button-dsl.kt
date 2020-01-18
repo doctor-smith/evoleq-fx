@@ -25,17 +25,20 @@ import org.drx.evoleq.fx.component.FxComponent
  * Button
  */
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <D> FxComponentConfiguration<out Any, D>.fxButton(scope: CoroutineScope = this.scope, configuration: suspend FxComponentConfiguration<Button, D>.()->Unit): FxComponent<Button, D> {
     return  fxComponent(scope,configuration)
 }
 
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <D> fxButton(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration:suspend  FxComponentConfiguration<Button, D>.()->Unit): FxComponent<Button, D> {
     return fxComponent(scope,configuration)
 }
 
 
 @Suppress("unused")
+@EvoleqFxDsl
 fun <B : ButtonBase> B.action(action: ActionEvent.()->Unit): B {
     this.setOnAction{
         it.action()

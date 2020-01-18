@@ -24,12 +24,15 @@ import org.drx.evoleq.fx.component.FxComponent
  * Stage
  */
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <D> Any?.fxStage(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(), configuration:suspend  FxComponentConfiguration<Stage, D>.()->Unit): FxComponent<Stage, D> = fxComponent (scope, configuration )
 
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <D> fxStage(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(), configuration:suspend  FxComponentConfiguration<Stage, D>.()->Unit): FxComponent<Stage, D> = fxComponent (scope, configuration )
 
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <D> FxComponentConfiguration<Stage, D>.scene(component: FxComponent<Scene, D>): FxComponentConfiguration<Stage, D> {
     child(component)
     fxRunTime { scene = component.show() }

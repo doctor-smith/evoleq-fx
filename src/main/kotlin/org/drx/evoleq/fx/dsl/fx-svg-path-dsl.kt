@@ -22,11 +22,13 @@ import org.drx.evoleq.fx.component.FxComponent
 
 
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <D> FxComponentConfiguration<out Any, *>.fxSvgPath(scope: CoroutineScope = this.scope, configuration: suspend FxComponentConfiguration<SVGPath, D>.()->Unit): FxComponent<SVGPath, D> {
     return fxComponent(scope,configuration)
 }
 
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <D> fxSvgPath(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: suspend FxComponentConfiguration<SVGPath, D>.()->Unit): FxComponent<SVGPath, D> {
     return fxComponent(scope,configuration)
 }
@@ -82,6 +84,7 @@ sealed class SVGPathElement {
             // a25,25 -30 0,1 50,-25
     }
 }
+@EvoleqFxDsl
 fun ArrayList<SVGPathElement>.svg(): String = map{ it.svg() }.reduce{s, t -> "$s $t" }
 
 abstract class SVGPathElementConfiguration : Configuration<SVGPathElement> {
@@ -191,42 +194,49 @@ class ClosePathConfiguration: SVGPathElementConfiguration() {
 
 
 
+@EvoleqFxDsl
 fun ArrayList<SVGPathElement>.moveTo(configuration: MoveToConfiguration.()->Unit) {
     val conf = MoveToConfiguration()
     conf.configuration()
     add(conf.configure())
 }
 
+@EvoleqFxDsl
 fun ArrayList<SVGPathElement>.lineTo(configuration: LineToConfiguration.()->Unit) {
     val conf = LineToConfiguration()
     conf.configuration()
     add(conf.configure())
 }
 
+@EvoleqFxDsl
 fun ArrayList<SVGPathElement>.hLineTo(configuration: HLineToConfiguration.()->Unit) {
     val conf = HLineToConfiguration()
     conf.configuration()
     add(conf.configure())
 }
 
+@EvoleqFxDsl
 fun ArrayList<SVGPathElement>.vLineTo(configuration: VLineToConfiguration.()->Unit) {
     val conf = VLineToConfiguration()
     conf.configuration()
     add(conf.configure())
 }
 
+@EvoleqFxDsl
 fun ArrayList<SVGPathElement>.cubicCurveTo(configuration: CubicCurveToConfiguration.()->Unit) {
     val conf = CubicCurveToConfiguration()
     conf.configuration()
     add(conf.configure())
 }
 
+@EvoleqFxDsl
 fun ArrayList<SVGPathElement>.quadraticCurveTo(configuration: QuadraticCurveToConfiguration.()->Unit) {
     val conf = QuadraticCurveToConfiguration()
     conf.configuration()
     add(conf.configure())
 }
 
+@EvoleqFxDsl
 fun ArrayList<SVGPathElement>.arcTo(configuration: ArcToConfiguration.()->Unit) {
     val conf = ArcToConfiguration()
     conf.configuration()
@@ -238,12 +248,14 @@ fun ArrayList<SVGPathElement>.closePath() {
     add(conf.configure())
 }
 
+@EvoleqFxDsl
 fun SVGPath.elements(configuration: ArrayList<SVGPathElement>.()->Unit) {
     val list = arrayListOf<SVGPathElement>()
     list.configuration()
     content = list.svg()
 }
 
+@EvoleqFxDsl
 fun SVGPath.M( x: Int, y: Int): SVGPath = when(content) {
     "" -> {
         content = "M$x,$y"
@@ -255,6 +267,7 @@ fun SVGPath.M( x: Int, y: Int): SVGPath = when(content) {
     }
 }
 
+@EvoleqFxDsl
 fun SVGPath.m( dx: Int, dy: Int): SVGPath = when(content) {
     "" -> {
         content = "m$dx,$dy"
@@ -266,11 +279,13 @@ fun SVGPath.m( dx: Int, dy: Int): SVGPath = when(content) {
     }
 }
 
+@EvoleqFxDsl
 fun SVGPath.L( x: Int, y: Int): SVGPath  {
     content += ", L$x,$y"
     return this
 }
 
+@EvoleqFxDsl
 fun SVGPath.l( dx: Int, dy: Int): SVGPath  {
     content += ", l$dx,$dy"
     return this

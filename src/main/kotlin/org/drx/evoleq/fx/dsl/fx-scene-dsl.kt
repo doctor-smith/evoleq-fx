@@ -25,11 +25,13 @@ import org.drx.evoleq.fx.component.FxComponent
 import java.lang.Thread.sleep
 
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <D> FxComponentConfiguration<Stage, D>.fxScene(scope: CoroutineScope = this.scope, configuration: suspend  FxComponentConfiguration<Scene, D>.()->Unit): FxComponent<Scene, D> {
     return fxComponent(scope,configuration)
 }
 
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <D> fxScene(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: suspend FxComponentConfiguration<Scene, D>.()->Unit): FxComponent<Scene, D> {
     return fxComponent(scope,configuration)
 }
@@ -38,6 +40,7 @@ suspend fun <D> fxScene(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),con
  * Scene
  */
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <P: Parent, D> FxComponentConfiguration<Scene, D>.root(component: FxComponent<P, D>, inject:(P)->Scene = { p -> Scene(p)}) : FxComponentConfiguration<Scene, D> {
     child(component)
     val root = component.show()
@@ -47,6 +50,7 @@ suspend fun <P: Parent, D> FxComponentConfiguration<Scene, D>.root(component: Fx
 }
 
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <P: Parent, D> FxComponentConfiguration<Scene, D>.root(component: CoroutineScope.(CoroutineScope)->FxComponent<P, D>, inject:(P)->Scene = { p -> Scene(p)}) : FxComponentConfiguration<Scene, D> {
     var comp: FxComponent<P, D>? = null
     scope.parallel{
@@ -63,6 +67,7 @@ suspend fun <P: Parent, D> FxComponentConfiguration<Scene, D>.root(component: Co
 }
 
 @Suppress("unused")
+@EvoleqFxDsl
 fun < D> FxComponentConfiguration<Scene, D>.stylesheet(stylesheet: String) {
     fxRunTimeConfig {
         stylesheets.add(stylesheet)
@@ -70,6 +75,7 @@ fun < D> FxComponentConfiguration<Scene, D>.stylesheet(stylesheet: String) {
 }
 
 @Suppress("unused")
+@EvoleqFxDsl
 fun < D> FxComponentConfiguration<Scene, D>.stylesheets(stylesheets: ArrayList<String>) {
     fxRunTimeConfig {
         stylesheets.addAll(stylesheets)

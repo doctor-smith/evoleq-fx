@@ -23,21 +23,25 @@ import kotlinx.coroutines.CoroutineScope
 import org.drx.evoleq.fx.component.FxComponent
 
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <D> FxComponentConfiguration<out Any, *>.fxPath(scope: CoroutineScope = this.scope, configuration: suspend FxComponentConfiguration<Path, D>.()->Unit): FxComponent<Path, D> {
     return fxComponent(scope,configuration)
 }
 
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <D> fxPath(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: suspend FxComponentConfiguration<Path, D>.()->Unit): FxComponent<Path, D> {
     return fxComponent(scope,configuration)
 }
 
 @Suppress("unused")
+@EvoleqFxDsl
 fun <D> FxComponentConfiguration<Path, D>.elements(configure: ObservableList<PathElement>.()->Unit) {
     fxRunTime{ elements.configure() }
 }
 
 @Suppress("unused")
+@EvoleqFxDsl
 fun ObservableList<PathElement>.moveTo(configuration: MoveTo.()->Unit){
     val moveTo = MoveTo()
     moveTo.configuration()
@@ -45,6 +49,7 @@ fun ObservableList<PathElement>.moveTo(configuration: MoveTo.()->Unit){
 }
 
 @Suppress("unused")
+@EvoleqFxDsl
 fun ObservableList<PathElement>.lineTo(configuration: LineTo.()->Unit){
     val lineTo = LineTo()
     lineTo.configuration()
@@ -52,6 +57,7 @@ fun ObservableList<PathElement>.lineTo(configuration: LineTo.()->Unit){
 }
 
 @Suppress("unused")
+@EvoleqFxDsl
 fun ObservableList<PathElement>.hLineTo(configuration: HLineTo.()->Unit){
     val hLineTo = HLineTo()
     hLineTo.configuration()
@@ -59,6 +65,7 @@ fun ObservableList<PathElement>.hLineTo(configuration: HLineTo.()->Unit){
 }
 
 @Suppress("unused")
+@EvoleqFxDsl
 fun ObservableList<PathElement>.vLineTo(configuration: VLineTo.()->Unit){
     val vLineTo = VLineTo()
     vLineTo.configuration()
@@ -66,6 +73,7 @@ fun ObservableList<PathElement>.vLineTo(configuration: VLineTo.()->Unit){
 }
 
 @Suppress("unused")
+@EvoleqFxDsl
 fun ObservableList<PathElement>.arcTo(configuration: ArcTo.()->Unit){
     val arcTo = ArcTo()
     arcTo.configuration()
@@ -73,6 +81,7 @@ fun ObservableList<PathElement>.arcTo(configuration: ArcTo.()->Unit){
 }
 
 @Suppress("unused")
+@EvoleqFxDsl
 fun ObservableList<PathElement>.quadCurveTo(configuration: QuadCurveTo.()->Unit){
     val quadCurveTo = QuadCurveTo()
     quadCurveTo.configuration()
@@ -83,6 +92,7 @@ fun ObservableList<PathElement>.quadCurveTo(configuration: QuadCurveTo.()->Unit)
  * Velocity at the end-point
  */
 @Suppress("unused")
+@EvoleqFxDsl
 fun QuadCurveTo.endVelocity(setup: Point2DConfiguration.()->Unit){
     val point = point(setup)
     controlX = -point.x / 2 + x
@@ -90,6 +100,7 @@ fun QuadCurveTo.endVelocity(setup: Point2DConfiguration.()->Unit){
 }
 
 @Suppress("unused")
+@EvoleqFxDsl
 fun QuadCurveTo.startVelocity(startPoint: Point2D,setup: Point2DConfiguration.()->Unit){
     val point = point(setup)
     controlX = startPoint.x + point.x / 2
@@ -98,6 +109,7 @@ fun QuadCurveTo.startVelocity(startPoint: Point2D,setup: Point2DConfiguration.()
 
 
 @Suppress("unused")
+@EvoleqFxDsl
 fun ObservableList<PathElement>.cubicCurveTo(
         startVelocity: Point2D? = null,
         endVelocity: Point2D? = null,
@@ -122,6 +134,7 @@ fun ObservableList<PathElement>.cubicCurveTo(
 }
 
 @Suppress("unused")
+@EvoleqFxDsl
 fun ObservableList<PathElement>.startPoint(): Point2D? = when(this.size) {
     0 -> null
     else -> when (val p = first()) {
@@ -131,6 +144,7 @@ fun ObservableList<PathElement>.startPoint(): Point2D? = when(this.size) {
 }
 
 @Suppress("unused")
+@EvoleqFxDsl
 fun ObservableList<PathElement>.endPoint(): Point2D? = when(this.size) {
     0 -> null
     1 -> when(val p = last()) {
@@ -152,6 +166,7 @@ fun ObservableList<PathElement>.endPoint(): Point2D? = when(this.size) {
 }
 
 @Suppress("unused")
+@EvoleqFxDsl
 fun ObservableList<PathElement>.endX() : Double? = when(this.size) {
     0 -> null
     1 -> when(val p = last()) {
@@ -174,6 +189,7 @@ fun ObservableList<PathElement>.endX() : Double? = when(this.size) {
 }
 
 @Suppress("unused")
+@EvoleqFxDsl
 fun ObservableList<PathElement>.endY() : Double? = when(this.size) {
     0 -> null
     1 -> when(val p = last()) {
@@ -196,6 +212,7 @@ fun ObservableList<PathElement>.endY() : Double? = when(this.size) {
 }
 
 @Suppress("unused")
+@EvoleqFxDsl
 fun CubicCurveTo.startVelocity(startPoint: Point2D,setup: Point2DConfiguration.()->Unit){
     val point = point(setup)
     controlX1 = startPoint.x + point.x / 3
@@ -204,6 +221,7 @@ fun CubicCurveTo.startVelocity(startPoint: Point2D,setup: Point2DConfiguration.(
 }
 
 @Suppress("unused")
+@EvoleqFxDsl
 fun CubicCurveTo.endVelocity(setup: Point2DConfiguration.()->Unit){
     val point = point(setup)
 
@@ -212,6 +230,7 @@ fun CubicCurveTo.endVelocity(setup: Point2DConfiguration.()->Unit){
 }
 
 @Suppress("unused")
+@EvoleqFxDsl
 fun ObservableList<PathElement>.closePath(configuration: ClosePath.()->Unit){
     val closePath = ClosePath()
     closePath.configuration()
@@ -219,17 +238,20 @@ fun ObservableList<PathElement>.closePath(configuration: ClosePath.()->Unit){
 }
 
 @Suppress("unused")
+@EvoleqFxDsl
 fun ObservableList<PathElement>.closePath(){
     val closePath = ClosePath()
     add(closePath)
 }
 
 @Suppress("unused")
+@EvoleqFxDsl
 fun Path.add(element: PathElement) {
     elements.add(element)
 }
 
 @Suppress("unused")
+@EvoleqFxDsl
 fun Path.remove(element: PathElement) {
     elements.remove(element)
 }

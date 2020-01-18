@@ -15,14 +15,4 @@
  */
 package org.drx.evoleq.fx.dsl
 
-import javafx.scene.control.Label
-import kotlinx.coroutines.CoroutineScope
-import org.drx.evoleq.fx.component.FxComponent
-
-@Suppress("unused")
-@EvoleqFxDsl
-suspend fun <D> FxComponentConfiguration<out Any, *>.fxLabel(scope: CoroutineScope = this.scope, configuration: suspend FxComponentConfiguration<Label, D>.()->Unit): FxComponent<Label, D> = fxComponent(scope,configuration)
-
-@Suppress("unused")
-@EvoleqFxDsl
-suspend fun <D> fxLabel(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: suspend FxComponentConfiguration<Label, D>.()->Unit): FxComponent<Label, D> = fxComponent(scope,configuration)
+@DslMarker annotation class EvoleqFxDsl

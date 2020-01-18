@@ -24,6 +24,7 @@ import org.drx.evoleq.fx.component.FxComponent
  * AnchorPane
  */
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <D> FxComponentConfiguration<out Any, *>.fxAnchorPane(scope: CoroutineScope = this.scope, configuration: suspend FxComponentConfiguration<AnchorPane, D>.()->Unit): FxComponent<AnchorPane, D> {
     return fxComponent(scope,configuration)
 }
@@ -31,15 +32,19 @@ suspend fun <D> FxComponentConfiguration<out Any, *>.fxAnchorPane(scope: Corouti
 suspend fun <D> fxAnchorPane(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration:suspend  FxComponentConfiguration<AnchorPane, D>.()->Unit): FxComponent<AnchorPane, D> {
     return fxComponent(scope,configuration)
 }
+@EvoleqFxDsl
 fun Node.leftAnchor(anchor: Number) {
     AnchorPane.setLeftAnchor(this, anchor.toDouble())
 }
+@EvoleqFxDsl
 fun Node.rightAnchor(anchor: Number) {
     AnchorPane.setRightAnchor(this, anchor.toDouble())
 }
+@EvoleqFxDsl
 fun Node.topAnchor(anchor: Number) {
     AnchorPane.setTopAnchor(this, anchor.toDouble())
 }
+@EvoleqFxDsl
 fun Node.bottomAnchor(anchor: Number) {
     AnchorPane.setBottomAnchor(this, anchor.toDouble())
 }

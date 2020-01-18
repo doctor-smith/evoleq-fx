@@ -25,15 +25,18 @@ import org.drx.evoleq.fx.component.FxComponent
  * ScrollPane
  */
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <D> FxComponentConfiguration<out Any, *>.fxScrollPane(scope: CoroutineScope = this.scope, configuration: suspend FxComponentConfiguration<ScrollPane, D>.()->Unit): FxComponent<ScrollPane, D> {
     return fxComponent(scope,configuration)
 }
 
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <D> fxScrollPane(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: suspend FxComponentConfiguration<ScrollPane, D>.()->Unit): FxComponent<ScrollPane, D> {
     return fxComponent(scope,configuration)
 }
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <C : Node, D> FxComponentConfiguration<ScrollPane, D>.content(component: FxComponent<C, D>)  {
     fxSpecial( component )
     fxRunTimeConfig {

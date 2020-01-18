@@ -24,14 +24,17 @@ import org.drx.evoleq.fx.component.FxComponent
  * BorderPane
  */
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <D> FxComponentConfiguration<out Any, *>.fxBorderPane(scope: CoroutineScope = this.scope, configuration: suspend FxComponentConfiguration<BorderPane,D>.()->Unit): FxComponent<BorderPane, D> {
     return fxComponent(scope,configuration)
 }
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <D> fxBorderPane(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration:suspend  FxComponentConfiguration<BorderPane,D>.()->Unit): FxComponent<BorderPane, D> {
     return fxComponent(scope,configuration)
 }
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.top(component: FxComponent<C, D>)  {
     fxSpecial( component )
     fxRunTimeConfig {
@@ -39,6 +42,7 @@ suspend fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.top(component:
     }
 }
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.bottom(component: FxComponent<C, D>)  {
     fxSpecial( component )
     fxRunTime {
@@ -46,6 +50,7 @@ suspend fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.bottom(compone
     }
 }
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.left(component: FxComponent<C, D>)  {
     fxSpecial( component )
     fxRunTimeConfig {
@@ -53,6 +58,7 @@ suspend fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.left(component
     }
 }
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.right(component: FxComponent<C, D>)  {
     fxSpecial( component )
     fxRunTimeConfig {
@@ -60,6 +66,7 @@ suspend fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.right(componen
     }
 }
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <C : Node, D> FxComponentConfiguration<BorderPane, D>.center(component: FxComponent<C, D>)  {
     fxSpecial( component )
     fxRunTimeConfig {

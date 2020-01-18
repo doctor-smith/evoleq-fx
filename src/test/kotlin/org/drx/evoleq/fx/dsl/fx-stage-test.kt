@@ -43,7 +43,6 @@ class FxStageTest{
 
     private suspend fun testStageConfig() = onScopeSuspended{scope: CoroutineScope->fxStage<Nothing>(scope){
         id<StageId>()
-        //noStub()
         view{configure{}}
         scene(fxScene{
             id<Scene>()

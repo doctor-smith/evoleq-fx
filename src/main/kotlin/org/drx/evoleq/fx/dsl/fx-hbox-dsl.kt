@@ -20,7 +20,9 @@ import kotlinx.coroutines.CoroutineScope
 import org.drx.evoleq.fx.component.FxComponent
 
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <D> FxComponentConfiguration<out Any, *>.fxHBox(scope: CoroutineScope = this.scope, configuration: suspend FxComponentConfiguration<HBox, D>.()->Unit): FxComponent<HBox, D> = fxComponent(scope,configuration)
 
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <D> fxHBox(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: suspend FxComponentConfiguration<HBox, D>.()->Unit): FxComponent<HBox, D> = fxComponent(scope,configuration)

@@ -26,11 +26,13 @@ import org.drx.evoleq.fx.component.FxComponent
  * StackPane
  */
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <D> FxComponentConfiguration<out Any, *>.fxTextField(scope: CoroutineScope = this.scope, configuration: suspend FxComponentConfiguration<TextField, D>.()->Unit): FxComponent<TextField, D> {
     return fxComponent(scope,configuration)
 }
 
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <D> fxTextField(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: suspend FxComponentConfiguration<TextField, D>.()->Unit): FxComponent<TextField, D> {
     return fxComponent(scope,configuration)
 }

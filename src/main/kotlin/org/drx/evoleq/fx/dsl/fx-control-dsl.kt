@@ -21,12 +21,15 @@ import javafx.scene.control.Tooltip
 import kotlinx.coroutines.CoroutineScope
 import org.drx.evoleq.fx.component.FxComponent
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <D> Any?.fxTooltip(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: suspend FxComponentConfiguration<Tooltip, D>.()->Unit): FxComponent<Tooltip, D> = fxComponent(scope,configuration)
 
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <D> fxTooltip(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: suspend FxComponentConfiguration<Tooltip, D>.()->Unit): FxComponent<Tooltip, D> = fxComponent(scope,configuration)
 
 @Suppress("unused")
+@EvoleqFxDsl
 fun <C : Control, D> FxComponentConfiguration<C, D>.tooltip(component: FxComponent<Tooltip, D>) {
     fxSpecial(component)
     fxRunTimeConfig{

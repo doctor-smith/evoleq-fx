@@ -20,7 +20,9 @@ import kotlinx.coroutines.CoroutineScope
 import org.drx.evoleq.fx.component.FxComponent
 
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <D> FxComponentConfiguration<out Any, *>.fxImageView(scope: CoroutineScope = this.scope, configuration: suspend FxComponentConfiguration<ImageView, D>.()->Unit): FxComponent<ImageView, D> = fxComponent(scope,configuration)
 
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <D> fxImageView(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: suspend FxComponentConfiguration<ImageView, D>.()->Unit): FxComponent<ImageView, D> = fxComponent(scope,configuration)

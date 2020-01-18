@@ -23,11 +23,13 @@ import org.drx.evoleq.fx.component.FxComponent
  * FlowPane
  */
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <D> FxComponentConfiguration<out Any, *>.fxFlowPane(scope: CoroutineScope = this.scope, configuration:suspend  FxComponentConfiguration<FlowPane, D>.()->Unit): FxComponent<FlowPane, D> {
     return fxComponent(scope,configuration)
 }
 
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <D> fxFlowPane(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration:suspend  FxComponentConfiguration<FlowPane, D>.()->Unit): FxComponent<FlowPane, D> {
     return fxComponent(scope,configuration)
 }

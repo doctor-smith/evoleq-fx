@@ -16,10 +16,14 @@
 package org.drx.evoleq.fx.component
 
 import org.drx.evoleq.coroutines.BaseReceiver
+import org.drx.evoleq.dsl.EvoleqDsl
+import org.drx.evoleq.fx.dsl.EvoleqFxDsl
 import org.drx.evoleq.stub.Stub
 
 interface FxComponent<N, D> : Stub<D> {
+    @EvoleqFxDsl
     fun show(): N
+    @EvoleqFxDsl
     fun stop()
 }
 
@@ -29,10 +33,13 @@ interface FxTunnelComponent<N, D> : FxComponent<N, D>
 
 abstract class FxInputComponent<I, N, D>(private val inputReceiver: BaseReceiver<I>) : FxComponent<N,D> {
 
+    @EvoleqDsl
     suspend fun input(input: I) {
         inputReceiver.send(input)
     }
 
+
+    @EvoleqDsl
     suspend fun closeInput() {
         try{inputReceiver.actor.close()}catch(ignored: Exception){
             println("Closing inputReceiver.actor: Error")
@@ -46,13 +53,16 @@ abstract class FxInputComponent<I, N, D>(private val inputReceiver: BaseReceiver
 }
 
 @Suppress("unchecked_cast")
+@EvoleqDsl
 fun <I, N, D> FxComponent<N, D>.withInput(): FxInputComponent<I, N, D> = this as FxInputComponent<I, N, D>
 
 //@Suppress("unchecked_cast")
 //fun <I> FxComponent<*, *>.withInput(): FxInputComponent<I, *, *> = this as FxInputComponent<I, *, *>
 
 @Suppress("unchecked_cast")
+@EvoleqDsl
 fun <N, D> Stub<*>.asFxComponent() : FxComponent<N, D> = this as FxComponent<N, D>
 
 @Suppress("unchecked_cast")
+@EvoleqDsl
 fun <I> Stub<*>.withInput(): FxInputComponent<I, *, *> = this as FxInputComponent<I, *, *>

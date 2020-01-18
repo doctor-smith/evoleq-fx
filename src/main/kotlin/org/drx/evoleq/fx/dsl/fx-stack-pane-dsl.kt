@@ -23,11 +23,13 @@ import org.drx.evoleq.fx.component.FxComponent
  * StackPane
  */
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <D> FxComponentConfiguration<out Any, *>.fxStackPane(scope: CoroutineScope = this.scope, configuration: suspend FxComponentConfiguration<StackPane, D>.()->Unit): FxComponent<StackPane, D> {
     return fxComponent(scope,configuration)
 }
 
 @Suppress("unused")
+@EvoleqFxDsl
 suspend fun <D> fxStackPane(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: suspend FxComponentConfiguration<StackPane, D>.()->Unit): FxComponent<StackPane, D> {
     return fxComponent(scope,configuration)
 }

@@ -27,6 +27,7 @@ import org.drx.evoleq.dsl.*
 import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.flow.SuspendedFlow
 import org.drx.evoleq.fx.component.FxComponent
+import org.drx.evoleq.fx.dsl.EvoleqFxDsl
 import org.drx.evoleq.fx.dsl.parallelFx
 import org.drx.evoleq.fx.stub.FxInputPhase
 import org.drx.evoleq.stub.ID
@@ -97,16 +98,19 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
     /**
      * Called in the start method of JavaFX-Application
      */
+    @EvoleqFxDsl
     open fun onFxStart(){}
 
     /**
      * Called in the init function of this class
      */
+    @EvoleqFxDsl
     open fun onFxInit(){}
 
     /**
      * Called in the stop method of JavaFX-Application
      */
+    @EvoleqFxDsl
     open fun onFxStop(){}
 
     /******************************************************************************************************************
@@ -220,36 +224,43 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
      * Abstract Process API
      *
      ******************************************************************************************************************/
+    @EvoleqDsl
     abstract fun initData(): Data
 
     /**
      * Define stages to be registered
      */
+    @EvoleqDsl
     abstract suspend fun stages(): ArrayList<Pair<ID,suspend ()->FxComponent<Stage,Data>>>
 
     /**
      * When stages are registered perform this action
      */
+    @EvoleqDsl
     abstract suspend fun onStagesRegistered(data: AppMessage<Data>): AppMessage<Data>
 
     /**
      * When a stage is shown, perform this action
      */
+    @EvoleqDsl
     abstract suspend fun onStageShown(id: ID, processId: ID?, data: AppMessage.Response.StageShown<Data>): AppMessage<Data>
 
     /**
      * When a stage is closed / hidden, perform this action
      */
+    @EvoleqDsl
     abstract suspend fun onStageHidden(id: ID, processId: ID?, data: AppMessage<Data>): AppMessage<Data>
 
     /**
      * When a new stub arises
      */
+    @EvoleqDsl
     abstract suspend fun onDriveStub(stub: Stub<Data>, processId: ID?, initialData: Data): AppMessage<Data>
 
     /**
      *
      */
+    @EvoleqDsl
     abstract suspend fun onError(error: AppMessage.Process.Error<Data>): AppMessage<Data>
 
     /******************************************************************************************************************
@@ -270,6 +281,7 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
     /**
      * Show a registered stage
      */
+    @EvoleqFxDsl
     private fun showStage(id: ID, processId: ID?): Evolving<Stub<Data>> = scope.parallel {
 
         val stubPicker = registry[id]!!
@@ -291,6 +303,7 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
     /**
      * Show stage
      */
+    @EvoleqFxDsl
     private fun showStage(stage: Stage): Evolving<Unit> = scope.parallel{
         parallelFx{
             stage.show()
@@ -301,6 +314,7 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
     /**
      * Hide stage
      */
+    @EvoleqFxDsl
     private fun hideStage(id: ID, processId: ID?): Evolving<ID> = scope.parallel{
         try{
             parallelFx {
@@ -333,12 +347,14 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
     /**
      * Called in the waiting-phase ([AppMessage.Process.Wait]) of the application flow
      */
+    @EvoleqDsl
     abstract  fun  onInput(input: Input, data:  Data): Evolving<AppMessage<Data>>
 
     /**
      * Input function. Use this function to pass input to the appöication (-flow)
      */
     @Suppress("unused")
+    @EvoleqDsl
     suspend fun input(input: Input) = inputReceiver.send(input)
 
     /******************************************************************************************************************
@@ -356,6 +372,7 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
      * Register an output-function
      */
     @Suppress("unused")
+    @EvoleqDsl
     fun outputs(put: ()->Pair<ID, out (Nothing)->Evolving<Unit>>) {
         val pair = put()
         outputs[pair.first] = pair.second
@@ -366,12 +383,14 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
      * Hint: Throws an exception if the desired output does not exist
      */
     @Suppress("unused")
+    @EvoleqDsl
     fun outputs(id: ID): (Nothing)->Evolving<Unit> = outputs[id]!!
 
     /**
      * Remove an output function
      */
     @Suppress("unused")
+    @EvoleqDsl
     fun removeOutput(id: ID) {
         outputs.remove(id)
     }
@@ -391,6 +410,7 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
      * Register a process
      */
     @Suppress("unused")
+    @EvoleqDsl
     suspend fun processes(put: suspend HashMap<ID, Evolving<Any>>.()->Pair<ID, Evolving<Any>>): Unit {
         val pair = processes.put()
         processes[pair.first] = pair.second as Evolving<Any>
@@ -400,18 +420,21 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
      * Get a process
      */
     @Suppress("unused")
+    @EvoleqDsl
     fun processes(id: ID) : Evolving<Any> = processes[id]!!
 
     /**
      * Remove a process
      */
     @Suppress("unused")
+    @EvoleqDsl
     fun removeProcess(id: ID) = processes.remove(id)
 
     /**
      * Get processes
      */
     @Suppress("unused")
+    @EvoleqDsl
     fun processes() = processes
 
     /******************************************************************************************************************
