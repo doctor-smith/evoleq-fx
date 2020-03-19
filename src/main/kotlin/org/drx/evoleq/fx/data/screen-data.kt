@@ -18,10 +18,13 @@ package org.drx.evoleq.fx.data
 import javafx.stage.Screen
 
 
-class ScreenData(
+data class ScreenData(
         val width: Double,
         val height: Double
 )
+
+fun ScreenData.width(set: Double.()->Double): ScreenData = copy(width = width.set())
+fun ScreenData.height(set: Double.()->Double): ScreenData = copy(height = height.set())
 
 fun primaryScreen(): ScreenData = with(Screen.getPrimary()) {
     val width = visualBounds.width

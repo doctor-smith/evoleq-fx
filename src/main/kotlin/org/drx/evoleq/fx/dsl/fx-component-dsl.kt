@@ -15,6 +15,7 @@
  */
 package org.drx.evoleq.fx.dsl
 
+import javafx.beans.property.BooleanProperty
 import javafx.beans.property.Property
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
@@ -38,8 +39,7 @@ import org.drx.evoleq.fx.runtime.FxRunTime
 import org.drx.evoleq.fx.stub.*
 import org.drx.evoleq.stub.Stub
 import org.drx.evoleq.stub.findByKey
-import org.drx.evoleq.util.booleanProperty
-import org.drx.evoleq.util.or
+import org.drx.evoleq.util.*
 import java.lang.Thread.sleep
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
@@ -162,7 +162,10 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
 
             override suspend fun evolve(d: D): Evolving<D> = stubConfiguration.evolve(d)
         }
-        is InputStub<*, D> -> object : FxInputComponent<Any, N, D>((stubConfiguration as InputStub<*,D>).inputReceiver as BaseReceiver<Any>) {
+        is InputStub<*, D> -> object : FxInputComponent<Any, N, D>(
+                (stubConfiguration as InputStub<*,D>).inputReceiver as BaseReceiver<Any>,
+                (stubConfiguration as InputStub<*,D>).updateReceiver
+            ) {
             override val scope: CoroutineScope
                 get() = this@FxComponentConfiguration.scope
             override val id: ID
@@ -414,6 +417,15 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
             }
         }
     }
+    @Suppress("unused")
+    @EvoleqDsl
+    fun FxComponentConfiguration<N, D>.onUpdate(onUpdate: suspend Updated<ID,D>.()->D) {
+        stubAction {
+            if (launcher.stub is InputStub<*, *>) {
+                (launcher.stub as InputStub<Any, D>).onUpdate = onUpdate
+            }
+        }
+    }
 
     /******************************************************************************************************************
      *
@@ -430,11 +442,11 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
     @Suppress("unused")
     @EvoleqDsl
     fun FxComponentConfiguration<N, D>.processes(id: ID) : Evolving<Any> = processes[id]!!
-
+    
     @Suppress("unused")
     @EvoleqDsl
     fun FxComponentConfiguration<N, D>.removeProcess(id: ID) = processes.remove(id)
-
+    
     @Suppress("unused")
     @EvoleqDsl
     fun FxComponentConfiguration<N, D>.processes() = processes
@@ -539,6 +551,12 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
         } asLongAs (stoppingProperty or cancelProperty).isFalse()
     }
 
+    @Suppress("unused", "unchecked_cast")
+    @EvoleqFxDsl
+    suspend fun <E> FxComponentConfiguration<N,D>.update(componentId: ID,senderId: ID, update: suspend E.()->E) =
+        with( runtimeComponent().stubs[componentId]!! as FxInputComponent<*,*,E>) {
+            update(senderId){ update() }
+        }
 
     /**
      * Shutdown the component-flow
@@ -602,10 +620,8 @@ abstract class FxComponentConfiguration<N, D>() :  Configuration<FxComponent<N, 
  * Configure an FxComponent
  */
 @Suppress("unused")
-suspend
-
 @EvoleqFxDsl
-fun <N,D> fxComponent(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: suspend  FxComponentConfiguration<N,D>.()->Unit): FxComponent<N, D> {
+suspend fun <N,D> fxComponent(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),configuration: suspend  FxComponentConfiguration<N,D>.()->Unit): FxComponent<N, D> {
 
     var component : FxComponent<N, D>? = null
     var cancelled = false
@@ -615,7 +631,7 @@ fun <N,D> fxComponent(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),confi
     // launch component flow and await termination
     scope.parallel {
         val l = conf.launcher.launch(conf)
-        val terminationPhase = parallel{ fxComponentFlow<N, D>().evolve(l) .get() }
+        val terminationPhase = parallel { fxComponentFlow<N, D>().evolve(l).get() }
         val terminate = terminationPhase.get()
         println("\n*****************************************************************************************************")
         println("Log (FxComponent Terminated):")
@@ -625,7 +641,7 @@ fun <N,D> fxComponent(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),confi
         println("*****************************************************************************************************")
         assert(
             terminate is FxComponentPhase.TerminationPhase.TerminateWithErrors ||
-            terminate is FxComponentPhase.TerminationPhase.Terminate
+                terminate is FxComponentPhase.TerminationPhase.Terminate
         )
         if (terminate is FxComponentPhase.TerminationPhase.TerminateWithErrors) {
             if (terminationPhase is Cancellable<*>) {
@@ -638,9 +654,7 @@ fun <N,D> fxComponent(scope: CoroutineScope = DEFAULT_FX_COMPONENT_SCOPE(),confi
     }
     // await component
     scope.parallel {
-        while (!conf.finish && !conf.cancel) {
-            kotlinx.coroutines.delay(1)
-        }
+        blockUntil(conf.finishProperty or conf.cancelProperty) { b -> b == true }
         if (!conf.cancel) {
             //println("finished: ${conf.idConfiguration}")
             component = conf.component

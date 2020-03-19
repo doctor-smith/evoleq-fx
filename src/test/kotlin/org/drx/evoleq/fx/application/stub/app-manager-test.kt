@@ -80,7 +80,14 @@ class AppManagerTest {
         override fun onInput(input: Input, data: Int): Evolving<AppMessage<Int>> {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
-
+    
+        /**
+         * OnUpdate
+         */
+        override suspend fun onUpdate(senderId: ID, data: Int): Int {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+    
     }
 
 

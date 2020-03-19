@@ -17,7 +17,10 @@ package org.drx.evoleq.fx.component
 
 import org.drx.evoleq.coroutines.BaseReceiver
 import org.drx.evoleq.dsl.EvoleqDsl
+import org.drx.evoleq.dsl.DefaultSender
 import org.drx.evoleq.fx.dsl.EvoleqFxDsl
+import org.drx.evoleq.fx.dsl.ID
+import org.drx.evoleq.dsl.Update
 import org.drx.evoleq.stub.Stub
 
 interface FxComponent<N, D> : Stub<D> {
@@ -31,13 +34,21 @@ interface FxNoStubComponent<N, D> : FxComponent<N, D>
 
 interface FxTunnelComponent<N, D> : FxComponent<N, D>
 
-abstract class FxInputComponent<I, N, D>(private val inputReceiver: BaseReceiver<I>) : FxComponent<N,D> {
+abstract class FxInputComponent<I, N, D>(
+    private val inputReceiver: BaseReceiver<I>,
+    private val updateReceiver: BaseReceiver<Update<ID,D>>
+) : FxComponent<N,D> {
 
     @EvoleqDsl
     suspend fun input(input: I) {
         inputReceiver.send(input)
     }
-
+    @EvoleqDsl
+    suspend fun update(sender: ID, update: suspend D.()->D) {
+        updateReceiver.send(Update(sender){
+            update()
+        })
+    }
 
     @EvoleqDsl
     suspend fun closeInput() {
@@ -49,6 +60,14 @@ abstract class FxInputComponent<I, N, D>(private val inputReceiver: BaseReceiver
             println("Closing inputReceiver.channel: Error")
             ignored.stackTrace
         }
+        try{updateReceiver.actor.close()}catch(ignored: Exception){
+            println("Closing updateReceiver.actor: Error")
+            ignored.stackTrace
+        }
+        try{updateReceiver.channel.close()}catch(ignored: Exception){
+            println("Closing updateReceiver.channel: Error")
+            ignored.stackTrace
+        }
     }
 }
 
@@ -56,8 +75,9 @@ abstract class FxInputComponent<I, N, D>(private val inputReceiver: BaseReceiver
 @EvoleqDsl
 fun <I, N, D> FxComponent<N, D>.withInput(): FxInputComponent<I, N, D> = this as FxInputComponent<I, N, D>
 
-//@Suppress("unchecked_cast")
-//fun <I> FxComponent<*, *>.withInput(): FxInputComponent<I, *, *> = this as FxInputComponent<I, *, *>
+@Suppress("unchecked_cast")
+@EvoleqDsl
+fun <D> FxComponent<*,*>.withUpdate():FxInputComponent<*,*,D> = this as FxInputComponent<*,*,D>
 
 @Suppress("unchecked_cast")
 @EvoleqDsl
@@ -66,3 +86,9 @@ fun <N, D> Stub<*>.asFxComponent() : FxComponent<N, D> = this as FxComponent<N, 
 @Suppress("unchecked_cast")
 @EvoleqDsl
 fun <I> Stub<*>.withInput(): FxInputComponent<I, *, *> = this as FxInputComponent<I, *, *>
+
+/**
+ *
+ */
+@EvoleqFxDsl
+suspend fun <N, D> FxComponent<N, D>.wrapBy(inject: suspend FxComponent<N, D>.()->FxComponent<*,*>): FxComponent<*,*> = inject()

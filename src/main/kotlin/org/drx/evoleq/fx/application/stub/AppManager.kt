@@ -27,12 +27,14 @@ import org.drx.evoleq.dsl.*
 import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.flow.SuspendedFlow
 import org.drx.evoleq.fx.component.FxComponent
+import org.drx.evoleq.fx.component.FxInputComponent
 import org.drx.evoleq.fx.dsl.EvoleqFxDsl
 import org.drx.evoleq.fx.dsl.parallelFx
 import org.drx.evoleq.fx.stub.FxInputPhase
 import org.drx.evoleq.stub.ID
 import org.drx.evoleq.stub.Stub
 import org.drx.evoleq.stub.toFlow
+import org.drx.evoleq.util.*
 import kotlin.reflect.KClass
 
 /**
@@ -151,9 +153,19 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
             }
             is AppMessage.Request.ShowStage<*> -> scope.parallel {
                 val stub = showStage(message.id, message.processId).get()
+                if(message.processId != null) {
+                    stubs[message.processId] = stub
+                } else {
+                    stubs[message.id] = stub
+                }
                 AppMessage.Response.StageShown(stub, message.processId, message.data)
             }
             is AppMessage.Request.HideStage -> scope.parallel{
+                if(message.processId != null) {
+                    stubs.remove(message.processId)
+                } else {
+                    stubs.remove(message.id)
+                }
                 hideStage(message.id, message.processId).get()
                 AppMessage.Response.StageHidden<Data>(message.id, message.processId, message.data)
             }
@@ -177,8 +189,24 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
                 require(message is AppMessage.Process.DriveStub<Data>)
                 onDriveStub(message.stub, message.processId, message.data)
             }
-            is AppMessage.Process.Wait<*> -> inputStack.onNext {
-                input -> onInput(input, message.data)
+            is AppMessage.Process.Wait<*> -> {
+                blockUntil(inputStack.isEmpty and updateStack.isEmpty){value -> !value}
+                if(updateStack.isNotEmpty()){
+                    updateStack.onNext { update ->
+                        scope.parallel {
+                            AppMessage.Process.Wait(
+                                with(update.update(message.data)){
+                                    val (senderId,data) = this
+                                    onUpdate(senderId, data)
+                                }
+                            )
+                        }
+                    }
+                } else {
+                    inputStack.onNext { input ->
+                        onInput(input, message.data)
+                    }
+                }
             }
             is AppMessage.Process.Error<*> -> scope.parallel {
                 onError(message as AppMessage.Process.Error<Data>)
@@ -337,7 +365,7 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
     /**
      * InputReceiver
      */
-    private val inputReceiver = CoroutineScope(Job()).receiver<Input> {  }
+    private val inputReceiver = CoroutineScope(Job()).receiver<Input>(capacity = 10_000) {  }
 
     /**
      * InputStack
@@ -397,6 +425,46 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
 
     /******************************************************************************************************************
      *
+     * Update
+     *
+     ******************************************************************************************************************/
+    /**
+     * InputReceiver
+     */
+    private val updateReceiver = CoroutineScope(Job()).receiver<Update<ID,Data>>(capacity = 10_000) {  }
+    
+    /**
+     * InputStack
+     */
+    private val  updateStack = smartArrayListOf<Update<ID,Data>>()
+    /**
+     * Update an child component provided that it is an input-component
+     */
+    @Suppress("unchecked_cast")
+    @EvoleqDsl
+    suspend fun <E> updateComponent(componentId: ID, update: suspend E.()->E) = try {
+        (stubs[componentId]!! as FxInputComponent<*, *, E>).update(id) { update() }
+    } catch(ex:Exception){
+        throw ex
+    }
+    
+    /**
+     * Update the app-manager
+     */
+    @EvoleqDsl
+    suspend fun update(sender: ID, update: suspend Data.()->Data) {
+        updateReceiver.send(Update(sender){ update(this) })
+    }
+    
+    /**
+     * OnUpdate
+     */
+    @EvoleqDsl
+    abstract suspend fun onUpdate(senderId: ID, data: Data): Data
+
+
+    /******************************************************************************************************************
+     *
      * Processes API
      *
      *****************************************************************************************************************/
@@ -412,8 +480,10 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
     @Suppress("unused")
     @EvoleqDsl
     suspend fun processes(put: suspend HashMap<ID, Evolving<Any>>.()->Pair<ID, Evolving<Any>>): Unit {
-        val pair = processes.put()
-        processes[pair.first] = pair.second as Evolving<Any>
+        //scope.parallel {
+            val pair = processes.put()
+            processes[pair.first] = pair.second as Evolving<Any>
+        //}.get()
     }
 
     /**
@@ -444,5 +514,6 @@ abstract class AppManager <Input,Data> : Application(), Stub<AppMessage<Data>> {
      ******************************************************************************************************************/
     init{
         inputReceiver.onNext(scope){input -> inputStack.add(input)}
+        updateReceiver.onNext(scope){update -> updateStack.add(update)}
     }
 }
